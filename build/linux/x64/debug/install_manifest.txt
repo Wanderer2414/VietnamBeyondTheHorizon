@@ -1,0 +1,15 @@
+/home/nguyenlequochuy/vietnambeyondthehorizon/build/linux/x64/debug/bundle/vietnambeyondthehorizon
+/home/nguyenlequochuy/vietnambeyondthehorizon/build/linux/x64/debug/bundle/data/icudtl.dat
+/home/nguyenlequochuy/vietnambeyondthehorizon/build/linux/x64/debug/bundle/lib/libflutter_linux_gtk.so
+/home/nguyenlequochuy/vietnambeyondthehorizon/build/linux/x64/debug/bundle/data/flutter_assets/AssetManifest.json
+/home/nguyenlequochuy/vietnambeyondthehorizon/build/linux/x64/debug/bundle/data/flutter_assets/FontManifest.json
+/home/nguyenlequochuy/vietnambeyondthehorizon/build/linux/x64/debug/bundle/data/flutter_assets/AssetManifest.bin.json
+/home/nguyenlequochuy/vietnambeyondthehorizon/build/linux/x64/debug/bundle/data/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf
+/home/nguyenlequochuy/vietnambeyondthehorizon/build/linux/x64/debug/bundle/data/flutter_assets/shaders/ink_sparkle.frag
+/home/nguyenlequochuy/vietnambeyondthehorizon/build/linux/x64/debug/bundle/data/flutter_assets/NativeAssetsManifest.json
+/home/nguyenlequochuy/vietnambeyondthehorizon/build/linux/x64/debug/bundle/data/flutter_assets/NOTICES
+/home/nguyenlequochuy/vietnambeyondthehorizon/build/linux/x64/debug/bundle/data/flutter_assets/kernel_blob.bin
+/home/nguyenlequochuy/vietnambeyondthehorizon/build/linux/x64/debug/bundle/data/flutter_assets/version.json
+/home/nguyenlequochuy/vietnambeyondthehorizon/build/linux/x64/debug/bundle/data/flutter_assets/fonts/MaterialIcons-Regular.otf
+/home/nguyenlequochuy/vietnambeyondthehorizon/build/linux/x64/debug/bundle/data/flutter_assets/NOTICES.Z
+/home/nguyenlequochuy/vietnambeyondthehorizon/build/linux/x64/debug/bundle/data/flutter_assets/AssetManifest.bin
