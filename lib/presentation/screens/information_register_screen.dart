@@ -20,7 +20,7 @@ class InfomationRegisterScreenState extends State<InformationRegisterScreen> {
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: Color.fromARGB(0xFF, 0xFF, 0xDF, 0x9E),
+      backgroundColor: const Color(0xFFFFDF9E),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Column(
@@ -63,7 +63,7 @@ class Title extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(shape: BoxShape.rectangle),
+      decoration: const BoxDecoration(shape: BoxShape.rectangle),
       clipBehavior: Clip.hardEdge,
       width: size.width,
       height: size.height,
@@ -73,7 +73,7 @@ class Title extends StatelessWidget {
         child: Text(
           "Create your\nprofile",
           style: TextStyle(
-            color: Color.fromARGB(0xFF, 0x79, 0x51, 00),
+            color: const Color(0xFF795100),
             fontFamily: "InriaSans",
             fontWeight: FontWeight.w500,
             fontSize: size.height * 0.3,
@@ -101,13 +101,13 @@ class InputPanel extends StatelessWidget {
         ),
         shape: BoxShape.rectangle,
         boxShadow: [
-          BoxShadow(
+          const BoxShadow(
             color: Color.fromRGBO(0, 0, 0, 0.3),
             offset: Offset(2, 1),
             blurRadius: 2,
             spreadRadius: 1,
           ),
-          BoxShadow(
+          const BoxShadow(
             color: Color.fromRGBO(0, 0, 0, 0.1),
             offset: Offset(-2, 1),
             blurRadius: 2,
@@ -173,9 +173,9 @@ class _InputNameBoxState extends State<InputNameBox> {
               color: Colors.black,
               fontSize: widget.size.height * 0.4,
             ),
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               border: InputBorder.none,
-              fillColor: Color.fromARGB(255, 0xF2, 0xF2, 0xF2),
+              fillColor: Color(0xFFF2F2F2),
               filled: true,
               hintText: "Enter your name",
             ),
@@ -226,7 +226,7 @@ class _InputAgeBoxState extends State<InputAgeBox> {
           decoration: BoxDecoration(
             shape: BoxShape.rectangle,
             borderRadius: BorderRadius.circular(15),
-            color: Color.fromARGB(255, 0xF2, 0xF2, 0xF2),
+            color: const Color(0xFFF2F2F2),
           ),
           clipBehavior: Clip.antiAlias,
           child: DropdownButton<int>(
@@ -239,7 +239,10 @@ class _InputAgeBoxState extends State<InputAgeBox> {
               overflow: TextOverflow.clip,
               color: Colors.black,
             ),
-            hint: Align(alignment: Alignment.center, child: Text("Select age")),
+            hint: const Align(
+              alignment: Alignment.center,
+              child: Text("Select age"),
+            ),
             isExpanded: true,
             items: List.generate(81, (index) => index + 10).map((int age) {
               return DropdownMenuItem<int>(
@@ -293,14 +296,14 @@ class _InputCityState extends State<InputCity> {
           height: widget.size.height,
           decoration: BoxDecoration(
             shape: BoxShape.rectangle,
-            color: Color.fromARGB(255, 0xF2, 0xF2, 0xF2),
+            color: const Color(0xFFF2F2F2),
             borderRadius: BorderRadius.circular(16),
           ),
           clipBehavior: Clip.antiAlias,
           child: DropdownButton<String>(
             value: _selectedCity,
             alignment: Alignment.centerRight,
-            hint: Align(
+            hint: const Align(
               alignment: Alignment.center,
               child: Text("Your interest city"),
             ),
@@ -312,7 +315,7 @@ class _InputCityState extends State<InputCity> {
             ),
             isExpanded: true,
             items: [
-              DropdownMenuItem(
+              const DropdownMenuItem(
                 child: Align(
                   alignment: Alignment.center,
                   child: Text("Ho Chi Minh city"),
@@ -346,12 +349,12 @@ class _NextButtonState extends State<NextButton> {
     return ElevatedButton(
       onPressed: () {},
       style: ElevatedButton.styleFrom(
-        backgroundColor: Color.fromARGB(0xFF, 0xD9, 0x91, 0),
+        backgroundColor: const Color(0xFFD99100),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 5,
         fixedSize: widget.size,
       ),
-      child: FittedBox(
+      child: const FittedBox(
         fit: BoxFit.scaleDown,
         child: Text(
           "NEXT",
