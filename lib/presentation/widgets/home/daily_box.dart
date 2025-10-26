@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/request_task.dart'
     as home_widgets;
@@ -16,26 +15,33 @@ class DailyBox extends StatelessWidget {
         shape: BoxShape.rectangle,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
-          BoxShadow(
+          const BoxShadow(
             offset: Offset(0, 0),
             blurStyle: BlurStyle.outer,
             blurRadius: 3,
             spreadRadius: 0,
-            color: Color.fromRGBO(0, 0, 0, 0.5),
+            color: Color(0x78000000),
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Padding(
-            padding: EdgeInsetsGeometry.only(top: 10, left: 20),
-            child: Text(
-              "Daily Quest",
-              style: TextStyle(
-                color: Colors.black,
-                fontFamily: "Inder",
-                fontSize: 31,
+          Container(
+            padding: EdgeInsets.only(top: size.height * 0.1),
+            width: size.width * 0.9,
+            height: size.height * 0.4,
+            alignment: Alignment.centerLeft,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: const Text(
+                "Daily Quest",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontFamily: "Inder",
+                  fontSize: 31,
+                ),
               ),
             ),
           ),

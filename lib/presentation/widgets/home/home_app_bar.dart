@@ -34,7 +34,7 @@ class HomeAppbar extends AppBar {
            child: Container(
              width: size.height * 0.8,
              height: size.height * 0.8,
-             decoration: BoxDecoration(
+             decoration: const BoxDecoration(
                image: DecorationImage(
                  image: AssetImage("assets/icons/bar.png"),
                ),
@@ -50,7 +50,6 @@ class HomeAppbar extends AppBar {
              spacing: size.width * 0.08,
              children: [
                GemsBox(size: Size(size.width * 0.15, size.height * 0.45)),
-
                StarsBox(size: Size(size.width * 0.15, size.height * 0.45)),
              ],
            ),

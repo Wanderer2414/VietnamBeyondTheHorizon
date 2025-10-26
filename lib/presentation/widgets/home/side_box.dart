@@ -27,7 +27,7 @@ class SideBox extends StatelessWidget {
           title: Container(
             height: size.height * 0.03,
             alignment: Alignment.centerLeft,
-            child: FittedBox(
+            child: const FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
                 'Settings',
@@ -42,7 +42,7 @@ class SideBox extends StatelessWidget {
           title: Container(
             height: size.height * 0.03,
             alignment: Alignment.centerLeft,
-            child: FittedBox(
+            child: const FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
                 'About us',
@@ -57,7 +57,7 @@ class SideBox extends StatelessWidget {
           title: Container(
             height: size.height * 0.03,
             alignment: Alignment.centerLeft,
-            child: FittedBox(
+            child: const FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
                 'Exit',

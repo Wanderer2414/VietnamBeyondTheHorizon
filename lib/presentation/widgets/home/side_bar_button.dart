@@ -21,7 +21,7 @@ class SideBarButton extends StatelessWidget {
       child: Container(
         width: side,
         height: side,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(image: AssetImage("assets/icons/bar.png")),
         ),
       ),

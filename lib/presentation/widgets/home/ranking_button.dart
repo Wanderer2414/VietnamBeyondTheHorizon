@@ -21,7 +21,7 @@ class RankingButton extends StatelessWidget {
       ),
       child: Container(
         padding: EdgeInsets.zero,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage("assets/icons/ranking-star.png"),
             fit: BoxFit.scaleDown,

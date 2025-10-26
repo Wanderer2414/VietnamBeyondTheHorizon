@@ -18,7 +18,7 @@ class RequestTask extends StatelessWidget {
           Set<WidgetState> states,
         ) {
           if (states.contains(WidgetState.pressed)) {
-            return EdgeInsetsGeometry.only(top: 1, bottom: 1);
+            return EdgeInsetsGeometry.only(top: 2, bottom: 0);
           } else {
             return EdgeInsetsGeometry.only(bottom: 2);
           }

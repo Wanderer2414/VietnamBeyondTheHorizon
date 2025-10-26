@@ -9,54 +9,51 @@ class GreetingBox extends StatelessWidget {
     return Container(
       width: size.width,
       height: size.height,
+      margin: EdgeInsets.zero,
+      padding: EdgeInsets.only(left: size.width * 0.05),
       decoration: BoxDecoration(
         color: Colors.white,
         shape: BoxShape.rectangle,
         borderRadius: BorderRadius.circular(18),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             offset: Offset(0, 0),
             blurStyle: BlurStyle.outer,
             blurRadius: 3,
             spreadRadius: 0,
-            color: Color.fromRGBO(0, 0, 0, 0.5),
+            color: Color(0x78000000),
           ),
         ],
       ),
-      child: Stack(
-        children: [
-          Align(
-            alignment: Alignment.topLeft,
-            child: Padding(
-              padding: EdgeInsetsGeometry.only(top: 15, left: 20),
-              child: Text(
-                "Hi",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontFamily: "KronaOne",
-                  fontSize: 26,
-                ),
+      alignment: Alignment.centerLeft,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "Hi",
+              style: TextStyle(
+                color: Colors.black,
+                fontFamily: "KronaOne",
+                fontSize: 26,
               ),
             ),
-          ),
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: Padding(
-              padding: EdgeInsetsGeometry.only(bottom: 15, left: 20),
-              child: Text(
-                userName,
-                maxLines: 1,
-                softWrap: false,
-                style: TextStyle(
-                  color: Color.fromARGB(255, 0x1E, 0x17, 0x62),
-                  fontFamily: "KronaOne",
-                  fontSize: 26,
-                  letterSpacing: -1,
-                ),
+
+            Text(
+              userName,
+              maxLines: 1,
+              softWrap: false,
+              style: const TextStyle(
+                color: Color(0xFF1E1762),
+                fontFamily: "KronaOne",
+                fontSize: 26,
+                letterSpacing: -1,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

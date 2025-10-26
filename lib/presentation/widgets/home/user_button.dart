@@ -21,7 +21,7 @@ class UserButton extends StatelessWidget {
       ),
 
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(image: AssetImage("assets/icons/user.png")),
         ),
       ),

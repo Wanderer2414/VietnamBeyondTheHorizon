@@ -21,7 +21,6 @@ class PlayButton extends StatelessWidget {
         shape: WidgetStateProperty.all(CircleBorder()),
         fixedSize: WidgetStateProperty.all(Size(radius, radius)),
         backgroundColor: WidgetStateProperty.all(Colors.transparent),
-        // shadowColor: WidgetStateProperty.all(Colors.black),
         shadowColor: WidgetStateProperty.resolveWith<Color?>((
           Set<WidgetState> states,
         ) {

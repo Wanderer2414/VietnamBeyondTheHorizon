@@ -15,10 +15,9 @@ class HomeDownBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final double spacing =
         (size.width - size.height * (5.0 / 3 + 0.7 + 0.4)) / 4;
-    return Container(
+    return SizedBox(
       width: size.width,
       height: size.height,
-      decoration: BoxDecoration(),
       child: Stack(
         children: [
           CustomPaint(
@@ -55,11 +54,8 @@ class HomeDownBar extends StatelessWidget {
 class HomeDownBarDecoration extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final Gradient gradient = LinearGradient(
-      colors: [
-        Color.fromARGB(255, 0xFA, 0x6C, 0x6F),
-        Color.fromARGB(255, 0xD9, 0x91, 0),
-      ],
+    final Gradient gradient = const LinearGradient(
+      colors: [Color(0xFFFA6C6F), Color(0xFFD99100)],
       begin: AlignmentGeometry.xy(-2, 0.5),
       end: AlignmentGeometry.xy(1.8, 0.5),
     );

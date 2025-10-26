@@ -21,7 +21,7 @@ class HeartButton extends StatelessWidget {
       ),
 
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(image: AssetImage("assets/icons/heart.png")),
         ),
       ),

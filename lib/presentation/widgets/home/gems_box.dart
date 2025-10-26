@@ -30,13 +30,11 @@ class GemsBox extends StatelessWidget {
                   ),
                   BoxShadow(
                     color: Color.alphaBlend(
-                      Color.fromRGBO(0, 0, 0, 0.36),
-                      Color.fromARGB(255, 0xFF, 0x95, 00),
+                      const Color(0x5B000000),
+                      const Color(0xFFFF9500),
                     ),
-                    // offset: Offset(0, 3),
                     blurRadius: 2,
                     spreadRadius: -2.0,
-                    // blurStyle: BlurStyle.outer,
                   ),
                 ],
               ),
@@ -52,7 +50,7 @@ class GemsBox extends StatelessWidget {
               child: Container(
                 width: size.height * 1.5,
                 height: size.height * 1.5,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage("assets/icons/diamond-icon.png"),
                   ),

@@ -27,9 +27,9 @@ class VisitedPlaceBox extends StatelessWidget {
               spacing: 10,
               children: List.generate(10, (index) {
                 return home_widgets.ScenicPanel(
-                  size: Size(size.width * 0.5, size.height * 0.85),
+                  size: Size(size.width * 0.5, size.height * 0.8),
                   package: Reccommendscenic(
-                    image: AssetImage(
+                    image: const AssetImage(
                       "assets/temporary/lorem-ipsum-small-background.png",
                     ),
                     name: "Lorem ipsum",

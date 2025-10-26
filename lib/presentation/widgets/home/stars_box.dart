@@ -45,7 +45,7 @@ class StarsBox extends StatelessWidget {
             child: Container(
               width: size.height * 1.5,
               height: size.height * 1.5,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage("assets/icons/star.png"),
                 ),

@@ -14,29 +14,33 @@ class ScenicPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(blurRadius: 5, color: Color.fromRGBO(0, 0, 0, 0.3)),
-        ],
+        boxShadow: const [BoxShadow(blurRadius: 5, color: Color(0x4B000000))],
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(height: 15),
           Container(
             width: size.width * 0.88,
-            height: size.height * 0.6,
+            height: size.height * 0.65,
             decoration: BoxDecoration(
               image: DecorationImage(image: package.image),
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          SizedBox(height: 10),
-          Text(
-            package.name,
-            style: TextStyle(fontFamily: "Jost", fontSize: 16),
-          ),
-          Text(
-            "${package.establishedTime.day}/${package.establishedTime.month}/${package.establishedTime.year}",
-            style: TextStyle(fontFamily: "Jost", fontSize: 14),
+          SizedBox(height: size.height * 0.05),
+          FittedBox(
+            child: Column(
+              children: [
+                Text(
+                  package.name,
+                  style: const TextStyle(fontFamily: "Jost", fontSize: 16),
+                ),
+                Text(
+                  "${package.establishedTime.day}/${package.establishedTime.month}/${package.establishedTime.year}",
+                  style: const TextStyle(fontFamily: "Jost", fontSize: 14),
+                ),
+              ],
+            ),
           ),
         ],
       ),
