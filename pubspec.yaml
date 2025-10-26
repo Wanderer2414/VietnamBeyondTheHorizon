@@ -59,65 +59,82 @@ flutter:
   fonts:
     - family: InriaSans
       fonts:
-        - asset: fonts/InriaSans/InriaSans-Regular.ttf
-        - asset: fonts/InriaSans/InriaSans-Bold.ttf
+        - asset: assets/fonts/InriaSans/InriaSans-Regular.ttf
+        - asset: assets/fonts/InriaSans/InriaSans-Bold.ttf
           weight: 700
-        - asset: fonts/InriaSans/InriaSans-BoldItalic.ttf
+        - asset: assets/fonts/InriaSans/InriaSans-BoldItalic.ttf
           weight: 700
           style: italic
-        - asset: fonts/InriaSans/InriaSans-Italic.ttf
+        - asset: assets/fonts/InriaSans/InriaSans-Italic.ttf
           style: italic
-        - asset: fonts/InriaSans/InriaSans-Light.ttf
+        - asset: assets/fonts/InriaSans/InriaSans-Light.ttf
           weight: 200
-        - asset: fonts/InriaSans/InriaSans-LightItalic.ttf
+        - asset: assets/fonts/InriaSans/InriaSans-LightItalic.ttf
           weight: 200
           style: italic
     - family: Jost
       fonts:
-        - asset: fonts/Jost/Jost-Black.ttf
+        - asset: assets/fonts/Jost/Jost-Black.ttf
           weight: 900
-        - asset: fonts/Jost/Jost-BlackItalic.ttf
+        - asset: assets/fonts/Jost/Jost-BlackItalic.ttf
           weight: 900
           style: italic
-        - asset: fonts/Jost/Jost-Bold.ttf
+        - asset: assets/fonts/Jost/Jost-Bold.ttf
           weight: 700
-        - asset: fonts/Jost/Jost-BoldItalic.ttf
+        - asset: assets/fonts/Jost/Jost-BoldItalic.ttf
           weight: 700
           style: italic
-        - asset: fonts/Jost/Jost-ExtraBold.ttf
+        - asset: assets/fonts/Jost/Jost-ExtraBold.ttf
           weight: 800
-        - asset: fonts/Jost/Jost-ExtraBoldItalic.ttf
+        - asset: assets/fonts/Jost/Jost-ExtraBoldItalic.ttf
           weight: 800
           style: italic
-        - asset: fonts/Jost/Jost-ExtraLight.ttf
+        - asset: assets/fonts/Jost/Jost-ExtraLight.ttf
           weight: 200
-        - asset: fonts/Jost/Jost-ExtraLightItalic.ttf
+        - asset: assets/fonts/Jost/Jost-ExtraLightItalic.ttf
           weight: 200
           style: italic
-        - asset: fonts/Jost/Jost-Italic.ttf
+        - asset: assets/fonts/Jost/Jost-Italic.ttf
           style: italic
-        - asset: fonts/Jost/Jost-Light.ttf
+        - asset: assets/fonts/Jost/Jost-Light.ttf
           weight: 300
-        - asset: fonts/Jost/Jost-LightItalic.ttf
+        - asset: assets/fonts/Jost/Jost-LightItalic.ttf
           weight: 300
           style: italic
-        - asset: fonts/Jost/Jost-Medium.ttf
+        - asset: assets/fonts/Jost/Jost-Medium.ttf
           weight: 500
-        - asset: fonts/Jost/Jost-MediumItalic.ttf
+        - asset: assets/fonts/Jost/Jost-MediumItalic.ttf
           weight: 500
           style: italic
-        - asset: fonts/Jost/Jost-Regular.ttf
-        - asset: fonts/Jost/Jost-SemiBold.ttf
+        - asset: assets/fonts/Jost/Jost-Regular.ttf
+        - asset: assets/fonts/Jost/Jost-SemiBold.ttf
           weight: 600
-        - asset: fonts/Jost/Jost-SemiBold.ttf
+        - asset: assets/fonts/Jost/Jost-SemiBold.ttf
           weight: 600
           style: italic
-        - asset: fonts/Jost/Jost-Thin.ttf
+        - asset: assets/fonts/Jost/Jost-Thin.ttf
           weight: 100
-        - asset: fonts/Jost/Jost-Thin.ttf
+        - asset: assets/fonts/Jost/Jost-Thin.ttf
           weight: 100
           style: italic
-
+    - family: KronaOne
+      fonts:
+        - asset: assets/fonts/KronaOne/KronaOne-Regular.ttf
+    - family: Inder
+      fonts:
+        - asset: assets/fonts/Inder/Inder-Regular.ttf
+  assets:
+    - assets/icons/camera-icon.png
+    - assets/icons/diamond-icon.png
+    - assets/icons/gamepad.png
+    - assets/icons/home.png
+    - assets/icons/ranking-star.png
+    - assets/icons/heart.png
+    - assets/icons/user.png
+    - assets/icons/star.png
+    - assets/icons/bar.png
+    - assets/temporary/lorem-ipsum-small-background.png
+    
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
