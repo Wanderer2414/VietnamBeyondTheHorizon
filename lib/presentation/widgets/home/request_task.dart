@@ -61,9 +61,9 @@ class RequestTask extends StatelessWidget {
             ),
           ),
           trailing: Container(
-            width: size.width * 0.22,
-            height: size.height * 0.5,
-            padding: EdgeInsets.only(left: size.width * 0.03),
+            width: size.width * 0.25,
+            height: size.height * 0.6,
+            padding: EdgeInsets.only(left: 10, bottom: 4, top: 4),
             alignment: Alignment.centerLeft,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(13),
@@ -87,13 +87,13 @@ class RequestTask extends StatelessWidget {
               dense: true,
               contentPadding: EdgeInsets.zero,
               visualDensity: VisualDensity(
-                horizontal: -size.width * 0.01,
+                horizontal: size.width * 0.01,
                 vertical: -size.height * 0.06,
               ),
               horizontalTitleGap: -size.width * 0.05,
               minVerticalPadding: 0,
               leading: Container(
-                width: size.height / 4,
+                width: size.height * 0.35,
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage("assets/icons/diamond-icon.png"),
@@ -104,7 +104,7 @@ class RequestTask extends StatelessWidget {
                 fit: BoxFit.scaleDown,
                 child: Text(
                   " x $reward",
-                  style: TextStyle(fontFamily: "Inder", fontSize: 16),
+                  style: TextStyle(fontFamily: "Inder", fontSize: 20),
                 ),
               ),
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/home/play_confirm_box.dart';
 
 class PlayButton extends StatelessWidget {
   final double radius;
@@ -7,7 +8,19 @@ class PlayButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: () {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          barrierColor: Colors.black54,
+          builder: (BuildContext context) {
+            final Size size = MediaQuery.of(context).size;
+            return PlayConfirmBox(
+              size: Size(size.width * 0.8, size.height * 0.2),
+            );
+          },
+        );
+      },
       style: ButtonStyle(
         padding: WidgetStateProperty.resolveWith<EdgeInsets?>((
           Set<WidgetState> states,
