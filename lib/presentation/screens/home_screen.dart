@@ -1,10 +1,7 @@
-import 'package:vietnambeyondthehorizon/presentation/widgets/home/decoration.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/daily_box.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/home/gems_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_down_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/side_box.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/home/stars_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/visited_places_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/greeting_box.dart';
 import 'package:flutter/material.dart';
@@ -39,9 +36,13 @@ class HomeScreenState extends State<HomeScreen> {
       ),
       body: Stack(
         children: [
-          CustomPaint(
-            size: Size(screenSize.width, screenSize.height),
-            painter: HomeDecoration(),
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/background/blur_map.png"),
+                alignment: Alignment.topCenter,
+              ),
+            ),
           ),
 
           Column(
@@ -49,7 +50,7 @@ class HomeScreenState extends State<HomeScreen> {
               SizedBox(height: screenSize.height * 0.03),
               //Hi box
               GreetingBox(
-                size: Size(screenSize.width * 0.9, screenSize.height * 0.15),
+                size: Size(screenSize.width * 0.9, screenSize.height * 0.1),
                 userName: "Quoc Huy",
               ),
               SizedBox(height: screenSize.height * 0.03),
@@ -68,9 +69,9 @@ class HomeScreenState extends State<HomeScreen> {
                   Text(
                     "VISITED PLACES",
                     style: TextStyle(
-                      fontFamily: "Jost",
-                      fontSize: 19,
-                      fontWeight: FontWeight.w600,
+                      fontFamily: "Kay Pho Du",
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   Spacer(),
@@ -79,7 +80,7 @@ class HomeScreenState extends State<HomeScreen> {
 
               //Scroll view of visited place
               VisitedPlaceBox(
-                size: Size(screenSize.width * 0.9, screenSize.height * 0.4),
+                size: Size(screenSize.width * 0.9, screenSize.height * 0.36),
               ),
             ],
           ),

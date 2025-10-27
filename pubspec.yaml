@@ -132,6 +132,17 @@ flutter:
     - family: Inder
       fonts:
         - asset: assets/fonts/Inder/Inder-Regular.ttf
+
+    - family: Kay Pho Du
+      fonts:
+        - asset: assets/fonts/KayPhoDu/KayPhoDu-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/KayPhoDu/KayPhoDu-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/KayPhoDu/KayPhoDu-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/KayPhoDu/KayPhoDu-Regular.ttf
+          weight: 400
   assets:
     - assets/icons/camera-icon.png
     - assets/icons/diamond-icon.png
@@ -142,5 +153,6 @@ flutter:
     - assets/icons/user.png
     - assets/icons/star.png
     - assets/icons/bar.png
+    - assets/background/blur_map.png
     - assets/temporary/lorem-ipsum-small-background.png
       - assets/images/

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/home/avatar_circle_bound.dart';
 
 class GreetingBox extends StatelessWidget {
   final Size size;
@@ -10,7 +11,11 @@ class GreetingBox extends StatelessWidget {
       width: size.width,
       height: size.height,
       margin: EdgeInsets.zero,
-      padding: EdgeInsets.only(left: size.width * 0.05),
+      padding: EdgeInsets.only(
+        left: size.width * 0.05,
+        top: size.height * 0.15,
+        bottom: size.height * 0.1,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         shape: BoxShape.rectangle,
@@ -26,35 +31,68 @@ class GreetingBox extends StatelessWidget {
         ],
       ),
       alignment: Alignment.centerLeft,
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              "Hi",
-              style: TextStyle(
-                color: Colors.black,
-                fontFamily: "KronaOne",
-                fontSize: 26,
-              ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.only(left: size.width * 0.02),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: _TextGreeting(size: size, userName: userName),
             ),
-
-            Text(
-              userName,
-              maxLines: 1,
-              softWrap: false,
-              style: const TextStyle(
-                color: Color(0xFF1E1762),
-                fontFamily: "KronaOne",
-                fontSize: 26,
-                letterSpacing: -1,
-              ),
+          ),
+          Spacer(),
+          Container(
+            alignment: Alignment.centerRight,
+            padding: EdgeInsets.only(right: size.width * 0.1),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: AvaterCircle(radius: size.height * 0.6),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class _TextGreeting extends StatelessWidget {
+  final Size size;
+  final String userName;
+  const _TextGreeting({required this.size, required this.userName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Text(
+          "Hello, $userName",
+          style: TextStyle(
+            color: Colors.black,
+            fontFamily: "Kay Pho Du",
+            fontWeight: FontWeight.bold,
+            fontSize: 38,
+          ),
+        ),
+        SizedBox(
+          width: size.width,
+          height: size.height * 0.5,
+          child: Row(
+            children: [
+              Icon(Icons.location_on, color: Color(0xFFCAC4D0)),
+              Text(
+                "Ho Chi Minh city",
+                style: const TextStyle(
+                  color: Color(0xFFCAC4D0),
+                  fontFamily: "Kay Pho Du",
+                  fontSize: 25,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
