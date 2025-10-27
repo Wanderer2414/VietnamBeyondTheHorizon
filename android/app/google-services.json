@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "419875383273",
+    "project_id": "vietnam-beyond-the-horizon",
+    "storage_bucket": "vietnam-beyond-the-horizon.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:419875383273:android:1f6921151166c4b247cd78",
+        "android_client_info": {
+          "package_name": "com.example.vietnambeyondthehorizon"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiKfUsIDQX-QVjy-ao0IK21s7tWy0yEm4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

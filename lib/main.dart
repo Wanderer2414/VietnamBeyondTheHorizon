@@ -5,7 +5,6 @@ import 'package:vietnambeyondthehorizon/osm_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  //Disable status bar on mobile
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   runApp(const Application());
 }

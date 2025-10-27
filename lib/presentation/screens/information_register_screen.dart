@@ -254,7 +254,7 @@ class _InputAgeBoxState extends State<InputAgeBox> {
               );
             }).toList(),
             onChanged: (value) {
-              _selectedAge = value;
+              setState(() => _selectedAge = value);
             },
           ),
         ),
