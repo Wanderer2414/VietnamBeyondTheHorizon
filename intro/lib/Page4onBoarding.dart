@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
 // Page 4 - Complete Missions, Collect Memories
-class Page4 extends StatelessWidget {
-  const Page4({Key? key}) : super(key: key);
+class Page4onBoarding extends StatelessWidget {
+  const Page4onBoarding({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +157,7 @@ class Page4 extends StatelessWidget {
                                   onPressed: () {
                                     // Navigate to main app or show completion
                                     // For now, just print
-                                    print('Onboarding completed!');
+                                    Navigator.pushReplacementNamed(context, '/InputPage');
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFFD4A428),

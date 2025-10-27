@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 // Page 2 - Discover Vietnam
-class Page2 extends StatelessWidget {
-  const Page2({Key? key}) : super(key: key);
+class Page2onBoarding extends StatelessWidget {
+  const Page2onBoarding({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +98,7 @@ class Page2 extends StatelessWidget {
                               children: [
                                 TextButton(
                                   onPressed: () {
-                                    Navigator.pushReplacementNamed(context, '/page4');
+                                    Navigator.pushReplacementNamed(context, '/Page4onBoarding');
                                   },
                                   child: const Text(
                                     'SKIP',
@@ -141,7 +141,7 @@ class Page2 extends StatelessWidget {
                                 ),
                                 ElevatedButton(
                                   onPressed: () {
-                                    Navigator.pushReplacementNamed(context, '/page3');
+                                    Navigator.pushReplacementNamed(context, '/Page3onBoarding');
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFFD4A428),

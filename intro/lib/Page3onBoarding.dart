@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 // Page 3 - Let Us Guide Your Journey
-class Page3 extends StatelessWidget {
-  const Page3({Key? key}) : super(key: key);
+class Page3onBoarding extends StatelessWidget {
+  const Page3onBoarding({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +99,7 @@ class Page3 extends StatelessWidget {
                               children: [
                                 TextButton(
                                   onPressed: () {
-                                    Navigator.pushReplacementNamed(context, '/page4');
+                                    Navigator.pushReplacementNamed(context, '/Page4onBoarding');
                                   },
                                   child: const Text(
                                     'SKIP',
@@ -142,7 +142,7 @@ class Page3 extends StatelessWidget {
                                 ),
                                 ElevatedButton(
                                   onPressed: () {
-                                    Navigator.pushReplacementNamed(context, '/page4');
+                                    Navigator.pushReplacementNamed(context, '/Page4onBoarding');
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFFD4A428),
