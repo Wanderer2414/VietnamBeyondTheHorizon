@@ -22,6 +22,7 @@ class HomeScreen extends StatefulWidget {
 
 class HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final sideBox = SideBox();
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
@@ -31,9 +32,7 @@ class HomeScreenState extends State<HomeScreen> {
         superKey: _scaffoldKey,
         size: Size(screenSize.width, screenSize.height * 0.06),
       ),
-      drawer: Drawer(
-        child: SideBox(size: Size(screenSize.width * 0.4, screenSize.height)),
-      ),
+      drawer: Drawer(child: sideBox),
       body: Stack(
         children: [
           Container(

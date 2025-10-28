@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/data/packages/reccommend_scenic.dart';
 
-class ScenicPanel extends StatelessWidget {
+class ScenicPanel extends StatefulWidget {
   final Size size;
-  final double scale;
   final Reccommendscenic package;
-  const ScenicPanel({
-    super.key,
-    required this.size,
-    required this.package,
-    this.scale = 1,
-  });
+  const ScenicPanel({super.key, required this.size, required this.package});
+  @override
+  State<ScenicPanel> createState() => ScenicPanelState();
+}
+
+class ScenicPanelState extends State<ScenicPanel> {
+  double scale = 1;
+  void setScale(double scale) {
+    setState(() {
+      this.scale = scale;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: size.width,
-      height: size.height,
+      width: widget.size.width,
+      height: widget.size.height,
       alignment: Alignment.bottomCenter,
       child: Container(
-        width: size.width * scale,
-        height: size.height * scale,
+        width: widget.size.width * scale,
+        height: widget.size.height * scale,
 
         decoration: BoxDecoration(
           color: Colors.white,
@@ -31,17 +36,20 @@ class ScenicPanel extends StatelessWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                image: DecorationImage(image: package.image, fit: BoxFit.fill),
+                image: DecorationImage(
+                  image: widget.package.image,
+                  fit: BoxFit.fill,
+                ),
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
             Container(
-              width: size.width,
-              height: size.height,
+              width: widget.size.width,
+              height: widget.size.height,
               alignment: Alignment.bottomLeft,
               padding: EdgeInsets.only(
-                left: size.width * 0.1,
-                bottom: size.height * 0.03,
+                left: widget.size.width * 0.1,
+                bottom: widget.size.height * 0.03,
               ),
               child: FittedBox(
                 fit: BoxFit.scaleDown,
@@ -50,7 +58,7 @@ class ScenicPanel extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      package.name,
+                      widget.package.name,
                       style: const TextStyle(
                         fontFamily: "Jost",
                         fontSize: 22,
@@ -60,7 +68,7 @@ class ScenicPanel extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "${package.establishedTime.day}/${package.establishedTime.month}/${package.establishedTime.year}",
+                      "${widget.package.establishedTime.day}/${widget.package.establishedTime.month}/${widget.package.establishedTime.year}",
                       style: const TextStyle(
                         fontFamily: "Jost",
                         fontWeight: FontWeight.normal,

@@ -7,15 +7,39 @@ import 'package:vietnambeyondthehorizon/presentation/widgets/home/scenic_panel.d
 class VisitedPlaceBox extends StatefulWidget {
   final Size size;
   final double miniWidth;
+
   VisitedPlaceBox({super.key, required this.size})
     : miniWidth = size.width * 0.55;
-
   @override
   State<VisitedPlaceBox> createState() => _VisitedPlaceBoxState();
 }
 
 class _VisitedPlaceBoxState extends State<VisitedPlaceBox> {
+  List<GlobalKey<home_widgets.ScenicPanelState>> keys = [];
+  List<home_widgets.ScenicPanel> list = [];
   double targetIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    for (int i = 0; i < 10; i++) {
+      keys.add(GlobalKey<home_widgets.ScenicPanelState>());
+      list.add(
+        home_widgets.ScenicPanel(
+          key: keys[i],
+          size: Size(widget.miniWidth, widget.size.height * 0.9),
+          package: Reccommendscenic(
+            image: const AssetImage(
+              "assets/temporary/lorem-ipsum-small-background.png",
+            ),
+            name: "Lorem ipsum",
+            establishedTime: DateTime(2022, 20, 19),
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     ScrollController scrollbar = ScrollController();
@@ -31,24 +55,7 @@ class _VisitedPlaceBoxState extends State<VisitedPlaceBox> {
           child: Container(
             height: widget.size.height,
             padding: EdgeInsets.only(bottom: widget.size.height * 0.05),
-            child: Row(
-              spacing: 20,
-              children: List.generate(10, (index) {
-                double scale = 1 - (index - targetIndex).abs() / 5;
-                if (scale < 0) scale = 0;
-                return home_widgets.ScenicPanel(
-                  size: Size(widget.miniWidth, widget.size.height * 0.9),
-                  scale: scale,
-                  package: Reccommendscenic(
-                    image: const AssetImage(
-                      "assets/temporary/lorem-ipsum-small-background.png",
-                    ),
-                    name: "Lorem ipsum",
-                    establishedTime: DateTime(2022, 20, 19),
-                  ),
-                );
-              }),
-            ),
+            child: Row(spacing: 20, children: list),
           ),
         ),
         notificationPredicate: (notification) {
@@ -56,6 +63,15 @@ class _VisitedPlaceBoxState extends State<VisitedPlaceBox> {
             targetIndex =
                 (notification.metrics.pixels + 15) / (widget.miniWidth + 20);
             targetIndex += (widget.size.width) / (widget.miniWidth + 20) / 4;
+
+            int current = targetIndex.floor() - 1;
+            for (int i = 0; i < 4; i++) {
+              if (current + i < keys.length && current + i >= 0) {
+                keys[current + i].currentState?.setScale(
+                  1 - (targetIndex - current - i).abs() / 5,
+                );
+              }
+            }
           });
           return (notification.depth == 0);
         },
