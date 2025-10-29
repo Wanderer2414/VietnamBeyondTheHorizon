@@ -173,7 +173,7 @@ class _OpenStreetMapScreenState extends State<OpenStreetMapScreen> {
                   mapController: _mapController,
                   options: MapOptions(
                     initialCenter: _currentLocation ?? const LatLng(0, 0),
-                    initialZoom: 2,
+                    initialZoom: 40,
                     minZoom: 1,
                     maxZoom: 40,
                     initialRotation: -_heading,
