@@ -32,6 +32,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+/coverage/
 
 # Symbolication related
 app.*.symbols
@@ -43,4 +44,12 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+android/
+ios/
+linux/
+macos/
+test/
+web/
+windows/
+.metadata
 pubspec.lock
