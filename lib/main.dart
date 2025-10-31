@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vietnambeyondthehorizon/routes/main_route.dart';
-import 'package:vietnambeyondthehorizon/osm_page.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/map/map_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +18,7 @@ class Application extends StatelessWidget {
     MediaQuery.of(context).removePadding(removeTop: true);
     return MaterialApp(
       title: 'Vietnam: Beyond the Horizon',
-      initialRoute: MainRoute.home,
+      initialRoute: MainRoute.mapScreen,
       routes: MainRoute.routes,
     );
   }
