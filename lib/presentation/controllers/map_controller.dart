@@ -8,6 +8,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
+import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
 
 class MapState {
@@ -57,7 +58,9 @@ class MyMapController extends ValueNotifier<MapState> {
 
   bool mapReady = false;
   late BuildContext context;
-  final void Function(LocationModel?) togglePanel;
+  LocationModel? selectedLocation;
+  bool isLocationInfoPanelVisible = false;
+  bool isMissionCardVisible = false;
 
   //___________________TEST____________________
   final List<LocationModel> locationsList = [
@@ -95,7 +98,26 @@ class MyMapController extends ValueNotifier<MapState> {
       longitude: 106.66667,
     ),
   ];
-  MyMapController({required this.togglePanel}) : super(MapState());
+
+  final List<MissionModel> missionList = [
+    MissionModel(
+      id: "101",
+      description: "Take a photo involving yourself and the given image",
+      starReward: "2",
+      illustrationURL:
+          "https://static.vinwonders.com/production/pho-tay-bui-vien-3.jpg",
+    ),
+    MissionModel(
+      id: "102",
+      description:
+          "Take a photo involving yourself and the given image, and dance under the tree",
+      starReward: "5",
+      illustrationURL:
+          "https://cdn.thuvienphapluat.vn/uploads/tintuc/2025/07/17/truong-dai-hoc-khoa-hoc-tu-nhien-dhqg-tphcm.jpg",
+    ),
+  ];
+
+  MyMapController() : super(MapState());
 
   void initialize(BuildContext ctx) async {
     context = ctx;
@@ -141,6 +163,10 @@ class MyMapController extends ValueNotifier<MapState> {
       initialZoom: 15,
       minZoom: 10,
       maxZoom: 20,
+      onTap: (tapPosition, point) => {
+        toggleLocationInfoPanel(null),
+        toggleMissionCard(null),
+      },
       onMapReady: onMapReady,
     );
   }
@@ -180,7 +206,7 @@ class MyMapController extends ValueNotifier<MapState> {
     layers.add(
       MarkerLayerWidget(
         locations: locationsList,
-        onMarkerTap: togglePanel,
+        onMarkerTap: toggleMissionCard,
         onMovingToLocation: moveToLocation,
       ),
     );
@@ -249,6 +275,26 @@ class MyMapController extends ValueNotifier<MapState> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void toggleLocationInfoPanel(LocationModel? location) {
+    if (location == null) {
+      isLocationInfoPanelVisible = false;
+      // selectedLocation = null;
+    } else {
+      selectedLocation = location;
+      isLocationInfoPanelVisible = true;
+    }
+  }
+
+  void toggleMissionCard(LocationModel? location) {
+    if (location == null) {
+      isMissionCardVisible = false;
+      selectedLocation = null;
+    } else {
+      selectedLocation = location;
+      isMissionCardVisible = true;
+    }
   }
 }
 

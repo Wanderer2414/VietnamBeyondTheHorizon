@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-class PhotoBox extends StatelessWidget {
+class PhotoBoxWidget extends StatelessWidget {
   final List<String> imageURLs;
-  const PhotoBox({super.key, required this.imageURLs});
+  const PhotoBoxWidget({super.key, required this.imageURLs});
 
   Widget _buildPhoto(String path) {
     return Container(

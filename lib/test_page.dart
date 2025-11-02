@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/location_info/location_info.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission/mission_card.dart';
 
 class TestPage extends StatefulWidget {
   const TestPage({super.key});
@@ -27,20 +28,21 @@ class _TestPageState extends State<TestPage> {
           // Background
           Container(color: Colors.grey[200]),
 
+          //MissionCard(location: location, onNavigatingToLocationInfo: onNavigatingToLocationInfo, controller: controller)
           // Location info
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.fastEaseInToSlowEaseOut,
-            top: selected ? screenSize.height * 0.5 : screenSize.height,
-            left: 0,
-            right: 0,
-            child: SizedBox(
-              height: screenSize.height * 0.5,
-              child: SingleChildScrollView(
-                //child: LocationInfoWidget(onClose: togglePanel),
-              ),
-            ),
-          ),
+          // AnimatedPositioned(
+          //   duration: const Duration(milliseconds: 600),
+          //   curve: Curves.fastEaseInToSlowEaseOut,
+          //   top: selected ? screenSize.height * 0.5 : screenSize.height,
+          //   left: 0,
+          //   right: 0,
+          //   child: SizedBox(
+          //     height: screenSize.height * 0.5,
+          //     child: SingleChildScrollView(
+          //       child: LocationInfoWidget(onClose: togglePanel),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
       floatingActionButton: FloatingActionButton(

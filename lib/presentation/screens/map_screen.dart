@@ -5,8 +5,9 @@ import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/location_info/location_info.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission/mission_card.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/search_bar.dart';
-import 'map_controller.dart';
+import '../controllers/map_controller.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -16,30 +17,13 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  late final controller = MyMapController(
-    togglePanel: (location) => togglePanel(location),
-  );
+  late final controller = MyMapController();
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
-
-  LocationModel? selectedLocation;
-  bool isPanelVisible = false;
 
   @override
   void initState() {
     super.initState();
     controller.initialize(context);
-  }
-
-  void togglePanel(LocationModel? location) {
-    setState(() {
-      if (location == null) {
-        isPanelVisible = false;
-        selectedLocation = null;
-      } else {
-        selectedLocation = location;
-        isPanelVisible = true;
-      }
-    });
   }
 
   @override
@@ -67,10 +51,37 @@ class _MapScreenState extends State<MapScreen> {
                 children: controller.mapLayers(context),
               ),
 
+              //MISSION CARD
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.easeInOutCubicEmphasized,
+                top: controller.isMissionCardVisible
+                    ? screenSize.height * 0.15
+                    : screenSize.height,
+                left: screenSize.width * 0.05,
+                right: screenSize.width * 0.05,
+                child: AnimatedScale(
+                  duration: const Duration(milliseconds: 600),
+                  scale: controller.isMissionCardVisible ? 1 : 0.3,
+                  curve: Curves.easeInOutCubic,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 500),
+                    opacity: controller.isMissionCardVisible ? 1 : 0,
+                    child: controller.selectedLocation == null
+                        ? const SizedBox()
+                        : MissionCard(
+                            location: controller.selectedLocation!,
+                            controller: controller,
+                          ),
+                  ),
+                ),
+              ),
+
+              //LOCATION INFORMATION
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 600),
                 curve: Curves.fastEaseInToSlowEaseOut,
-                top: isPanelVisible
+                top: controller.isLocationInfoPanelVisible
                     ? screenSize.height * 0.5
                     : screenSize.height,
                 left: 0,
@@ -78,11 +89,12 @@ class _MapScreenState extends State<MapScreen> {
                 child: SizedBox(
                   height: screenSize.height * 0.5,
                   child: SingleChildScrollView(
-                    child: selectedLocation == null
+                    child: controller.selectedLocation == null
                         ? const SizedBox()
                         : LocationInfoWidget(
-                            location: selectedLocation!,
-                            onClose: () => togglePanel(null),
+                            location: controller.selectedLocation!,
+                            onClose: () =>
+                                controller.toggleLocationInfoPanel(null),
                             controller: controller,
                           ),
                   ),
@@ -101,7 +113,7 @@ class _MapScreenState extends State<MapScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: controller.moveToCurrentLocation,
         backgroundColor: Colors.blue,
-        child: const Icon(Icons.my_location, size: 30),
+        child: const Icon(Icons.my_location, size: 30, color: Colors.white),
       ),
     );
   }

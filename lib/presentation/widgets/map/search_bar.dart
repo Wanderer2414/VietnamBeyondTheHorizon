@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/map/map_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 
 class SearchBarWidget extends StatelessWidget {
   final MyMapController controller;

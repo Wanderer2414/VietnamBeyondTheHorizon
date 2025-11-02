@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/map/map_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/location_info/description_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/location_info/overview_box.dart';
@@ -57,7 +57,7 @@ class LocationInfoWidget extends StatelessWidget {
                 },
               ),
               IconButton(
-                onPressed: onClose,
+                onPressed: () => controller.toggleLocationInfoPanel(null),
                 icon: Icon(
                   Icons.close_rounded,
                   size: 35,
@@ -89,7 +89,7 @@ class LocationInfoWidget extends StatelessWidget {
             endIndent: screenSize.width * 0.1,
           ),
 
-          PhotoBox(imageURLs: location.imageURLs),
+          PhotoBoxWidget(imageURLs: location.imageURLs),
 
           SizedBox(height: 8),
           Divider(
