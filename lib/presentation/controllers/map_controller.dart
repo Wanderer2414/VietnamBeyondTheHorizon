@@ -16,7 +16,8 @@ class MapState {
   final bool isLoading;
   final LatLng? currentLocation;
   final LatLng? destination;
-  final List<LocationModel> locations;
+  final double? distance;
+  final List<LocationModel> locationList;
   final List<LatLng>? routes;
   final double heading;
 
@@ -25,9 +26,10 @@ class MapState {
     this.isLoading = true,
     this.currentLocation,
     this.destination,
+    this.distance,
     this.routes = const [],
     this.heading = 0,
-    this.locations = const [],
+    this.locationList = const [],
   });
 
   MapState copyWith({
@@ -35,18 +37,20 @@ class MapState {
     bool? isLoading,
     LatLng? currentLocation,
     LatLng? destination,
+    double? distance,
     List<LatLng>? routes,
     double? heading,
-    List<LocationModel>? locations,
+    List<LocationModel>? locationList,
   }) {
     return MapState(
       isPlaying: isPlaying ?? this.isPlaying,
       isLoading: isLoading ?? this.isLoading,
       currentLocation: currentLocation ?? this.currentLocation,
       destination: destination ?? this.destination,
+      distance: distance ?? this.distance,
       routes: routes ?? this.routes,
       heading: heading ?? this.heading,
-      locations: locations ?? this.locations,
+      locationList: locationList ?? this.locationList,
     );
   }
 }
@@ -61,6 +65,7 @@ class MyMapController extends ValueNotifier<MapState> {
   LocationModel? selectedLocation;
   bool isLocationInfoPanelVisible = false;
   bool isMissionCardVisible = false;
+  bool isCardFlipping = false;
 
   //___________________TEST____________________
   final List<LocationModel> locationsList = [
@@ -259,6 +264,63 @@ class MyMapController extends ValueNotifier<MapState> {
     }
   }
 
+  Future<void> fetchFullRoute(List<LocationModel> locations) async {
+    if (locations.length < 2) return;
+
+    List<LatLng> fullRoute = [];
+
+    for (int i = 0; i < locations.length - 1; i++) {
+      final start = LatLng(locations[i].latitude, locations[i].longitude);
+      final end = LatLng(locations[i + 1].latitude, locations[i + 1].longitude);
+
+      final url = Uri.parse(
+        'https://router.project-osrm.org/route/v1/driving/'
+        '${start.longitude},${start.latitude};'
+        '${end.longitude},${end.latitude}'
+        '?overview=full&geometries=polyline',
+      );
+
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final geometry = data['routes'][0]['geometry'];
+
+        final List<LatLng> decodedRoute = await compute<String, List<LatLng>>(
+          _decodePolyline,
+          geometry,
+        );
+
+        if (i > 0) decodedRoute.removeAt(0);
+
+        fullRoute.addAll(decodedRoute);
+      } else {
+        print('Failed to fetch route between ${i} and ${i + 1}');
+      }
+    }
+    value = value.copyWith(routes: fullRoute);
+
+    print("Full route length: ${fullRoute.length} points");
+  }
+
+  // Future<double> fetchDistance(LatLng? start, LatLng? end) async {
+  //    if (start == null || end == null) return 0;
+
+  //   final url = Uri.parse(
+  //     'https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=polyline&alternatives=false&annotations=distance',
+  //   );
+
+  //   final response = await http.get(url);
+  //   if (response.statusCode == 200) {
+  //     final data = json.decode(response.body);
+  //     final route = data['routes'][0];
+  //     final double distanceMeters = route['distance'];
+  //     return distanceMeters;
+  //   } else {
+  //     _showError('Failed to fetch distance.');
+  //   }
+  //   return 0;
+  // }
+
   void moveToCurrentLocation() {
     if (value.currentLocation != null) {
       mapController.move(value.currentLocation!, 15);
@@ -290,10 +352,22 @@ class MyMapController extends ValueNotifier<MapState> {
   void toggleMissionCard(LocationModel? location) {
     if (location == null) {
       isMissionCardVisible = false;
+      isCardFlipping = false;
       selectedLocation = null;
     } else {
+      isCardFlipping = true;
       selectedLocation = location;
       isMissionCardVisible = true;
+    }
+  }
+
+  void updateMissionImage(String missionId, String imagePath) {
+    for (var m in missionList) {
+      if (m.id == missionId) {
+        m.imagePath = imagePath;
+        //notifyListeners();
+        break;
+      }
     }
   }
 }

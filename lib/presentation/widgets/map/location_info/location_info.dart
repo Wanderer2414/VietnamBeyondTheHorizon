@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
-import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/location_info/description_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/location_info/overview_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/location_info/photo_box.dart';

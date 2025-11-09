@@ -5,6 +5,7 @@ class MissionModel {
   final bool isCompleted;
   final DateTime? finishDay;
   final String? illustrationURL;
+  String? imagePath;
 
   MissionModel({
     required this.id,
@@ -13,6 +14,7 @@ class MissionModel {
     this.isCompleted = false,
     this.finishDay,
     this.illustrationURL,
+    this.imagePath,
   });
 
   Map<String, dynamic> toJson() {
@@ -23,6 +25,7 @@ class MissionModel {
       'isCompleted': isCompleted,
       'finishDay': finishDay?.toIso8601String(),
       'illustrationURL': illustrationURL,
+      'imagePath': imagePath,
     };
   }
 
@@ -38,6 +41,7 @@ class MissionModel {
       illustrationURL: json['illustrationURL'] != null
           ? json['illustrationURL'] as String
           : null,
+      imagePath: json['imagePath'] != null ? json['imagePath'] as String : null,
     );
   }
 }

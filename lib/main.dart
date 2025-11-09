@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vietnambeyondthehorizon/routes/main_route.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/map_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

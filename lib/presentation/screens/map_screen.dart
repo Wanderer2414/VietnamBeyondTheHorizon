@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/location_info/location_info.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission/mission_card.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/search_bar.dart';
 import '../controllers/map_controller.dart';
@@ -67,12 +65,43 @@ class _MapScreenState extends State<MapScreen> {
                   child: AnimatedOpacity(
                     duration: const Duration(milliseconds: 500),
                     opacity: controller.isMissionCardVisible ? 1 : 0,
-                    child: controller.selectedLocation == null
-                        ? const SizedBox()
-                        : MissionCard(
-                            location: controller.selectedLocation!,
-                            controller: controller,
-                          ),
+                    child: AnimatedSwitcher(
+                      duration: Duration(milliseconds: 600),
+                      transitionBuilder: (child, animation) {
+                        final rotate = Tween(
+                          begin: pi,
+                          end: 0.0,
+                        ).animate(animation);
+                        return AnimatedBuilder(
+                          animation: rotate,
+                          builder: (context, child) {
+                            final isUnder =
+                                (ValueKey(controller.isCardFlipping) !=
+                                child!.key);
+                            var tilt = (animation.value - 0.5).abs() - 0.5;
+                            tilt *= 0.003;
+                            final value = isUnder
+                                ? min(rotate.value, pi / 2)
+                                : rotate.value;
+                            return Transform(
+                              transform: Matrix4.rotationY(value)
+                                ..setEntry(3, 0, tilt),
+                              alignment: Alignment.center,
+                              child: child,
+                            );
+                          },
+                          child: child,
+                        );
+                      },
+                      child: controller.isCardFlipping
+                          ? controller.selectedLocation == null
+                                ? const SizedBox()
+                                : MissionCard(
+                                    location: controller.selectedLocation!,
+                                    controller: controller,
+                                  )
+                          : SizedBox(height: 200, width: 300),
+                    ),
                   ),
                 ),
               ),
@@ -117,4 +146,8 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
   }
+}
+
+double min(double a, double b) {
+  return a < b ? a : b;
 }

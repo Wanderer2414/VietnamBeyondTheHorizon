@@ -3,7 +3,7 @@ import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/map/location_info/location_info.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/map/image_upload.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission/challenge_box.dart';
 
 class MissionCard extends StatelessWidget {
@@ -29,7 +29,7 @@ class MissionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     final mission = retrieveMission();
-    final double cardHeight = screenSize.height * 0.65; // chiều cao cố định
+    final double cardHeight = screenSize.height * 0.65;
     if (mission == null) {
       return SizedBox(height: 20);
     }
@@ -103,6 +103,8 @@ class MissionCard extends StatelessWidget {
                   "Your submission",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
                 ),
+
+                ImageUploadWidget(controller: controller, mission: mission),
               ],
             ),
           ),

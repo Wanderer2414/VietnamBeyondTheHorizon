@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
-import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/home/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/photo.dart';
 
 class ChallengeBoxWidget extends StatelessWidget {

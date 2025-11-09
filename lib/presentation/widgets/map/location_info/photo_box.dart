@@ -1,32 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/map/photo.dart';
 
 class PhotoBoxWidget extends StatelessWidget {
   final List<String> imageURLs;
   const PhotoBoxWidget({super.key, required this.imageURLs});
-
-  Widget _buildPhoto(String path) {
-    return Container(
-      margin: const EdgeInsets.only(right: 12),
-      width: 120,
-      height: 120,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        image: DecorationImage(image: AssetImage(path), fit: BoxFit.cover),
-      ),
-    );
-  }
-
-  Widget _buildPhotoFromNetwork(String path) {
-    return Container(
-      margin: const EdgeInsets.only(right: 12),
-      width: 120,
-      height: 120,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        image: DecorationImage(image: NetworkImage(path), fit: BoxFit.cover),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +16,15 @@ class PhotoBoxWidget extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: imageURLs.map((url) {
-              return _buildPhotoFromNetwork(url);
+              return Container(
+                margin: const EdgeInsets.only(right: 12),
+                child: PhotoWidget(
+                  url,
+                  width: 120,
+                  height: 120,
+                  borderRadius: 8,
+                ),
+              );
             }).toList(),
           ),
         ),
