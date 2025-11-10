@@ -1,25 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:vietnambeyondthehorizon/routes/main_route.dart';
-import 'package:vietnambeyondthehorizon/osm_page.dart';
+import 'screens/splash_begin_screen.dart';
+import 'screens/introduction_screen.dart';
+import 'screens/input_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  //Disable status bar on mobile
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  runApp(const Application());
+  runApp(const MyApp());
 }
 
-class Application extends StatelessWidget {
-  const Application({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    MediaQuery.of(context).removePadding(removeTop: true);
     return MaterialApp(
-      title: 'Vietnam: Beyond the Horizon',
-      initialRoute: MainRoute.home,
-      routes: MainRoute.routes,
+      title: 'Vietnam Beyond The Horizon',
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/SplashScreen',
+      routes: {
+        '/SplashScreen': (context) => SplashScreen(),
+        '/Page2onBoarding': (context) => IntroScreen(),
+        '/InputPage': (context) => const InputPage(),
+      },
     );
   }
 }
