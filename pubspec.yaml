@@ -143,4 +143,4 @@ flutter:
     - assets/icons/star.png
     - assets/icons/bar.png
     - assets/temporary/lorem-ipsum-small-background.png
-      - assets/images/
+      # - assets/images/
