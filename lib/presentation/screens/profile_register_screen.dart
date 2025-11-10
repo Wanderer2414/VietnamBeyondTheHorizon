@@ -3,17 +3,18 @@ import 'package:vietnambeyondthehorizon/presentation/widgets/login/decoration.da
     as login;
 import 'package:vietnambeyondthehorizon/presentation/widgets/login/back_button.dart'
     as login;
-import 'package:vietnambeyondthehorizon/presentation/widgets/register/register_panel.dart'
-    as register;
+import 'package:vietnambeyondthehorizon/presentation/widgets/profile_register/title.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/profile_register/panel.dart'
+    as profilefill;
 
-class AccountRegisterScreen extends StatefulWidget {
-  const AccountRegisterScreen({super.key});
+class ProfileRegister extends StatefulWidget {
+  const ProfileRegister({super.key});
 
   @override
-  State<AccountRegisterScreen> createState() => _AccountLoginScreenState();
+  State<ProfileRegister> createState() => _AccountLoginScreenState();
 }
 
-class _AccountLoginScreenState extends State<AccountRegisterScreen> {
+class _AccountLoginScreenState extends State<ProfileRegister> {
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
@@ -28,8 +29,9 @@ class _AccountLoginScreenState extends State<AccountRegisterScreen> {
           child: Stack(
             children: [
               login.Decoration(),
+              ProfileFillLabel(size: screenSize),
               login.BackButton(size: screenSize),
-              register.RegisterPanel(size: screenSize),
+              profilefill.Panel(size: screenSize),
             ],
           ),
         ),

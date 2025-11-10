@@ -53,3 +53,5 @@ web/
 windows/
 .metadata
 pubspec.lock
+analysis_options.yaml
+README.md

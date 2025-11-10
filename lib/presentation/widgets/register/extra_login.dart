@@ -16,19 +16,19 @@ class ExtraLogin extends StatelessWidget {
           _Decoration(size: size),
           SizedBox(
             width: size.width,
-            height: size.height * 0.3,
+            height: size.height * 0.5,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _ExtraLoginButton(radius: size.height * 0.22),
+                _ExtraLoginButton(radius: size.height * 0.4),
                 SizedBox(width: size.width * 0.1),
-                _ExtraLoginButton(radius: size.height * 0.22),
+                _ExtraLoginButton(radius: size.height * 0.4),
                 SizedBox(width: size.width * 0.1),
-                _ExtraLoginButton(radius: size.height * 0.22),
+                _ExtraLoginButton(radius: size.height * 0.4),
               ],
             ),
           ),
-          _SignUpNavigate(size: size),
+          _SignUpNavigate(size: Size(size.width, size.height * 0.25)),
         ],
       ),
     );
@@ -59,31 +59,39 @@ class _SignUpNavigate extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: size.width,
-      height: size.height * 0.25,
+      height: size.height,
       child: FittedBox(
         fit: BoxFit.scaleDown,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "Don't have an account? ",
-              style: TextStyle(fontFamily: "Jost", color: Colors.black38),
+              "Do have an account? ",
+              style: TextStyle(
+                fontFamily: "Jost",
+                color: Colors.black38,
+                fontSize: 20,
+              ),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pushReplacementNamed("register");
+                Navigator.of(context).pushReplacementNamed("login");
               },
               style: TextButton.styleFrom(
                 padding: EdgeInsets.zero,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadiusGeometry.circular(2),
                 ),
-                minimumSize: Size(size.width * 0.1, size.height * 0.1),
-                maximumSize: Size(size.width * 0.15, size.height * 0.15),
+                minimumSize: Size(size.width * 0.15, size.height),
+                maximumSize: Size(size.width * 0.2, size.height),
               ),
               child: Text(
-                "Sign up",
-                style: TextStyle(color: Color(0xFF1295FF), fontFamily: "Jost"),
+                "Log in",
+                style: TextStyle(
+                  color: Color(0xFF1295FF),
+                  fontFamily: "Jost",
+                  fontSize: 20,
+                ),
               ),
             ),
           ],
@@ -117,14 +125,14 @@ class _LoginWithLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: size.height * 0.13,
+      height: size.height * 0.15,
       alignment: Alignment.topCenter,
       child: Container(
         width: size.width * 0.25,
         decoration: BoxDecoration(color: Colors.white),
         alignment: Alignment.center,
         child: Text(
-          "Log in with",
+          "Sign up with",
           style: TextStyle(
             fontFamily: "Jost",
             color: Colors.black38,
@@ -145,7 +153,7 @@ class _LogInDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: size.width * 0.8,
-      height: size.height * 0.1,
+      height: size.height * 0.12,
       padding: EdgeInsets.only(top: 5),
       child: Divider(
         color: Colors.black38,
