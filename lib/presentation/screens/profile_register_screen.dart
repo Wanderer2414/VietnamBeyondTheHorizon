@@ -15,27 +15,37 @@ class ProfileRegister extends StatefulWidget {
 }
 
 class _AccountLoginScreenState extends State<ProfileRegister> {
+  late final _Content _content;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final Size screenSize = MediaQuery.of(context).size;
+    _content = _Content(screenSize);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Size screenSize = MediaQuery.of(context).size;
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: const Color(0xFFFFDF9E),
-      body: SingleChildScrollView(
-        child: Container(
-          width: screenSize.width,
-          height: screenSize.height,
-          alignment: Alignment.bottomCenter,
-          child: Stack(
-            children: [
-              login.Decoration(),
-              ProfileFillLabel(size: screenSize),
-              common.BackButton(size: screenSize),
-              profilefill.Panel(size: screenSize),
-            ],
-          ),
-        ),
-      ),
+      body: SingleChildScrollView(child: _content),
     );
   }
+}
+
+class _Content extends Container {
+  _Content(Size screenSize)
+    : super(
+        width: screenSize.width,
+        height: screenSize.height,
+        alignment: Alignment.bottomCenter,
+        child: Stack(
+          children: [
+            login.Decoration(),
+            ProfileFillLabel(size: screenSize),
+            common.BackButton(size: screenSize),
+            profilefill.Panel(size: screenSize),
+          ],
+        ),
+      );
 }
