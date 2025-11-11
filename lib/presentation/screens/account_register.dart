@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/login/decoration.dart'
     as login;
-import 'package:vietnambeyondthehorizon/presentation/widgets/login/back_button.dart'
-    as login;
 import 'package:vietnambeyondthehorizon/presentation/widgets/register/register_panel.dart'
     as register;
 
@@ -28,7 +26,6 @@ class _AccountLoginScreenState extends State<AccountRegisterScreen> {
           child: Stack(
             children: [
               login.Decoration(),
-              login.BackButton(size: screenSize),
               register.RegisterPanel(size: screenSize),
             ],
           ),

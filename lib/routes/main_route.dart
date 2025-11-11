@@ -27,9 +27,6 @@ class MainRoute {
       case "filter":
         return TransitionRLPageRoute(nextScreen: InputPage());
 
-      case "profile_register":
-        return TransitionRLPageRoute(nextScreen: ProfileRegister());
-
       case "home":
         return TransitionRLPageRoute(nextScreen: HomeScreen());
 

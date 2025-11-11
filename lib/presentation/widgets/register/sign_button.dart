@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/animations/screen/transitionRL.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/profile_register_screen.dart';
 
 class LoginButton extends StatelessWidget {
   final Size size;
@@ -8,7 +10,9 @@ class LoginButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
-        Navigator.of(context).pushReplacementNamed("profile_register");
+        Navigator.of(
+          context,
+        ).push(TransitionRLPageRoute(nextScreen: ProfileRegister()));
       },
       style: ButtonStyle(
         backgroundColor: WidgetStatePropertyAll(Colors.transparent),

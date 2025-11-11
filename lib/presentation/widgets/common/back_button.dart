@@ -12,7 +12,9 @@ class BackButton extends StatelessWidget {
       height: size.height * 0.1,
       alignment: Alignment.bottomRight,
       child: IconButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
         padding: EdgeInsets.zero,
         style: IconButton.styleFrom(
           minimumSize: Size.square(size.height * 0.04),

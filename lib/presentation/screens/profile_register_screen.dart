@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/login/decoration.dart'
     as login;
-import 'package:vietnambeyondthehorizon/presentation/widgets/profile_register/back_button.dart'
-    as login;
+import 'package:vietnambeyondthehorizon/presentation/widgets/common/back_button.dart'
+    as common;
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile_register/title.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile_register/panel.dart'
     as profilefill;
@@ -30,7 +30,7 @@ class _AccountLoginScreenState extends State<ProfileRegister> {
             children: [
               login.Decoration(),
               ProfileFillLabel(size: screenSize),
-              login.BackButton(size: screenSize),
+              common.BackButton(size: screenSize),
               profilefill.Panel(size: screenSize),
             ],
           ),

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/login/decoration.dart'
     as login;
-import 'package:vietnambeyondthehorizon/presentation/widgets/login/back_button.dart'
-    as login;
 import 'package:vietnambeyondthehorizon/presentation/widgets/login/login_panel.dart'
     as login;
 
@@ -28,7 +26,6 @@ class _AccountLoginScreenState extends State<AccountLoginScreen> {
           child: Stack(
             children: [
               login.Decoration(),
-              login.BackButton(size: screenSize),
               login.LoginPanel(size: screenSize),
             ],
           ),

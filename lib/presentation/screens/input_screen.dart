@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/animations/screen/transitionRL.dart';
+import 'package:vietnambeyondthehorizon/osm_page.dart';
 
 class InputPage extends StatefulWidget {
   const InputPage({Key? key}) : super(key: key);
@@ -9,9 +11,13 @@ class InputPage extends StatefulWidget {
 
 class _InputPageState extends State<InputPage> {
   final TextEditingController _locationController = TextEditingController();
-  final TextEditingController _budgetController = TextEditingController(text: '20\$');
-  final TextEditingController _durationController = TextEditingController(text: '2 days');
-  
+  final TextEditingController _budgetController = TextEditingController(
+    text: '20\$',
+  );
+  final TextEditingController _durationController = TextEditingController(
+    text: '2 days',
+  );
+
   Map<String, bool> interests = {
     'Attractions': true,
     'Culture': true,
@@ -35,11 +41,7 @@ class _InputPageState extends State<InputPage> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFFFF0E8),
-              Color(0xFFB8F5F0),
-              Color(0xFFFFF9C4),
-            ],
+            colors: [Color(0xFFFFF0E8), Color(0xFFB8F5F0), Color(0xFFFFF9C4)],
           ),
         ),
         child: SafeArea(
@@ -50,7 +52,11 @@ class _InputPageState extends State<InputPage> {
                 top: 16,
                 left: 16,
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios, size: 32, color: Colors.black),
+                  icon: const Icon(
+                    Icons.arrow_back_ios,
+                    size: 32,
+                    color: Colors.black,
+                  ),
                   onPressed: () {
                     if (Navigator.canPop(context)) {
                       Navigator.pop(context);
@@ -58,7 +64,7 @@ class _InputPageState extends State<InputPage> {
                   },
                 ),
               ),
-              
+
               // Main content
               Align(
                 alignment: Alignment.topCenter,
@@ -69,7 +75,9 @@ class _InputPageState extends State<InputPage> {
                       builder: (context, constraints) {
                         return Container(
                           constraints: BoxConstraints(
-                            maxWidth: constraints.maxWidth > 500 ? 500 : constraints.maxWidth,
+                            maxWidth: constraints.maxWidth > 500
+                                ? 500
+                                : constraints.maxWidth,
                           ),
                           padding: EdgeInsets.symmetric(
                             horizontal: constraints.maxWidth > 400 ? 28 : 20,
@@ -91,15 +99,23 @@ class _InputPageState extends State<InputPage> {
                             children: [
                               // Plan Your Trip Button
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 32,
+                                  vertical: 14,
+                                ),
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
-                                    colors: [Color(0xFFFF8A5B), Color(0xFFFF6B6B)],
+                                    colors: [
+                                      Color(0xFFFF8A5B),
+                                      Color(0xFFFF6B6B),
+                                    ],
                                   ),
                                   borderRadius: BorderRadius.circular(30),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFFFF8A5B).withOpacity(0.4),
+                                      color: const Color(
+                                        0xFFFF8A5B,
+                                      ).withOpacity(0.4),
                                       blurRadius: 15,
                                       offset: const Offset(0, 6),
                                     ),
@@ -115,22 +131,33 @@ class _InputPageState extends State<InputPage> {
                                   ),
                                 ),
                               ),
-                              
+
                               const SizedBox(height: 40),
-                              
+
                               // Location Field
-                              _buildInputField('Location', '(GPS)', _locationController),
-                              
+                              _buildInputField(
+                                'Location',
+                                '(GPS)',
+                                _locationController,
+                              ),
+
                               const SizedBox(height: 20),
-                              
+
                               // Budget Field
-                              _buildInputField('Budget', '20\$', _budgetController),
-                              
+                              _buildInputField(
+                                'Budget',
+                                '20\$',
+                                _budgetController,
+                              ),
+
                               const SizedBox(height: 20),
-                              
+
                               // Interest Field
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 24,
+                                ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFF5F5F5),
                                   borderRadius: BorderRadius.circular(25),
@@ -148,13 +175,18 @@ class _InputPageState extends State<InputPage> {
                                     ),
                                     const SizedBox(height: 16),
                                     ...interests.entries.map((entry) {
-                                      bool isOrange = entry.key == 'Culture' || entry.key == 'Entertainment';
+                                      bool isOrange =
+                                          entry.key == 'Culture' ||
+                                          entry.key == 'Entertainment';
                                       return Padding(
-                                        padding: const EdgeInsets.only(bottom: 12.0),
+                                        padding: const EdgeInsets.only(
+                                          bottom: 12.0,
+                                        ),
                                         child: InkWell(
                                           onTap: () {
                                             setState(() {
-                                              interests[entry.key] = !entry.value;
+                                              interests[entry.key] =
+                                                  !entry.value;
                                             });
                                           },
                                           child: Row(
@@ -164,15 +196,24 @@ class _InputPageState extends State<InputPage> {
                                                 height: 26,
                                                 decoration: BoxDecoration(
                                                   color: entry.value
-                                                      ? (isOrange ? const Color(0xFFFF9800) : Colors.black)
+                                                      ? (isOrange
+                                                            ? const Color(
+                                                                0xFFFF9800,
+                                                              )
+                                                            : Colors.black)
                                                       : Colors.white,
                                                   border: Border.all(
                                                     color: entry.value
-                                                        ? (isOrange ? const Color(0xFFFF9800) : Colors.black)
+                                                        ? (isOrange
+                                                              ? const Color(
+                                                                  0xFFFF9800,
+                                                                )
+                                                              : Colors.black)
                                                         : Colors.grey.shade400,
                                                     width: 2,
                                                   ),
-                                                  borderRadius: BorderRadius.circular(6),
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
                                                 ),
                                                 child: entry.value
                                                     ? const Icon(
@@ -201,29 +242,45 @@ class _InputPageState extends State<InputPage> {
                                   ],
                                 ),
                               ),
-                              
+
                               const SizedBox(height: 20),
-                              
+
                               // Duration Field
-                              _buildInputField('Duration', '2 days', _durationController),
-                              
+                              _buildInputField(
+                                'Duration',
+                                '2 days',
+                                _durationController,
+                              ),
+
                               const SizedBox(height: 50),
-                              
+
                               // Next Button
                               InkWell(
                                 onTap: () {
-                                  Navigator.pushNamed(context, '/SplashScreen');
+                                  Navigator.of(context).push(
+                                    TransitionRLPageRoute(
+                                      nextScreen: OpenStreetMapScreen(),
+                                    ),
+                                  );
                                 },
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 50,
+                                    vertical: 16,
+                                  ),
                                   decoration: BoxDecoration(
                                     gradient: const LinearGradient(
-                                      colors: [Color(0xFFF59E0B), Color(0xFFFF6B6B)],
+                                      colors: [
+                                        Color(0xFFF59E0B),
+                                        Color(0xFFFF6B6B),
+                                      ],
                                     ),
                                     borderRadius: BorderRadius.circular(30),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFFF59E0B).withOpacity(0.4),
+                                        color: const Color(
+                                          0xFFF59E0B,
+                                        ).withOpacity(0.4),
                                         blurRadius: 15,
                                         offset: const Offset(0, 6),
                                       ),
@@ -255,7 +312,11 @@ class _InputPageState extends State<InputPage> {
     );
   }
 
-  Widget _buildInputField(String label, String hint, TextEditingController controller) {
+  Widget _buildInputField(
+    String label,
+    String hint,
+    TextEditingController controller,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       decoration: BoxDecoration(

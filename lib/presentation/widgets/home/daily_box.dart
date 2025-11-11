@@ -29,23 +29,23 @@ class DailyBox extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.only(top: size.height * 0.1),
+            padding: EdgeInsets.only(top: size.height * 0.05),
             width: size.width * 0.9,
             height: size.height * 0.4,
             alignment: Alignment.centerLeft,
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: const Text(
-                "Daily Quest",
+                "Daily mission",
                 style: TextStyle(
                   color: Colors.black,
-                  fontFamily: "Inder",
-                  fontSize: 31,
+                  fontFamily: "Kay Pho Du",
+                  fontSize: 34,
                 ),
               ),
             ),
           ),
-          SizedBox(height: size.height * 0.05),
+          SizedBox(height: size.height * 0.08),
           Center(
             child: home_widgets.RequestTask(
               size: Size(size.width * 0.9, size.height * 0.4),
