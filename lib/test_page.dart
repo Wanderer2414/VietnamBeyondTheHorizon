@@ -1,7 +1,4 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/map/location_info/location_info.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission/mission_card.dart';
 
 class TestPage extends StatefulWidget {
   const TestPage({super.key});
@@ -21,7 +18,6 @@ class _TestPageState extends State<TestPage> {
 
   @override
   Widget build(BuildContext context) {
-    final Size screenSize = MediaQuery.of(context).size;
     return Scaffold(
       body: Stack(
         children: [

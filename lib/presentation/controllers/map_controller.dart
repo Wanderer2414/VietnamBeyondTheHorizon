@@ -7,9 +7,11 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 import 'package:flutter_compass/flutter_compass.dart';
+import 'package:vietnambeyondthehorizon/animations/card/appear.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission_screen.dart';
 
 class MapState {
   final bool isPlaying;
@@ -161,7 +163,10 @@ class MyMapController extends ValueNotifier<MapState> {
     return true;
   }
 
-  MapOptions mapOptions({required Function() onMapReady}) {
+  MapOptions mapOptions({
+    required Function() onMapReady,
+    required BuildContext context,
+  }) {
     return MapOptions(
       initialCenter:
           value.currentLocation ?? const LatLng(10.762622, 106.660172),
@@ -170,7 +175,7 @@ class MyMapController extends ValueNotifier<MapState> {
       maxZoom: 20,
       onTap: (tapPosition, point) => {
         toggleLocationInfoPanel(null),
-        toggleMissionCard(null),
+        toggleMissionCard(null, context),
       },
       onMapReady: onMapReady,
     );
@@ -218,7 +223,7 @@ class MyMapController extends ValueNotifier<MapState> {
     return layers;
   }
 
-  Future<void> fetchCoordinates(String locationName) async {
+  Future<bool> fetchCoordinates(String locationName) async {
     final url = Uri.parse(
       "https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(locationName)}&format=json&limit=1",
     );
@@ -227,7 +232,6 @@ class MyMapController extends ValueNotifier<MapState> {
       url,
       headers: {'User-Agent': 'my_map/1.0 (khangthinh111555@gmail.com)'},
     );
-
     if (response.statusCode == 200) {
       final List data = json.decode(response.body);
       if (data.isNotEmpty) {
@@ -235,12 +239,14 @@ class MyMapController extends ValueNotifier<MapState> {
         final lon = double.parse(data[0]['lon']);
         value = value.copyWith(destination: LatLng(lat, lon));
         await fetchRoute(value.currentLocation, value.destination);
+        return true;
       } else {
         _showError("Location not found.");
       }
     } else {
       _showError("Failed to fetch location.");
     }
+    return false;
   }
 
   Future<void> fetchRoute(LatLng? start, LatLng? end) async {
@@ -349,7 +355,7 @@ class MyMapController extends ValueNotifier<MapState> {
     }
   }
 
-  void toggleMissionCard(LocationModel? location) {
+  void toggleMissionCard(LocationModel? location, BuildContext context) {
     if (location == null) {
       isMissionCardVisible = false;
       isCardFlipping = false;
@@ -358,6 +364,13 @@ class MyMapController extends ValueNotifier<MapState> {
       isCardFlipping = true;
       selectedLocation = location;
       isMissionCardVisible = true;
+
+      Navigator.of(context).push(
+        ApearAnimation(
+          opaque: false,
+          nextScreen: MissionScreen(controller: this),
+        ),
+      );
     }
   }
 
