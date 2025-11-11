@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-class NameBox extends StatelessWidget {
+class TextboxT2 extends StatelessWidget {
   final Size size;
-  const NameBox({super.key, required this.size});
+  final String hint;
+  const TextboxT2({super.key, required this.size, required this.hint});
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +31,14 @@ class NameBox extends StatelessWidget {
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   hint: Text(
-                    "Nguyen Van A",
+                    hint,
                     style: TextStyle(color: Colors.black54, fontSize: 15),
                   ),
                 ),
+                onTapOutside: (e) {
+                  FocusScope.of(context).unfocus();
+                  FocusScope.of(context).setFirstFocus(FocusScopeNode());
+                },
               ),
             ),
           ],

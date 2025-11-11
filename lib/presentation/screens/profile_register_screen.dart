@@ -39,6 +39,8 @@ class _Content extends Container {
         width: screenSize.width,
         height: screenSize.height,
         alignment: Alignment.bottomCenter,
+        decoration: BoxDecoration(shape: BoxShape.rectangle),
+        clipBehavior: Clip.hardEdge,
         child: Stack(
           children: [
             login.Decoration(),

@@ -70,7 +70,11 @@ class _SideBoxState extends State<SideBox> {
               ),
             ),
           ),
-          onTap: () => Navigator.of(context).pushReplacementNamed("login"),
+          onTap: () {
+            Navigator.of(
+              context,
+            ).pushNamedAndRemoveUntil("login", (route) => false);
+          },
         ),
       ],
     );

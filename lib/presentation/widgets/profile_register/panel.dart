@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/common/textbox_t2.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile_register/age_input.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile_register/city_input.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile_register/finish_button.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/profile_register/name_box.dart';
 
 class Panel extends StatelessWidget {
   final Size size;
@@ -42,7 +42,10 @@ class Panel extends StatelessWidget {
                 child: null,
               ),
             ),
-            NameBox(size: Size(size.width, size.height * 0.06)),
+            TextboxT2(
+              size: Size(size.width, size.height * 0.06),
+              hint: "Nguyen Van A",
+            ),
             SizedBox(height: size.height * 0.03),
             AgeInput(size: Size(size.width, size.height * 0.06)),
             SizedBox(height: size.height * 0.03),
