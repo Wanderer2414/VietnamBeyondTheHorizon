@@ -1,29 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'screens/splash_begin_screen.dart';
-import 'screens/introduction_screen.dart';
-import 'screens/input_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  runApp(const MyApp());
+  runApp(ProviderScope(child: const Application()));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class Application extends StatelessWidget {
+  const Application({super.key});
 
   @override
   Widget build(BuildContext context) {
+    MediaQuery.of(context).removePadding(removeTop: true);
     return MaterialApp(
-      title: 'Vietnam Beyond The Horizon',
-      debugShowCheckedModeBanner: false,
-      initialRoute: '/SplashScreen',
-      routes: {
-        '/SplashScreen': (context) => SplashScreen(),
-        '/Page2onBoarding': (context) => IntroScreen(),
-        '/InputPage': (context) => const InputPage(),
-      },
+      title: 'Vietnam: Beyond the Horizon',
+      initialRoute: MainRoute.home,
+      onGenerateRoute: (settings) => MainRoute.newRoute(settings.name),
     );
   }
 }

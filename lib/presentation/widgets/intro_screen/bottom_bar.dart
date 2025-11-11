@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:vietnambeyondthehorizon/widgets/intro_screen/next_button.dart';
-import 'package:vietnambeyondthehorizon/widgets/intro_screen/screen_index.dart';
-import 'package:vietnambeyondthehorizon/widgets/intro_screen/skip_button.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/intro_screen/next_button.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/intro_screen/screen_index.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/intro_screen/skip_button.dart';
 
 class BottomBar extends Container {
   BottomBar({

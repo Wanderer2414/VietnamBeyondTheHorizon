@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transitionRL.dart';
-import 'package:vietnambeyondthehorizon/screens/input_screen.dart';
-import 'package:vietnambeyondthehorizon/widgets/intro_screen/template.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/account_login.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/account_register.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/intro_screen/template.dart';
 
 class _FirstTitle extends StatelessWidget {
   const _FirstTitle();
@@ -116,7 +117,7 @@ class IntroScreen extends StatelessWidget {
       content:
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris efficitur ex sit amet elementum sagittis.',
       background: AssetImage("assets/backgrounds/introduce_first.png"),
-      skipRoute: TransitionRLPageRoute(nextScreen: InputPage()),
+      skipRoute: TransitionRLPageRoute(nextScreen: AccountLoginScreen()),
       nextRoute: TransitionRLPageRoute(nextScreen: _SecondScreen()),
     );
   }
@@ -133,7 +134,7 @@ class _SecondScreen extends StatelessWidget {
       content:
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris efficitur ex sit amet elementum sagittis.',
       background: AssetImage("assets/backgrounds/introduce_second.png"),
-      skipRoute: TransitionRLPageRoute(nextScreen: InputPage()),
+      skipRoute: TransitionRLPageRoute(nextScreen: AccountLoginScreen()),
       nextRoute: TransitionRLPageRoute(nextScreen: _ThirdScreen()),
     );
   }
@@ -150,8 +151,8 @@ class _ThirdScreen extends StatelessWidget {
       content:
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris efficitur ex sit amet elementum sagittis.',
       background: AssetImage("assets/backgrounds/introduce_third.png"),
-      skipRoute: TransitionRLPageRoute(nextScreen: InputPage()),
-      nextRoute: TransitionRLPageRoute(nextScreen: InputPage()),
+      skipRoute: TransitionRLPageRoute(nextScreen: AccountRegisterScreen()),
+      nextRoute: TransitionRLPageRoute(nextScreen: AccountRegisterScreen()),
     );
   }
 }

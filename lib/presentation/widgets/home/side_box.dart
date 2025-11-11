@@ -65,7 +65,7 @@ class SideBox extends StatelessWidget {
               ),
             ),
           ),
-          onTap: () => Navigator.pop(context),
+          onTap: () => Navigator.of(context).pushReplacementNamed("login"),
         ),
       ],
     );

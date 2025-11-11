@@ -30,7 +30,7 @@ class VisitedPlaceBox extends StatelessWidget {
                   size: Size(size.width * 0.5, size.height * 0.8),
                   package: Reccommendscenic(
                     image: const AssetImage(
-                      "assets/temporary/lorem-ipsum-small-background.png",
+                      "assets/temporary/lorem_ipsum_background.png",
                     ),
                     name: "Lorem ipsum",
                     establishedTime: DateTime(2022, 20, 19),

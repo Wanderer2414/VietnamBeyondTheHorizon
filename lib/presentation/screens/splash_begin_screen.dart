@@ -17,7 +17,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void navigateNext() {
-    Navigator.pushReplacementNamed(context, "/Page2onBoarding");
+    Navigator.pushReplacementNamed(context, "intro");
   }
 
   @override
