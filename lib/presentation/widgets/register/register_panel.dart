@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/register/email_panel.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/common/input_panel_t1.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/register/extra_login.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/register/sign_button.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/register/password_panel.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/register/re_password_panel.dart';
 
 class RegisterPanel extends StatelessWidget {
   final Size size;
@@ -28,11 +26,20 @@ class RegisterPanel extends StatelessWidget {
         child: Column(
           children: [
             _LogInLabel(size: Size(size.width, size.height * 0.11)),
-            EmailBox(size: Size(size.width, size.height * 0.1)),
+            InputPanelT1(
+              size: Size(size.width, size.height * 0.1),
+              content: "Email",
+            ),
             SizedBox(height: size.height * 0.01),
-            PasswordBox(size: Size(size.width, size.height * 0.1)),
+            InputPanelT1(
+              size: Size(size.width, size.height * 0.1),
+              content: "Password",
+            ),
             SizedBox(height: size.height * 0.01),
-            RePasswordBox(size: Size(size.width, size.height * 0.1)),
+            InputPanelT1(
+              size: Size(size.width, size.height * 0.1),
+              content: "Confirm password",
+            ),
             SizedBox(height: size.height * 0.02),
             LoginButton(size: Size(size.width * 0.5, size.height * 0.05)),
             SizedBox(height: size.height * 0.02),

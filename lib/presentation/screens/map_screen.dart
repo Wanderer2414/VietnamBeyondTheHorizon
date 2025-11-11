@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/home/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/main_content.dart';
 import '../controllers/map_controller.dart';
 
@@ -15,8 +16,8 @@ class _MapScreenState extends State<MapScreen> {
   late final controller = MyMapController();
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
   late Drawer _sidePanel;
-  late HomeAppbar _homeBar;
-  Content? _content;
+  HomeAppbar? _homeBar;
+  ProviderScope? _content;
   late final FloatingActionButton _myLocation;
 
   @override
@@ -32,30 +33,27 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final Size screenSize = MediaQuery.of(context).size;
-    _homeBar = HomeAppbar(
-      superKey: _key,
-      size: Size(screenSize.width, screenSize.height * 0.06),
-    );
-    if (_content == null)
-      _content = Content(controller: controller, screenSize: screenSize);
+    if (_homeBar == null) {
+      _homeBar = HomeAppbar(
+        superKey: _key,
+        size: Size(screenSize.width, screenSize.height * 0.06),
+      );
+      _content = ProviderScope(
+        child: Content(controller: controller, screenSize: screenSize),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _key,
+      resizeToAvoidBottomInset: false,
       appBar: _homeBar,
       drawer: _sidePanel,
-      resizeToAvoidBottomInset: false,
       body: _content,
       floatingActionButton: _myLocation,
     );

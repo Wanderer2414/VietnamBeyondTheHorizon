@@ -57,17 +57,13 @@ class MapState {
   }
 }
 
-class MyMapController extends ValueNotifier<MapState> {
+class MyMapController {
   final MapController mapController = MapController();
   final Location location = Location();
-  final TextEditingController searchController = TextEditingController();
-
+  MapState value = MapState();
   bool mapReady = false;
   late BuildContext context;
   LocationModel? selectedLocation;
-  bool isLocationInfoPanelVisible = false;
-  bool isMissionCardVisible = false;
-  bool isCardFlipping = false;
 
   //___________________TEST____________________
   final List<LocationModel> locationsList = [
@@ -124,7 +120,7 @@ class MyMapController extends ValueNotifier<MapState> {
     ),
   ];
 
-  MyMapController() : super(MapState());
+  MyMapController();
 
   void initialize(BuildContext ctx) async {
     context = ctx;
@@ -346,24 +342,14 @@ class MyMapController extends ValueNotifier<MapState> {
   }
 
   void toggleLocationInfoPanel(LocationModel? location) {
-    if (location == null) {
-      isLocationInfoPanelVisible = false;
-      // selectedLocation = null;
-    } else {
+    if (location != null) {
       selectedLocation = location;
-      isLocationInfoPanelVisible = true;
     }
   }
 
   void toggleMissionCard(LocationModel? location, BuildContext context) {
-    if (location == null) {
-      isMissionCardVisible = false;
-      isCardFlipping = false;
-      selectedLocation = null;
-    } else {
-      isCardFlipping = true;
+    if (location != null) {
       selectedLocation = location;
-      isMissionCardVisible = true;
 
       Navigator.of(context).push(
         ApearAnimation(
