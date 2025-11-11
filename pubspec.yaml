@@ -1,4 +1,4 @@
-name: vietnam_beyond_the_horizon
+name: vietnambeyondthehorizon
 description: "Vietnam: Beyond the horizon."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -143,10 +143,6 @@ flutter:
     - assets/icons/star.png
     - assets/icons/bar.png
     - assets/temporary/lorem-ipsum-small-background.png
-      - assets/images/
-
-  # To add assets to your application, add an assets section, like this:
-  assets:
     - assets/icons/app_icon.png
     - assets/backgrounds/introduce_first.png
     - assets/backgrounds/introduce_second.png

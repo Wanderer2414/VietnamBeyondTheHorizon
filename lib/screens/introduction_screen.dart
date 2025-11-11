@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:vietnam_beyond_the_horizon/animations/screen/transitionRL.dart';
-import 'package:vietnam_beyond_the_horizon/screens/input_screen.dart';
-import 'package:vietnam_beyond_the_horizon/widgets/intro_screen/template.dart';
+import 'package:vietnambeyondthehorizon/animations/screen/transitionRL.dart';
+import 'package:vietnambeyondthehorizon/screens/input_screen.dart';
+import 'package:vietnambeyondthehorizon/widgets/intro_screen/template.dart';
 
 class _FirstTitle extends StatelessWidget {
   const _FirstTitle();

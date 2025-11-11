@@ -1,10 +1,8 @@
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/decoration.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/daily_box.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/home/gems_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_down_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/side_box.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/home/stars_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/visited_places_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/greeting_box.dart';
 import 'package:flutter/material.dart';

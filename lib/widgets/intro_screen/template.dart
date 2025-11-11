@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:vietnam_beyond_the_horizon/widgets/intro_screen/background.dart';
-import 'package:vietnam_beyond_the_horizon/widgets/intro_screen/bottom_bar.dart';
-import 'package:vietnam_beyond_the_horizon/widgets/intro_screen/bottom_content.dart';
-import 'package:vietnam_beyond_the_horizon/widgets/intro_screen/shader_filter.dart';
+import 'package:vietnambeyondthehorizon/widgets/intro_screen/background.dart';
+import 'package:vietnambeyondthehorizon/widgets/intro_screen/bottom_bar.dart';
+import 'package:vietnambeyondthehorizon/widgets/intro_screen/bottom_content.dart';
+import 'package:vietnambeyondthehorizon/widgets/intro_screen/shader_filter.dart';
 
 class IntroScreenTemplate extends StatelessWidget {
   final int index, total;
