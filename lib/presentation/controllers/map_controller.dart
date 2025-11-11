@@ -1,0 +1,403 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
+import 'package:http/http.dart' as http;
+import 'package:latlong2/latlong.dart';
+import 'package:location/location.dart';
+import 'package:flutter_compass/flutter_compass.dart';
+import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
+import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
+
+class MapState {
+  final bool isPlaying;
+  final bool isLoading;
+  final LatLng? currentLocation;
+  final LatLng? destination;
+  final double? distance;
+  final List<LocationModel> locationList;
+  final List<LatLng>? routes;
+  final double heading;
+
+  MapState({
+    this.isPlaying = false,
+    this.isLoading = true,
+    this.currentLocation,
+    this.destination,
+    this.distance,
+    this.routes = const [],
+    this.heading = 0,
+    this.locationList = const [],
+  });
+
+  MapState copyWith({
+    bool? isPlaying,
+    bool? isLoading,
+    LatLng? currentLocation,
+    LatLng? destination,
+    double? distance,
+    List<LatLng>? routes,
+    double? heading,
+    List<LocationModel>? locationList,
+  }) {
+    return MapState(
+      isPlaying: isPlaying ?? this.isPlaying,
+      isLoading: isLoading ?? this.isLoading,
+      currentLocation: currentLocation ?? this.currentLocation,
+      destination: destination ?? this.destination,
+      distance: distance ?? this.distance,
+      routes: routes ?? this.routes,
+      heading: heading ?? this.heading,
+      locationList: locationList ?? this.locationList,
+    );
+  }
+}
+
+class MyMapController extends ValueNotifier<MapState> {
+  final MapController mapController = MapController();
+  final Location location = Location();
+  final TextEditingController searchController = TextEditingController();
+
+  bool mapReady = false;
+  late BuildContext context;
+  LocationModel? selectedLocation;
+  bool isLocationInfoPanelVisible = false;
+  bool isMissionCardVisible = false;
+  bool isCardFlipping = false;
+
+  //___________________TEST____________________
+  final List<LocationModel> locationsList = [
+    LocationModel(
+      id: "1",
+      name: "Bui Vien Street",
+      address: "District 1, HCMC",
+      type: "entertainment",
+      description: "Famous nightlife street.",
+      openTime: "18:00",
+      closeTime: "02:00",
+      price: "Free",
+      imageURLs: [
+        "https://vietnamnightlife.com/uploads/images/2023/05/1685518065-single_product7-phodibobuiviencover.jpg",
+      ],
+      missionID: "101",
+      latitude: 10.7725,
+      longitude: 106.6959,
+    ),
+
+    LocationModel(
+      id: "2",
+      name: "Umbalala",
+      address: "District 1, HCMC",
+      type: "culture",
+      description: "Famous",
+      openTime: "18:00",
+      closeTime: "02:00",
+      price: "20.000",
+      imageURLs: [
+        "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyAWrWppWahQZJDccRCPRX8ZIPn26P8R41au-eF1Rto6Bw_xpSeKuEikHLEI3iMq4u3uRE1bHdzqvduf0Fs5kyr_DBn7RWHT75BIUWuK2QftPbBIGn4Cku5Up25g8xYORAu2Vvs=w360-h256-p-k-no",
+      ],
+      missionID: "102",
+      latitude: 10.75,
+      longitude: 106.66667,
+    ),
+  ];
+
+  final List<MissionModel> missionList = [
+    MissionModel(
+      id: "101",
+      description: "Take a photo involving yourself and the given image",
+      starReward: "2",
+      illustrationURL:
+          "https://static.vinwonders.com/production/pho-tay-bui-vien-3.jpg",
+    ),
+    MissionModel(
+      id: "102",
+      description:
+          "Take a photo involving yourself and the given image, and dance under the tree",
+      starReward: "5",
+      illustrationURL:
+          "https://cdn.thuvienphapluat.vn/uploads/tintuc/2025/07/17/truong-dai-hoc-khoa-hoc-tu-nhien-dhqg-tphcm.jpg",
+    ),
+  ];
+
+  MyMapController() : super(MapState());
+
+  void initialize(BuildContext ctx) async {
+    context = ctx;
+    await _initLocation();
+    FlutterCompass.events?.listen((event) {
+      if (!mapReady || event.heading == null) return;
+      value = value.copyWith(heading: event.heading!);
+    });
+  }
+
+  Future<void> _initLocation() async {
+    if (!await _checkPermission()) return;
+    location.onLocationChanged.listen((loc) {
+      if (loc.latitude != null && loc.longitude != null) {
+        value = value.copyWith(
+          currentLocation: LatLng(loc.latitude!, loc.longitude!),
+          isLoading: false,
+        );
+      }
+    });
+  }
+
+  Future<bool> _checkPermission() async {
+    bool serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) return false;
+    }
+
+    PermissionStatus permission = await location.hasPermission();
+    if (permission == PermissionStatus.denied ||
+        permission == PermissionStatus.deniedForever) {
+      permission = await location.requestPermission();
+      if (permission != PermissionStatus.granted) return false;
+    }
+    return true;
+  }
+
+  MapOptions mapOptions({required Function() onMapReady}) {
+    return MapOptions(
+      initialCenter:
+          value.currentLocation ?? const LatLng(10.762622, 106.660172),
+      initialZoom: 15,
+      minZoom: 10,
+      maxZoom: 20,
+      onTap: (tapPosition, point) => {
+        toggleLocationInfoPanel(null),
+        toggleMissionCard(null),
+      },
+      onMapReady: onMapReady,
+    );
+  }
+
+  void onMapReady() => mapReady = true;
+
+  List<Widget> mapLayers(BuildContext context) {
+    final layers = <Widget>[
+      TileLayer(
+        urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        userAgentPackageName: 'com.example.my_map',
+      ),
+    ];
+
+    if (value.routes != null && value.routes!.isNotEmpty) {
+      layers.add(
+        PolylineLayer(
+          polylines: [
+            Polyline(points: value.routes!, strokeWidth: 5, color: Colors.red),
+          ],
+        ),
+      );
+    }
+
+    layers.add(
+      CurrentLocationLayer(
+        style: LocationMarkerStyle(
+          marker: DefaultLocationMarker(
+            child: Icon(Icons.location_pin, color: Colors.red),
+          ),
+          markerSize: Size(35, 35),
+          markerDirection: MarkerDirection.heading,
+        ),
+      ),
+    );
+
+    layers.add(
+      MarkerLayerWidget(
+        locations: locationsList,
+        onMarkerTap: toggleMissionCard,
+        onMovingToLocation: moveToLocation,
+      ),
+    );
+    return layers;
+  }
+
+  Future<void> fetchCoordinates(String locationName) async {
+    final url = Uri.parse(
+      "https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(locationName)}&format=json&limit=1",
+    );
+
+    final response = await http.get(
+      url,
+      headers: {'User-Agent': 'my_map/1.0 (khangthinh111555@gmail.com)'},
+    );
+
+    if (response.statusCode == 200) {
+      final List data = json.decode(response.body);
+      if (data.isNotEmpty) {
+        final lat = double.parse(data[0]['lat']);
+        final lon = double.parse(data[0]['lon']);
+        value = value.copyWith(destination: LatLng(lat, lon));
+        await fetchRoute(value.currentLocation, value.destination);
+      } else {
+        _showError("Location not found.");
+      }
+    } else {
+      _showError("Failed to fetch location.");
+    }
+  }
+
+  Future<void> fetchRoute(LatLng? start, LatLng? end) async {
+    if (start == null || end == null) return;
+
+    final url = Uri.parse(
+      'https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=polyline&alternatives=false&annotations=distance',
+    );
+
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final geometry = data['routes'][0]['geometry'];
+      final List<LatLng> decodedRoute = await compute<String, List<LatLng>>(
+        _decodePolyline,
+        geometry,
+      );
+      value = value.copyWith(routes: decodedRoute);
+    } else {
+      _showError('Failed to fetch route.');
+    }
+  }
+
+  Future<void> fetchFullRoute(List<LocationModel> locations) async {
+    if (locations.length < 2) return;
+
+    List<LatLng> fullRoute = [];
+
+    for (int i = 0; i < locations.length - 1; i++) {
+      final start = LatLng(locations[i].latitude, locations[i].longitude);
+      final end = LatLng(locations[i + 1].latitude, locations[i + 1].longitude);
+
+      final url = Uri.parse(
+        'https://router.project-osrm.org/route/v1/driving/'
+        '${start.longitude},${start.latitude};'
+        '${end.longitude},${end.latitude}'
+        '?overview=full&geometries=polyline',
+      );
+
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final geometry = data['routes'][0]['geometry'];
+
+        final List<LatLng> decodedRoute = await compute<String, List<LatLng>>(
+          _decodePolyline,
+          geometry,
+        );
+
+        if (i > 0) decodedRoute.removeAt(0);
+
+        fullRoute.addAll(decodedRoute);
+      } else {
+        print('Failed to fetch route between ${i} and ${i + 1}');
+      }
+    }
+    value = value.copyWith(routes: fullRoute);
+
+    print("Full route length: ${fullRoute.length} points");
+  }
+
+  // Future<double> fetchDistance(LatLng? start, LatLng? end) async {
+  //    if (start == null || end == null) return 0;
+
+  //   final url = Uri.parse(
+  //     'https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=polyline&alternatives=false&annotations=distance',
+  //   );
+
+  //   final response = await http.get(url);
+  //   if (response.statusCode == 200) {
+  //     final data = json.decode(response.body);
+  //     final route = data['routes'][0];
+  //     final double distanceMeters = route['distance'];
+  //     return distanceMeters;
+  //   } else {
+  //     _showError('Failed to fetch distance.');
+  //   }
+  //   return 0;
+  // }
+
+  void moveToCurrentLocation() {
+    if (value.currentLocation != null) {
+      mapController.move(value.currentLocation!, 15);
+    } else {
+      _showError("Current location not available");
+    }
+  }
+
+  void moveToLocation(LatLng destination, double zoom) {
+    mapController.move(destination, zoom);
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void toggleLocationInfoPanel(LocationModel? location) {
+    if (location == null) {
+      isLocationInfoPanelVisible = false;
+      // selectedLocation = null;
+    } else {
+      selectedLocation = location;
+      isLocationInfoPanelVisible = true;
+    }
+  }
+
+  void toggleMissionCard(LocationModel? location) {
+    if (location == null) {
+      isMissionCardVisible = false;
+      isCardFlipping = false;
+      selectedLocation = null;
+    } else {
+      isCardFlipping = true;
+      selectedLocation = location;
+      isMissionCardVisible = true;
+    }
+  }
+
+  void updateMissionImage(String missionId, String imagePath) {
+    for (var m in missionList) {
+      if (m.id == missionId) {
+        m.imagePath = imagePath;
+        //notifyListeners();
+        break;
+      }
+    }
+  }
+}
+
+List<LatLng> _decodePolyline(String encoded) {
+  final List<LatLng> points = [];
+  int index = 0, len = encoded.length;
+  int lat = 0, lng = 0;
+
+  while (index < len) {
+    int b, shift = 0, result = 0;
+    do {
+      b = encoded.codeUnitAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    int dlat = ((result & 1) != 0) ? ~(result >> 1) : (result >> 1);
+    lat += dlat;
+
+    shift = 0;
+    result = 0;
+    do {
+      b = encoded.codeUnitAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    int dlng = ((result & 1) != 0) ? ~(result >> 1) : (result >> 1);
+    lng += dlng;
+
+    points.add(LatLng(lat / 1E5, lng / 1E5));
+  }
+  return points;
+}
