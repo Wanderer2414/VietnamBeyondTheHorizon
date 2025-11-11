@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/login/email_panel.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/common/input_panel_t1.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/login/extra_login.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/login/forget_text.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/login/login_button.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/login/password_panel.dart';
 
 class LoginPanel extends StatelessWidget {
   final Size size;
-  const LoginPanel({super.key, required this.size});
+  final Function()? onTap;
+  const LoginPanel({super.key, required this.size, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +28,17 @@ class LoginPanel extends StatelessWidget {
         child: Column(
           children: [
             _LogInLabel(size: Size(size.width, size.height * 0.11)),
-            EmailBox(size: Size(size.width, size.height * 0.1)),
+            InputPanelT1(
+              size: Size(size.width, size.height * 0.1),
+              content: "Email",
+              onTap: onTap,
+            ),
             SizedBox(height: size.height * 0.01),
-            PasswordBox(size: Size(size.width, size.height * 0.1)),
+            InputPanelT1(
+              size: Size(size.width, size.height * 0.1),
+              content: "Password",
+              onTap: onTap,
+            ),
             SizedBox(
               width: size.width * 0.8,
               height: size.height * 0.05,
