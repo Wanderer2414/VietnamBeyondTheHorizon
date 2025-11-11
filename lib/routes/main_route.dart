@@ -5,7 +5,6 @@ import 'package:vietnambeyondthehorizon/presentation/screens/account_register.da
 import 'package:vietnambeyondthehorizon/presentation/screens/home_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/input_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/introduction_screen.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/profile_register_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/splash_begin_screen.dart';
 
 class MainRoute {

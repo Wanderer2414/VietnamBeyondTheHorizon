@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transitionRL.dart';
-import 'package:vietnambeyondthehorizon/osm_page.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/map_screen.dart';
 
 class InputPage extends StatefulWidget {
   const InputPage({Key? key}) : super(key: key);
@@ -259,7 +259,7 @@ class _InputPageState extends State<InputPage> {
                                 onTap: () {
                                   Navigator.of(context).push(
                                     TransitionRLPageRoute(
-                                      nextScreen: OpenStreetMapScreen(),
+                                      nextScreen: MapScreen(),
                                     ),
                                   );
                                 },
