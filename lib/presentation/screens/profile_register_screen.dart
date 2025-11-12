@@ -23,6 +23,8 @@ class _AccountLoginScreenState extends State<ProfileRegister> {
       backgroundColor: const Color(0xFFFFDF9E),
       body: SingleChildScrollView(
         child: Container(
+          decoration: BoxDecoration(shape: BoxShape.rectangle),
+          clipBehavior: Clip.hardEdge,
           width: screenSize.width,
           height: screenSize.height,
           alignment: Alignment.bottomCenter,

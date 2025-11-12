@@ -126,4 +126,5 @@ flutter:
     - assets/backgrounds/introduce_second.png
     - assets/backgrounds/introduce_third.png
     - assets/temporary/lorem_ipsum_background.png
-    - assets/background/blur_map.png
+    - assets/backgrounds/blur_map.png
+    - assets/backgrounds/log_navigator.png

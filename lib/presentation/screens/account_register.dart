@@ -22,6 +22,8 @@ class _AccountLoginScreenState extends State<AccountRegisterScreen> {
         child: Container(
           width: screenSize.width,
           height: screenSize.height,
+          decoration: BoxDecoration(shape: BoxShape.rectangle),
+          clipBehavior: Clip.hardEdge,
           alignment: Alignment.bottomCenter,
           child: Stack(
             children: [

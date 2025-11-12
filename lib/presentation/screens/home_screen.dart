@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("assets/background/blur_map.png"),
+                image: AssetImage("assets/backgrounds/blur_map.png"),
                 alignment: Alignment.topCenter,
               ),
             ),
