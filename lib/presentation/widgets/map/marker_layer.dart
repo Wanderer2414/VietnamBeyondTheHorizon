@@ -24,9 +24,9 @@ class MarkerLayerWidget extends StatelessWidget {
           height: 60,
           rotate: true,
           child: GestureDetector(
-            onTap: () => {
-              onMarkerTap(loc, context),
-              onMovingToLocation(loc.coordinates, 15),
+            onTap: () {
+              onMarkerTap(loc, context);
+              // onMovingToLocation(loc.coordinates, 15);
             },
             child: Icon(
               Icons.location_pin,

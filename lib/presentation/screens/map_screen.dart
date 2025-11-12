@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/main_content.dart';
@@ -17,7 +16,7 @@ class _MapScreenState extends State<MapScreen> {
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
   late Drawer _sidePanel;
   HomeAppbar? _homeBar;
-  ProviderScope? _content;
+  Content? _content;
   late final FloatingActionButton _myLocation;
 
   @override
@@ -25,7 +24,7 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
     controller.initialize(context);
     _myLocation = FloatingActionButton(
-      onPressed: controller.moveToCurrentLocation,
+      onPressed: () => controller.moveToCurrentLocation(context),
       backgroundColor: Colors.blue,
       child: const Icon(Icons.my_location, size: 30, color: Colors.white),
     );
@@ -41,9 +40,7 @@ class _MapScreenState extends State<MapScreen> {
         superKey: _key,
         size: Size(screenSize.width, screenSize.height * 0.06),
       );
-      _content = ProviderScope(
-        child: Content(controller: controller, screenSize: screenSize),
-      );
+      _content = Content(controller: controller, screenSize: screenSize);
     }
   }
 

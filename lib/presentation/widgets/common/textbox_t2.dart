@@ -1,30 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TextboxT2 extends ConsumerWidget {
+class TextboxT2 extends StatefulWidget {
   final Size size;
   final String hint;
   final Function()? onTap;
-  final StateProvider<String> provider;
-  const TextboxT2({
+  final Function(String value)? onUpdate;
+
+  TextboxT2({
     super.key,
     required this.size,
     required this.hint,
-    required this.provider,
     this.onTap,
+    this.onUpdate,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  State<TextboxT2> createState() => _TextboxT2State();
+}
+
+class _TextboxT2State extends State<TextboxT2> {
+  TextEditingController _controller = TextEditingController();
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      width: size.width,
-      height: size.height,
+      width: widget.size.width,
+      height: widget.size.height,
       alignment: Alignment.center,
       child: FittedBox(
         fit: BoxFit.scaleDown,
         child: Container(
-          width: size.width,
-          height: size.height,
+          width: widget.size.width,
+          height: widget.size.height,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(25),
@@ -32,15 +38,16 @@ class TextboxT2 extends ConsumerWidget {
           ),
           padding: EdgeInsets.only(left: 10, right: 10),
           child: TextField(
+            controller: _controller,
             decoration: InputDecoration(
               border: InputBorder.none,
               alignLabelWithHint: true,
               hint: Container(
-                width: size.width * 0.9,
-                height: size.height * 0.65,
+                width: widget.size.width * 0.9,
+                height: widget.size.height * 0.65,
                 alignment: Alignment.bottomLeft,
                 child: Text(
-                  hint,
+                  widget.hint,
                   style: TextStyle(color: Colors.black54, fontSize: 20),
                 ),
               ),
@@ -48,11 +55,12 @@ class TextboxT2 extends ConsumerWidget {
             onTapOutside: (e) {
               FocusScope.of(context).unfocus();
               FocusScope.of(context).setFirstFocus(FocusScopeNode());
+              if (widget.onUpdate != null) widget.onUpdate!(_controller.text);
             },
-            onChanged: (value) {
-              ref.read(provider.notifier).state = value;
+            onEditingComplete: () {
+              if (widget.onUpdate != null) widget.onUpdate!(_controller.text);
             },
-            onTap: onTap,
+            onTap: widget.onTap,
           ),
         ),
       ),

@@ -1,43 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/map_show.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/search_bar.dart';
 
 class Content extends StatefulWidget {
-  Content({required this.controller, required this.screenSize, this.onTap});
+  Content({required this.controller, required this.screenSize});
 
   final MyMapController controller;
   final Size screenSize;
-  final Function()? onTap;
 
   @override
   State<Content> createState() => _ContentState();
 }
 
 class _ContentState extends State<Content> {
-  late final Stack _content;
-
-  final StateProvider<bool> _provider = StateProvider<bool>((ref) => false);
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
-    _content = Stack(
+    return Stack(
       children: [
-        MapShow(controller: widget.controller, provider: _provider),
+        MapShow(controller: widget.controller),
         SearchBarWidget(
           controller: widget.controller,
-          provider: _provider,
           size: Size(screenSize.width * 0.9, screenSize.height * 0.05),
-          onTap: widget.onTap,
+          onTap: () => setState(() {}),
         ),
       ],
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _content;
   }
 }

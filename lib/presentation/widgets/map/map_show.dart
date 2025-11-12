@@ -1,24 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 
-class MapShow extends ConsumerWidget {
-  final StateProvider<bool> provider;
-  const MapShow({required this.controller, required this.provider});
+class MapShow extends StatefulWidget {
+  const MapShow({required this.controller});
 
   final MyMapController controller;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(provider);
+  State<MapShow> createState() => _MapShowState();
+}
+
+class _MapShowState extends State<MapShow> {
+  @override
+  Widget build(BuildContext context) {
     return FlutterMap(
-      mapController: controller.mapController,
-      options: controller.mapOptions(
-        onMapReady: controller.onMapReady,
+      mapController: widget.controller.mapController,
+      options: widget.controller.mapOptions(
+        onMapReady: () {
+          widget.controller.onMapReady();
+          setState(() {});
+        },
         context: context,
       ),
-      children: controller.mapLayers(context),
+      children: widget.controller.mapLayers(context, () => setState(() {})),
     );
   }
 }

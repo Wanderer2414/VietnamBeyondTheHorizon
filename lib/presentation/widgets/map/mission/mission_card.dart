@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:vietnambeyondthehorizon/animations/screen/transitionRL.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/image_upload.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/map/information_location.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission/challenge_box.dart';
 
 class MissionCard extends StatelessWidget {
   final MyMapController controller;
   final LocationModel location;
+  final Function(LatLng) onNavigate;
 
   const MissionCard({
     super.key,
     required this.location,
     required this.controller,
+    required this.onNavigate,
   });
 
   MissionModel? retrieveMission() {
@@ -70,7 +75,19 @@ class MissionCard extends StatelessWidget {
                     IconButton(
                       onPressed: () {
                         //controller.toggleMissionCard(null);
-                        controller.toggleLocationInfoPanel(location);
+                        // controller.toggleLocationInfoPanel(location);
+                        Navigator.of(context).push(
+                          TransitionBTPageRoute(
+                            nextScreen: InformationLocation(
+                              onClose: () => Navigator.of(context).pop(),
+                              onNavigate: (loc) {
+                                Navigator.of(context).pop();
+                                onNavigate(loc);
+                              },
+                              locationModel: location,
+                            ),
+                          ),
+                        );
                       },
                       icon: Icon(
                         Icons.info,

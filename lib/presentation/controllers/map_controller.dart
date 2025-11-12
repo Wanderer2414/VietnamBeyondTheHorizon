@@ -62,8 +62,6 @@ class MyMapController {
   final Location location = Location();
   MapState value = MapState();
   bool mapReady = false;
-  late BuildContext context;
-  LocationModel? selectedLocation;
 
   //___________________TEST____________________
   final List<LocationModel> locationsList = [
@@ -123,7 +121,6 @@ class MyMapController {
   MyMapController();
 
   void initialize(BuildContext ctx) async {
-    context = ctx;
     await _initLocation();
     FlutterCompass.events?.listen((event) {
       if (!mapReady || event.heading == null) return;
@@ -170,16 +167,16 @@ class MyMapController {
       minZoom: 10,
       maxZoom: 20,
       onTap: (tapPosition, point) => {
-        toggleLocationInfoPanel(null),
-        toggleMissionCard(null, context),
+        // toggleLocationInfoPanel(null),
       },
+
       onMapReady: onMapReady,
     );
   }
 
   void onMapReady() => mapReady = true;
 
-  List<Widget> mapLayers(BuildContext context) {
+  List<Widget> mapLayers(BuildContext context, Function() onNavigate) {
     final layers = <Widget>[
       TileLayer(
         urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -208,18 +205,38 @@ class MyMapController {
         ),
       ),
     );
-
     layers.add(
       MarkerLayerWidget(
         locations: locationsList,
-        onMarkerTap: toggleMissionCard,
+        onMarkerTap: (loc, context) {
+          Navigator.of(context).push(
+            ApearAnimation(
+              opaque: false,
+              nextScreen: MissionScreen(
+                controller: this,
+                onNavigate: (location) {
+                  fetchRoute(context, value.currentLocation, location).then((
+                    value,
+                  ) {
+                    onNavigate();
+                  });
+                  Navigator.of(context).pop();
+                },
+                locationModel: loc,
+              ),
+            ),
+          );
+        },
         onMovingToLocation: moveToLocation,
       ),
     );
     return layers;
   }
 
-  Future<bool> fetchCoordinates(String locationName) async {
+  Future<bool> fetchCoordinates(
+    BuildContext context,
+    String locationName,
+  ) async {
     final url = Uri.parse(
       "https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(locationName)}&format=json&limit=1",
     );
@@ -234,20 +251,24 @@ class MyMapController {
         final lat = double.parse(data[0]['lat']);
         final lon = double.parse(data[0]['lon']);
         value = value.copyWith(destination: LatLng(lat, lon));
-        await fetchRoute(value.currentLocation, value.destination);
+        await fetchRoute(context, value.currentLocation, value.destination);
         return true;
       } else {
-        _showError("Location not found.");
+        _showError(context, "Location not found.");
       }
     } else {
-      _showError("Failed to fetch location.");
+      _showError(context, "Failed to fetch location.");
     }
     return false;
   }
 
-  Future<void> fetchRoute(LatLng? start, LatLng? end) async {
+  Future<void> fetchRoute(
+    BuildContext context,
+    LatLng? start,
+    LatLng? end,
+  ) async {
     if (start == null || end == null) return;
-
+    moveToLocation(end, 15);
     final url = Uri.parse(
       'https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=polyline&alternatives=false&annotations=distance',
     );
@@ -262,7 +283,7 @@ class MyMapController {
       );
       value = value.copyWith(routes: decodedRoute);
     } else {
-      _showError('Failed to fetch route.');
+      _showError(context, 'Failed to fetch route.');
     }
   }
 
@@ -323,11 +344,11 @@ class MyMapController {
   //   return 0;
   // }
 
-  void moveToCurrentLocation() {
+  void moveToCurrentLocation(BuildContext context) {
     if (value.currentLocation != null) {
       mapController.move(value.currentLocation!, 15);
     } else {
-      _showError("Current location not available");
+      _showError(context, "Current location not available");
     }
   }
 
@@ -335,29 +356,10 @@ class MyMapController {
     mapController.move(destination, zoom);
   }
 
-  void _showError(String message) {
+  void _showError(BuildContext context, String message) {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  void toggleLocationInfoPanel(LocationModel? location) {
-    if (location != null) {
-      selectedLocation = location;
-    }
-  }
-
-  void toggleMissionCard(LocationModel? location, BuildContext context) {
-    if (location != null) {
-      selectedLocation = location;
-
-      Navigator.of(context).push(
-        ApearAnimation(
-          opaque: false,
-          nextScreen: MissionScreen(controller: this),
-        ),
-      );
-    }
   }
 
   void updateMissionImage(String missionId, String imagePath) {

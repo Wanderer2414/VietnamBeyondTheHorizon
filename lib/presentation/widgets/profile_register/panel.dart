@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/textbox_t2.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile_register/age_input.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile_register/city_input.dart';
@@ -46,7 +45,6 @@ class Panel extends StatelessWidget {
             TextboxT2(
               size: Size(size.width * 0.8, size.height * 0.06),
               hint: "Nguyen Van A",
-              provider: StateProvider((ref) => ""),
             ),
             SizedBox(height: size.height * 0.03),
             AgeInput(size: Size(size.width, size.height * 0.06)),

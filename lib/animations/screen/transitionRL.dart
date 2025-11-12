@@ -6,6 +6,7 @@ class TransitionPageRoute extends PageRouteBuilder {
     required Offset begin,
     required Offset end,
     Duration duration = const Duration(milliseconds: 300),
+    super.opaque = false,
   }) : super(
          pageBuilder: (context, animation, secondaryAnimation) => nextScreen,
          transitionDuration: duration,
@@ -21,16 +22,25 @@ class TransitionPageRoute extends PageRouteBuilder {
 }
 
 class TransitionRLPageRoute extends TransitionPageRoute {
-  TransitionRLPageRoute({required super.nextScreen, super.duration})
-    : super(begin: Offset(2, 0), end: Offset.zero);
+  TransitionRLPageRoute({
+    required super.nextScreen,
+    super.duration,
+    super.opaque,
+  }) : super(begin: Offset(2, 0), end: Offset.zero);
 }
 
 class TransitionLRPageRoute extends TransitionPageRoute {
-  TransitionLRPageRoute({required super.nextScreen, super.duration})
-    : super(begin: Offset(-2, 0), end: Offset.zero);
+  TransitionLRPageRoute({
+    required super.nextScreen,
+    super.duration,
+    super.opaque,
+  }) : super(begin: Offset(-2, 0), end: Offset.zero);
 }
 
 class TransitionBTPageRoute extends TransitionPageRoute {
-  TransitionBTPageRoute({required super.nextScreen, super.duration})
-    : super(begin: Offset(0, 2), end: Offset.zero);
+  TransitionBTPageRoute({
+    required super.nextScreen,
+    super.duration,
+    super.opaque,
+  }) : super(begin: Offset(0, 2), end: Offset.zero);
 }
