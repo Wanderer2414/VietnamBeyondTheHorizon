@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/animations/screen/transitionRL.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/profile_page.dart';
 
 class UserButton extends StatelessWidget {
   final double radius;
@@ -7,7 +9,11 @@ class UserButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: () {
+        Navigator.of(
+          context,
+        ).pushReplacement(TransitionRLPageRoute(nextScreen: ProfilePage()));
+      },
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadiusGeometry.circular(10),

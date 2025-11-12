@@ -33,7 +33,6 @@ class TextboxT2 extends ConsumerWidget {
           padding: EdgeInsets.only(left: 10, right: 10),
           child: TextField(
             decoration: InputDecoration(
-              focusColor: Colors.black,
               border: InputBorder.none,
               alignLabelWithHint: true,
               hint: Container(
