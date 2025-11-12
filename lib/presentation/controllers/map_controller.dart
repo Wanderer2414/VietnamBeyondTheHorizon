@@ -345,6 +345,7 @@ class MyMapController {
   // }
 
   void moveToCurrentLocation(BuildContext context) {
+    if (value.currentLocation == null) _initLocation();
     if (value.currentLocation != null) {
       mapController.move(value.currentLocation!, 15);
     } else {
