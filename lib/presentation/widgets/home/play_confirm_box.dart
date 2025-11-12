@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/animations/screen/transitionRL.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/input_screen.dart';
 
 class PlayConfirmBox extends StatelessWidget {
   final Size size;
@@ -72,7 +74,11 @@ class PlayConfirmBox extends StatelessWidget {
                       size: size,
                       text: "Alright",
                       color: const Color(0xFF7CFF70),
-                      func: () {},
+                      func: () {
+                        Navigator.of(
+                          context,
+                        ).push(TransitionRLPageRoute(nextScreen: InputPage()));
+                      },
                     ),
                   ],
                 ),

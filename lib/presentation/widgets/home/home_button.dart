@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/animations/screen/transitionRL.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/home_screen.dart';
 
 class HomeButton extends StatelessWidget {
   final double radius;
@@ -7,7 +9,11 @@ class HomeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: () {
+        Navigator.of(
+          context,
+        ).pushReplacement(TransitionLRPageRoute(nextScreen: HomeScreen()));
+      },
       style: ElevatedButton.styleFrom(
         shape: CircleBorder(),
         padding: EdgeInsets.zero,

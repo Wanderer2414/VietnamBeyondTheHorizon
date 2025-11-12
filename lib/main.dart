@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vietnambeyondthehorizon/routes/main_route.dart';
-import 'package:vietnambeyondthehorizon/osm_page.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //Disable status bar on mobile
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   runApp(const Application());
 }
@@ -19,7 +17,7 @@ class Application extends StatelessWidget {
     return MaterialApp(
       title: 'Vietnam: Beyond the Horizon',
       initialRoute: MainRoute.home,
-      routes: MainRoute.routes,
+      onGenerateRoute: (settings) => MainRoute.newRoute(settings.name),
     );
   }
 }

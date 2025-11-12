@@ -1,3 +1,5 @@
+import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_down_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile/avatar_panel.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile/decoration.dart'
     as profile;
@@ -16,6 +18,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
+  final SideBox _box = SideBox();
 
   // Sample photo data for album view
   final List<String> photos = [
@@ -32,11 +35,13 @@ class _ProfilePageState extends State<ProfilePage> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
+      key: _key,
       appBar: HomeAppbar(
         superKey: _key,
         size: Size(size.width, size.height * 0.06),
       ),
       backgroundColor: Colors.white,
+      drawer: Drawer(child: _box),
       body: SizedBox(
         width: size.width,
         height: size.height,
@@ -49,6 +54,10 @@ class _ProfilePageState extends State<ProfilePage> {
             _Content(photos: photos),
           ],
         ),
+      ),
+
+      floatingActionButton: HomeDownBar(
+        size: Size(size.width * 0.9, size.height * 0.13),
       ),
     );
   }
