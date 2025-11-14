@@ -58,16 +58,23 @@ class Waiting4L extends StatefulWidget {
 
 class _Waiting4LState extends State<Waiting4L> {
   double _angle = 0;
+  late final Timer _timer;
   @override
   void initState() {
     super.initState();
-    Timer.periodic(const Duration(milliseconds: 80), handle);
+    _timer = Timer.periodic(const Duration(milliseconds: 80), handle);
   }
 
   void handle(Timer time) {
     setState(() {
       _angle -= 0.2;
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _timer.cancel();
   }
 
   @override

@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/location_info/description_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/location_info/overview_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/location_info/photo_box.dart';
 
 class LocationInfoWidget extends StatelessWidget {
-  final VoidCallback onClose;
-  final MyMapController controller;
   final LocationModel location;
+  final Function() onClose;
+  final Function(LatLng) onNavigate;
 
   const LocationInfoWidget({
     super.key,
     required this.location,
     required this.onClose,
-    required this.controller,
+    required this.onNavigate,
   });
 
   @override
@@ -47,15 +47,10 @@ class LocationInfoWidget extends StatelessWidget {
                   color: ColorPalette.primaryColor,
                   size: 35,
                 ),
-                onPressed: () {
-                  controller.fetchRoute(
-                    controller.value.currentLocation,
-                    location.coordinates,
-                  );
-                },
+                onPressed: () => onNavigate(location.coordinates),
               ),
               IconButton(
-                onPressed: () => controller.toggleLocationInfoPanel(null),
+                onPressed: onClose,
                 icon: Icon(
                   Icons.close_rounded,
                   size: 35,

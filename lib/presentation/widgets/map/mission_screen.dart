@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission/mission_card.dart';
 
 class MissionScreen extends StatelessWidget {
   final MyMapController controller;
-  const MissionScreen({super.key, required this.controller});
+  final Function(LatLng location) onNavigate;
+  final LocationModel locationModel;
+  const MissionScreen({
+    super.key,
+    required this.controller,
+    required this.onNavigate,
+    required this.locationModel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,8 +32,9 @@ class MissionScreen extends StatelessWidget {
             child: Container(
               width: screenSize.width * 0.9,
               child: MissionCard(
-                location: controller.selectedLocation!,
+                location: locationModel,
                 controller: controller,
+                onNavigate: onNavigate,
               ),
             ),
           ),
