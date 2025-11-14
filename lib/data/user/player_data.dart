@@ -1,15 +1,13 @@
 class PlayerData {
-  final String userId; // link to UserAccount
   //int level;
   int stars;
   int diamonds;
   //int exp;
 
-  List<String> completedMissions; // ID of all completed missions
-  List<String> unlockedLocations; // unlocked locations
+  List<int> completedMissions; // ID of all completed missions
+  List<int> unlockedLocations; // ID of unlocked locations
 
   PlayerData({
-    required this.userId,
     //this.level = 1,
     this.stars = 0,
     this.diamonds = 0,
@@ -17,6 +15,15 @@ class PlayerData {
     this.completedMissions = const [],
     this.unlockedLocations = const [],
   });
+
+  factory PlayerData.fromJson(Map<String, dynamic> json) {
+    return PlayerData(
+      stars: json['stars'],
+      diamonds: json['diamonds'],
+      completedMissions: List<int>.from(json['completedMissions']),
+      unlockedLocations: List<int>.from(json['unlockedLocations']),
+    );
+  }
 }
 
 // JSON

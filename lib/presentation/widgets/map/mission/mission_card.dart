@@ -23,8 +23,10 @@ class MissionCard extends StatelessWidget {
 
   MissionModel? retrieveMission() {
     for (var mission in controller.missionList) {
-      if (mission.id == location.missionID) {
-        return mission;
+      for (var correspondingMission in location.missionID) {
+        if (mission.id == correspondingMission) {
+          return mission;
+        }
       }
     }
     return null;

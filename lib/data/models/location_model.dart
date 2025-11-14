@@ -11,10 +11,10 @@ class LocationModel {
   final String price; // "0", "20.000"                        FORMATED
   final List<String> imageURLs; //URLs to image
 
-  final String missionID; // "101"
+  final List<String> missionID; // "101"
   final double latitude; // "10.0001010"
   final double longitude; // "20.1234123"
-
+  //trie
   LocationModel({
     required this.id,
     required this.name,
