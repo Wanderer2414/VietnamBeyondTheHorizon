@@ -1,26 +1,18 @@
+import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/daily_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_down_bar.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/home/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/visited_places_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/greeting_box.dart';
 import 'package:flutter/material.dart';
 
-class HomeStation extends StatelessWidget {
-  const HomeStation({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(home: HomeScreen());
-  }
-}
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
   @override
-  State<StatefulWidget> createState() => HomeScreenState();
+  State<StatefulWidget> createState() => _HomeScreenState();
 }
 
-class HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final sideBox = SideBox();
   @override
@@ -38,7 +30,7 @@ class HomeScreenState extends State<HomeScreen> {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("assets/background/blur_map.png"),
+                image: AssetImage("assets/backgrounds/blur_map.png"),
                 alignment: Alignment.topCenter,
               ),
             ),

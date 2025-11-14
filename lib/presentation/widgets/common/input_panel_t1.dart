@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/common/textbox_t1.dart';
 
-class RePasswordBox extends StatelessWidget {
+class InputPanelT1 extends StatelessWidget {
   final Size size;
-  const RePasswordBox({super.key, required this.size});
+  final String content;
+  final Function()? onTap;
+  const InputPanelT1({
+    super.key,
+    required this.size,
+    required this.content,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +27,7 @@ class RePasswordBox extends StatelessWidget {
             Padding(
               padding: EdgeInsetsGeometry.only(left: size.width * 0.03),
               child: Text(
-                "Confirm Password",
+                content,
                 style: const TextStyle(
                   fontSize: 20,
                   fontFamily: "InriaSans",
@@ -27,18 +35,9 @@ class RePasswordBox extends StatelessWidget {
                 ),
               ),
             ),
-            Container(
-              width: size.width * 0.8,
-              height: size.height * 0.6,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                border: BoxBorder.all(width: 2, color: Colors.black38),
-              ),
-              padding: EdgeInsets.only(bottom: 2, left: 10, right: 10),
-              child: TextField(
-                decoration: InputDecoration(border: InputBorder.none),
-              ),
+            TextboxT1(
+              size: Size(size.width * 0.8, size.height * 0.6),
+              onTap: onTap,
             ),
           ],
         ),

@@ -5,7 +5,7 @@ import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 
 class MarkerLayerWidget extends StatelessWidget {
   final List<LocationModel> locations;
-  final void Function(LocationModel) onMarkerTap;
+  final void Function(LocationModel, BuildContext) onMarkerTap;
   final void Function(LatLng, double) onMovingToLocation;
   const MarkerLayerWidget({
     super.key,
@@ -25,7 +25,7 @@ class MarkerLayerWidget extends StatelessWidget {
           rotate: true,
           child: GestureDetector(
             onTap: () => {
-              onMarkerTap(loc),
+              onMarkerTap(loc, context),
               onMovingToLocation(loc.coordinates, 15),
             },
             child: Icon(
