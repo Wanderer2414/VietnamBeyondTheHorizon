@@ -81,7 +81,7 @@ class MyMapController extends ValueNotifier<MapState> {
       imageURLs: [
         "https://vietnamnightlife.com/uploads/images/2023/05/1685518065-single_product7-phodibobuiviencover.jpg",
       ],
-      missionID: "101",
+      missionID: ["101"],
       latitude: 10.7725,
       longitude: 106.6959,
     ),
@@ -98,7 +98,7 @@ class MyMapController extends ValueNotifier<MapState> {
       imageURLs: [
         "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyAWrWppWahQZJDccRCPRX8ZIPn26P8R41au-eF1Rto6Bw_xpSeKuEikHLEI3iMq4u3uRE1bHdzqvduf0Fs5kyr_DBn7RWHT75BIUWuK2QftPbBIGn4Cku5Up25g8xYORAu2Vvs=w360-h256-p-k-no",
       ],
-      missionID: "102",
+      missionID: ["102"],
       latitude: 10.75,
       longitude: 106.66667,
     ),
@@ -107,16 +107,18 @@ class MyMapController extends ValueNotifier<MapState> {
   final List<MissionModel> missionList = [
     MissionModel(
       id: "101",
+      name: "Hello nana",
       description: "Take a photo involving yourself and the given image",
-      starReward: "2",
+      difficulty: 2,
       illustrationURL:
           "https://static.vinwonders.com/production/pho-tay-bui-vien-3.jpg",
     ),
     MissionModel(
       id: "102",
+      name: "Hello baba",
       description:
           "Take a photo involving yourself and the given image, and dance under the tree",
-      starReward: "5",
+      difficulty: 4,
       illustrationURL:
           "https://cdn.thuvienphapluat.vn/uploads/tintuc/2025/07/17/truong-dai-hoc-khoa-hoc-tu-nhien-dhqg-tphcm.jpg",
     ),
@@ -216,6 +218,21 @@ class MyMapController extends ValueNotifier<MapState> {
       ),
     );
     return layers;
+  }
+
+  Future<void> fetchLocationData() async {
+    final url = Uri.parse(
+      "https://vnbth-backend.onrender.com/location/locations",
+    );
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer <token>'},
+    );
+
+    if (response.statusCode == 200) {
+      final List locationData = json.decode(response.body);
+      if (locationData.isNotEmpty) {}
+    }
   }
 
   Future<void> fetchCoordinates(String locationName) async {

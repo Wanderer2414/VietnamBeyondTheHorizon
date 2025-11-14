@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
         children: [
           AppIcon(screenWidth: screenWidth),
           AppTitle(size: Size(screenWidth, screenHeight)),
-          Waiting4L(side: screenWidth * 0.15),
+          // Waiting4L(side: screenWidth * 0.15),
         ],
       ),
     );

@@ -1,18 +1,33 @@
+import 'package:vietnambeyondthehorizon/data/user/player_data.dart';
+
 class UserAccount {
-  final String id;
   final String email;
   final String username;
-  final String? avatarUrl;
+  final String age;
+  final String avatarUrl;
+  final String? city;
 
-  final DateTime createdAt;
-  final DateTime lastLogin;
+  final DateTime? createdAt;
 
   UserAccount({
-    required this.id,
     required this.email,
     required this.username,
-    this.avatarUrl,
+    required this.age,
+    required this.city,
+    this.avatarUrl = "/", //default avatar
     required this.createdAt,
-    required this.lastLogin,
   });
+
+  factory UserAccount.fromJson(Map<String, dynamic> json) {
+    return UserAccount(
+      email: json['email'],
+      username: json['username'],
+      age: json['age'],
+      city: json['city'],
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : null,
+      avatarUrl: json['avtar'],
+    );
+  }
 }
