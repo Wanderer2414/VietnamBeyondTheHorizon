@@ -11,6 +11,9 @@ class LoginPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final emailCtrl = TextEditingController();
+    final passwordCtrl = TextEditingController();
+
     return Container(
       height: size.height,
       alignment: Alignment.bottomCenter,
@@ -29,12 +32,14 @@ class LoginPanel extends StatelessWidget {
           children: [
             _LogInLabel(size: Size(size.width, size.height * 0.11)),
             InputPanelT1(
+              controller: emailCtrl,
               size: Size(size.width, size.height * 0.1),
               content: "Email",
               onTap: onTap,
             ),
             SizedBox(height: size.height * 0.01),
             InputPanelT1(
+              controller: passwordCtrl,
               size: Size(size.width, size.height * 0.1),
               content: "Password",
               onTap: onTap,
@@ -44,7 +49,11 @@ class LoginPanel extends StatelessWidget {
               height: size.height * 0.05,
               child: ForgetBox(size: Size(size.width, size.height * 0.05)),
             ),
-            LoginButton(size: Size(size.width * 0.5, size.height * 0.05)),
+            LoginButton(
+              size: Size(size.width * 0.5, size.height * 0.05),
+              emailCtrl: emailCtrl,
+              passwordCtrl: passwordCtrl,
+            ),
             SizedBox(height: size.height * 0.02),
             ExtraLogin(size: Size(size.width, size.height * 0.25)),
           ],

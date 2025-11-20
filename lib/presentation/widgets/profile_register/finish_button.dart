@@ -1,14 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/auth_controller.dart';
 
-class FinishButton extends StatelessWidget {
+class FinishButton extends ConsumerStatefulWidget {
   final Size size;
-  const FinishButton({super.key, required this.size});
+  final TextEditingController nameCtrl;
+  final int? age;
+  final int? cityCode;
+  const FinishButton({
+    super.key,
+    required this.age,
+    required this.nameCtrl,
+    required this.cityCode,
+    required this.size,
+  });
 
   @override
+  ConsumerState<FinishButton> createState() => _FinishButtonState();
+}
+
+class _FinishButtonState extends ConsumerState<FinishButton> {
+  @override
   Widget build(BuildContext context) {
+    final auth = ref.read(authProvider);
+
     return ElevatedButton(
-      onPressed: () {
-        Navigator.of(context).pushReplacementNamed("home");
+      onPressed: () async {
+        final name = widget.nameCtrl.text.trim();
+        final age = widget.age!;
+        final cityCode = widget.cityCode!;
+        try {
+          await auth.updateProfile(name: name, age: age, cityCode: cityCode);
+
+          Navigator.of(context).pushReplacementNamed("home");
+        } catch (e) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Update profile failed: $e")));
+        }
       },
       style: ButtonStyle(
         backgroundColor: WidgetStatePropertyAll(Colors.transparent),
@@ -24,8 +53,8 @@ class FinishButton extends StatelessWidget {
         }),
       ),
       child: Container(
-        width: size.width,
-        height: size.height,
+        width: widget.size.width,
+        height: widget.size.height,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFFFA6C6F), Color(0xFFD99100)],

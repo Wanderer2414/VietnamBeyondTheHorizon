@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/auth_controller.dart';
 
-class SideBox extends StatefulWidget {
+class SideBox extends ConsumerStatefulWidget {
   const SideBox({super.key});
 
   @override
-  State<SideBox> createState() => _SideBoxState();
+  ConsumerState<SideBox> createState() => _SideBoxState();
 }
 
-class _SideBoxState extends State<SideBox> {
+class _SideBoxState extends ConsumerState<SideBox> {
   @override
   Widget build(BuildContext context) {
+    final auth = ref.read(authProvider);
     final Size size = MediaQuery.of(context).size;
     return ListView(
       padding: EdgeInsets.zero,
@@ -71,6 +74,7 @@ class _SideBoxState extends State<SideBox> {
             ),
           ),
           onTap: () {
+            auth.logout();
             Navigator.of(
               context,
             ).pushNamedAndRemoveUntil("log_navigator", (route) => false);

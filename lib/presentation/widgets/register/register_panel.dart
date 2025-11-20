@@ -9,6 +9,10 @@ class RegisterPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final emailCtrl = TextEditingController();
+    final passwordCtrl = TextEditingController();
+    final confirmPasswordCtrl = TextEditingController();
+
     return Container(
       height: size.height,
       alignment: Alignment.bottomCenter,
@@ -27,21 +31,29 @@ class RegisterPanel extends StatelessWidget {
           children: [
             _LogInLabel(size: Size(size.width, size.height * 0.11)),
             InputPanelT1(
+              controller: emailCtrl,
               size: Size(size.width, size.height * 0.1),
               content: "Email",
             ),
             SizedBox(height: size.height * 0.01),
             InputPanelT1(
+              controller: passwordCtrl,
               size: Size(size.width, size.height * 0.1),
               content: "Password",
             ),
             SizedBox(height: size.height * 0.01),
             InputPanelT1(
+              controller: confirmPasswordCtrl,
               size: Size(size.width, size.height * 0.1),
               content: "Confirm password",
             ),
             SizedBox(height: size.height * 0.02),
-            LoginButton(size: Size(size.width * 0.5, size.height * 0.05)),
+            SignUpButton(
+              size: Size(size.width * 0.5, size.height * 0.05),
+              emailCtrl: emailCtrl,
+              passwordCtrl: passwordCtrl,
+              confirmPasswordCtrl: confirmPasswordCtrl,
+            ),
             SizedBox(height: size.height * 0.02),
             ExtraLogin(size: Size(size.width, size.height * 0.15)),
           ],
