@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 class CityInput extends StatefulWidget {
   final Size size;
-  const CityInput({super.key, required this.size});
+  final Function(int?)? onChanged;
+
+  const CityInput({super.key, required this.onChanged, required this.size});
 
   @override
   State<CityInput> createState() => _CityInputState();
@@ -43,6 +45,7 @@ class _CityInputState extends State<CityInput> {
             setState(() {
               _cityCode = value;
             });
+            widget.onChanged?.call(value);
           },
         ),
       ),

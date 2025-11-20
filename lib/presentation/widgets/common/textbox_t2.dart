@@ -6,8 +6,10 @@ class TextboxT2 extends ConsumerWidget {
   final String hint;
   final Function()? onTap;
   final StateProvider<String> provider;
+  final TextEditingController controller;
   const TextboxT2({
     super.key,
+    required this.controller,
     required this.size,
     required this.hint,
     required this.provider,
@@ -32,6 +34,7 @@ class TextboxT2 extends ConsumerWidget {
           ),
           padding: EdgeInsets.only(left: 10, right: 10),
           child: TextField(
+            controller: controller,
             decoration: InputDecoration(
               border: InputBorder.none,
               alignLabelWithHint: true,

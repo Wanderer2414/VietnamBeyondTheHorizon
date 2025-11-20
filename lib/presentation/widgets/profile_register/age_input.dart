@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 class AgeInput extends StatefulWidget {
   final Size size;
-  const AgeInput({super.key, required this.size});
+  final Function(int?)? onChanged;
+  const AgeInput({super.key, required this.onChanged, required this.size});
 
   @override
   State<AgeInput> createState() => _AgeInputState();
@@ -43,6 +44,7 @@ class _AgeInputState extends State<AgeInput> {
             setState(() {
               _selectedAge = value;
             });
+            widget.onChanged?.call(value);
           },
         ),
       ),

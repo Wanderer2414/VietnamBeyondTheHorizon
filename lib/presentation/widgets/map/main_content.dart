@@ -16,7 +16,7 @@ class Content extends StatefulWidget {
 }
 
 class _ContentState extends State<Content> {
-  late final Stack _content;
+  Stack? _content;
 
   final StateProvider<bool> _provider = StateProvider<bool>((ref) => false);
   @override
@@ -38,6 +38,6 @@ class _ContentState extends State<Content> {
 
   @override
   Widget build(BuildContext context) {
-    return _content;
+    return _content!;
   }
 }
