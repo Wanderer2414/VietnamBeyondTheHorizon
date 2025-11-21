@@ -1,5 +1,5 @@
 class MissionModel {
-  final String id;
+  final int id;
   final String name;
   final String description;
   final int difficulty;
@@ -37,7 +37,7 @@ class MissionModel {
 
   factory MissionModel.fromJson(Map<String, dynamic> json) {
     return MissionModel(
-      id: json['id'] as String,
+      id: json['id'] as int,
       name: json['name'] as String,
       description: json['description'] as String,
       difficulty: json['difficulty'] as int,
