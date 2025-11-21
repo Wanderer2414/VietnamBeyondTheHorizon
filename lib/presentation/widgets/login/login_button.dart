@@ -19,35 +19,51 @@ class LoginButton extends ConsumerStatefulWidget {
 }
 
 class _LoginButtonState extends ConsumerState<LoginButton> {
+  bool _loading = false;
+
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
 
     return ElevatedButton(
-      onPressed: () async {
-        final email = widget.emailCtrl.text.trim();
-        final password = widget.passwordCtrl.text.trim();
-        try {
-          await auth.login(email, password);
-          try {
-            final user = await auth.fetchUserData();
-            if (user != null) {
-              ref.read(userProvider.notifier).setUser(user);
-              print("Fetch data successfully!");
-            }
-          } catch (e) {
-            print("Fetch user failed: $e");
-          }
-          if (auth.isLoggedIn) {
-            print("Move to Home");
-            Navigator.of(context).pushReplacementNamed("home");
-          }
-        } catch (e) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("Login failed: $e")));
-        }
-      },
+      onPressed: _loading
+          ? null
+          : () async {
+              setState(() {
+                _loading = true;
+              });
+              final email = widget.emailCtrl.text.trim();
+              final password = widget.passwordCtrl.text.trim();
+              try {
+                await auth.login(email, password);
+                try {
+                  final user = await auth.fetchUserData();
+                  if (user != null) {
+                    if (!mounted) return;
+                    ref.read(userProvider.notifier).setUser(user);
+                    print("Fetch data successfully!");
+                  }
+                } catch (e) {
+                  print("Fetch user failed: $e");
+                }
+                if (!mounted) return;
+                if (auth.isLoggedIn) {
+                  print("Move to Home");
+                  Navigator.of(context).pushReplacementNamed("home");
+                }
+              } catch (e) {
+                if (!mounted) return;
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text("Login failed: $e")));
+              } finally {
+                if (mounted)
+                  setState(() {
+                    _loading = false;
+                  });
+              }
+            },
+
       style: ButtonStyle(
         backgroundColor: MaterialStatePropertyAll(Colors.transparent),
         shadowColor: MaterialStatePropertyAll(Colors.transparent),
@@ -66,7 +82,9 @@ class _LoginButtonState extends ConsumerState<LoginButton> {
         height: widget.size.height,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFFA6C6F), Color(0xFFD99100)],
+            colors: _loading
+                ? [Colors.grey.shade400, Colors.grey.shade500]
+                : [Color(0xFFFA6C6F), Color(0xFFD99100)],
             begin: Alignment(-2.5, 0),
             end: Alignment(1, 0),
           ),
@@ -81,15 +99,21 @@ class _LoginButtonState extends ConsumerState<LoginButton> {
         ),
         child: FittedBox(
           fit: BoxFit.scaleDown,
-          child: Text(
-            "Log in",
-            style: TextStyle(
-              fontFamily: "Jost",
-              fontWeight: FontWeight.w300,
-              fontSize: 20,
-              color: Colors.white,
-            ),
-          ),
+          child: _loading
+              ? const CircularProgressIndicator(
+                  color: Color.fromARGB(255, 0, 0, 0),
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                )
+              : Text(
+                  "Log in",
+                  style: TextStyle(
+                    fontFamily: "Jost",
+                    fontWeight: FontWeight.w300,
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
+                ),
         ),
       ),
     );

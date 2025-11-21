@@ -1,16 +1,16 @@
 import 'package:latlong2/latlong.dart';
 
 class LocationModel {
-  final int id;
+  final String id;
   final String name;
   final String address;
   final String type;
   final String description;
   final String openTime;
   final String closeTime;
-  final double price;
+  final String price;
   final List<String> imageURLs;
-  final List<int> missionID;
+  final List<String> missionID;
   final double latitude;
   final double longitude;
 
@@ -31,21 +31,23 @@ class LocationModel {
 
   factory LocationModel.fromJson(Map<String, dynamic> json) {
     return LocationModel(
-      id: json['id'] as int,
+      id: json['id'] as String,
       name: json['name'] as String,
       address: json['address'] as String,
       type: json['type'] as String,
       description: json['description'] as String,
       openTime: json['openTime'] as String,
       closeTime: json['closeTime'] as String,
-      price: (json['price'] as num).toDouble(),
+      price: (json['price'] as num).toDouble() == 0
+          ? "Free"
+          : (json['price'] as String),
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
       imageURLs: (json['images'] as List<dynamic>)
           .map((e) => e['url'] as String)
           .toList(),
       missionID: (json['missions'] as List<dynamic>)
-          .map((e) => e['id'] as int)
+          .map((e) => e['id'] as String)
           .toList(),
     );
   }

@@ -23,7 +23,7 @@ class _MapShowState extends State<MapShow> {
         },
         context: context,
       ),
-      children: widget.controller.mapLayers(context, () => setState(() {})),
+      children: widget.controller.mapLayers(context),
     );
   }
 }

@@ -1,5 +1,5 @@
 class MissionModel {
-  final int id;
+  final String id;
   final String name;
   final String description;
   final int difficulty;
@@ -37,19 +37,27 @@ class MissionModel {
 
   factory MissionModel.fromJson(Map<String, dynamic> json) {
     return MissionModel(
-      id: json['id'] as int,
+      id: json['id'].toString(),
       name: json['name'] as String,
       description: json['description'] as String,
       difficulty: json['difficulty'] as int,
       isCompleted: json['isCompleted'] as bool? ?? false,
       finishDay: json['finishDay'] != null
-          ? DateTime.parse(json['finishDay'] as String)
+          ? DateTime.tryParse(json['finishDay'].toString())
           : null,
-      illustrationURL: json['illustrationURL'] != null
-          ? json['illustrationURL'] as String
-          : null,
-      imagePath: json['imagePath'] != null ? json['imagePath'] as String : null,
-      cost: json['cost'] != null ? json['cost'] as String : "0",
+      illustrationURL: json['illustrationURL'] as String?,
+      imagePath: json['imagePath'] as String?,
+      cost: json['cost']?.toString() ?? "0",
     );
   }
 }
+
+
+// {
+//             "id": 1,
+//             "name": "Right Angle",
+//             "description": "Take a photo in front of the clock at Bến Thành Market when the hour hand and the minute hand form a 90-degree angle.",
+//             "cost": 0,
+//             "difficulty": 2,
+//             "images": []
+//         },

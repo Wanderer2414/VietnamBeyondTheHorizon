@@ -24,7 +24,7 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
     controller.initialize(context);
     _myLocation = FloatingActionButton(
-      onPressed: () => controller.moveToCurrentLocation(context),
+      onPressed: () => controller.moveToCurrentLocation(),
       backgroundColor: Colors.blue,
       child: const Icon(Icons.my_location, size: 30, color: Colors.white),
     );

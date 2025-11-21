@@ -43,7 +43,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
             icon: const Icon(Icons.search),
             onPressed: () {
               if (_location.isNotEmpty) {
-                widget.controller.fetchCoordinates(context, _location).then((
+                widget.controller.fetchCoordinates(_location).then((
                   value,
                 ) {
                   widget.onTap();

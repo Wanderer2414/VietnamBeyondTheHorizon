@@ -5,8 +5,8 @@ import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:flutter/material.dart';
 
 class RouteResult {
-  final int locationId;
-  final int missionId;
+  final String locationId;
+  final String missionId;
   
   RouteResult({
     required this.locationId,
@@ -73,8 +73,8 @@ class RoutePlannerService {
   /// Kiểm tra giá phù hợp với ngân sách
   bool isPriceAffordable(LocationModel location, double budget) {
     try {
-      if (location.price == 0) return true;
-      final price = location.price;
+      if (location.price.toLowerCase() == "free") return true;
+      final price = double.parse(location.price);
       return price <= budget;
     } catch (e) {
       return true;
@@ -215,7 +215,7 @@ class RoutePlannerService {
         // Lấy mission
         if (location.missionID.isEmpty) continue;
         
-        int missionId = location.missionID[Random().nextInt(location.missionID.length)];
+        String missionId = location.missionID[Random().nextInt(location.missionID.length)];
         MissionModel? mission = allMissions.firstWhere(
           (m) => m.id == missionId,
           orElse: () => MissionModel(
@@ -281,7 +281,7 @@ class RoutePlannerService {
       }
 
       // Thêm vào route
-      int selectedMissionId = bestLocation.missionID[
+      String selectedMissionId = bestLocation.missionID[
         Random().nextInt(bestLocation.missionID.length)
       ];
       
