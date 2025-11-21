@@ -81,7 +81,7 @@ class RoutePlannerService {
     }
   }
 
-  /// Lọc địa điểm theo điều kiện
+  /// Lọc địa điểm theo điều kiện - TRẢ VỀ TẤT CẢ NẾU KHÔNG CÓ ĐỦ ĐIỀU KIỆN
   List<LocationModel> filterLocations({
     required List<LocationModel> allLocations,
     required LatLng userGPS,
@@ -89,24 +89,51 @@ class RoutePlannerService {
     required double budget,
     required double maxDuration,
     DateTime? currentTime,
+    bool strictMode = false, // Chế độ nghiêm ngặt
   }) {
     currentTime ??= DateTime.now();
     
-    return allLocations.where((location) {
-      // Kiểm tra interest
-      if (!interests.contains(location.type)) return false;
-      
-      // Kiểm tra giá
+    // Lọc nghiêm ngặt theo tất cả tiêu chí
+    List<LocationModel> strictFiltered = allLocations.where((location) {
+      if (interests.isNotEmpty && !interests.contains(location.type)) return false;
       if (!isPriceAffordable(location, budget)) return false;
-      
-      // Kiểm tra giờ mở cửa
       if (!isLocationOpen(location, currentTime!)) return false;
-      
       return true;
     }).toList();
+    
+    if (strictFiltered.isNotEmpty || strictMode) {
+      return strictFiltered;
+    }
+    
+    // Nếu không có kết quả, thử lọc lỏng hơn (bỏ qua giờ mở cửa)
+    List<LocationModel> relaxedFiltered = allLocations.where((location) {
+      if (interests.isNotEmpty && !interests.contains(location.type)) return false;
+      if (!isPriceAffordable(location, budget)) return false;
+      return true;
+    }).toList();
+    
+    if (relaxedFiltered.isNotEmpty) {
+      print('⚠️ Relaxed filter: Bỏ qua giờ mở cửa');
+      return relaxedFiltered;
+    }
+    
+    // Nếu vẫn không có, chỉ lọc theo interest
+    List<LocationModel> interestOnly = allLocations.where((location) {
+      if (interests.isNotEmpty && !interests.contains(location.type)) return false;
+      return true;
+    }).toList();
+    
+    if (interestOnly.isNotEmpty) {
+      print('⚠️ Interest-only filter: Bỏ qua budget và giờ mở cửa');
+      return interestOnly;
+    }
+    
+    // Cuối cùng, trả về tất cả locations sẵn có
+    print('⚠️ Returning all locations: Không đủ điều kiện lọc');
+    return allLocations;
   }
 
-  /// Thuật toán tìm đường tối ưu
+  /// Thuật toán tìm đường tối ưu - LUÔN TRẢ VỀ KẾT QUẢ
   Future<List<RouteResult>> planOptimalRoute({
     required LatLng userGPS,
     required List<String> interests,
@@ -118,7 +145,13 @@ class RoutePlannerService {
   }) async {
     startTime ??= DateTime.now();
     
-    // Bước 1: Lọc địa điểm phù hợp
+    // Kiểm tra dataset có rỗng không
+    if (allLocations.isEmpty) {
+      print('❌ Dataset rỗng: Không có location nào');
+      return [];
+    }
+    
+    // Bước 1: Lọc địa điểm phù hợp (relaxed filtering)
     List<LocationModel> filteredLocations = filterLocations(
       allLocations: allLocations,
       userGPS: userGPS,
@@ -126,11 +159,15 @@ class RoutePlannerService {
       budget: budget,
       maxDuration: maxDuration,
       currentTime: startTime,
+      strictMode: false, // Cho phép lọc lỏng
     );
 
     if (filteredLocations.isEmpty) {
+      print('⚠️ Không có location nào sau khi lọc, nhưng đây là trường hợp không thể xảy ra');
       return [];
     }
+
+    print('✅ Filtered locations: ${filteredLocations.length}/${allLocations.length}');
 
     // Bước 2: Tính điểm cho mỗi địa điểm
     Map<LocationModel, double> scores = {};
@@ -151,18 +188,23 @@ class RoutePlannerService {
       scores[location] = score;
     }
 
-    // Bước 3: Greedy algorithm - chọn địa điểm gần nhất có thể đi được
+    // Bước 3: Greedy algorithm - chọn địa điểm tốt nhất có thể
     List<RouteResult> route = [];
     LatLng currentPosition = userGPS;
     double remainingTime = maxDuration;
+    double remainingBudget = budget;
     Set<String> visitedTypes = {};
     DateTime currentTime = startTime;
+    
+    // Tạo bản sao để không làm thay đổi list gốc
+    List<LocationModel> availableLocations = List.from(filteredLocations);
 
-    while (filteredLocations.isNotEmpty && remainingTime > 0) {
+    while (availableLocations.isNotEmpty && route.length < 6) {
       LocationModel? bestLocation;
       double bestScore = -1;
+      bool foundAffordable = false;
 
-      for (var location in filteredLocations) {
+      for (var location in availableLocations) {
         // Tính thời gian cần thiết
         double distance = calculateDistance(
           currentPosition,
@@ -170,7 +212,7 @@ class RoutePlannerService {
         );
         double travelTime = calculateTravelTime(distance);
         
-        // Lấy mission đầu tiên (hoặc random)
+        // Lấy mission
         if (location.missionID.isEmpty) continue;
         
         int missionId = location.missionID[Random().nextInt(location.missionID.length)];
@@ -188,16 +230,42 @@ class RoutePlannerService {
         double visitTime = calculateVisitDuration(mission.difficulty);
         double totalTime = travelTime + visitTime;
 
-        if (totalTime > remainingTime) continue;
+        // Kiểm tra budget
+        bool canAfford = isPriceAffordable(location, remainingBudget);
+        
+        // Nếu đã hết thời gian và budget - dừng tìm
+        if (totalTime > remainingTime && !canAfford) continue;
+        
+        // Ưu tiên location vừa đủ thời gian VÀ budget
+        bool meetsAllCriteria = totalTime <= remainingTime && canAfford;
+        
+        if (meetsAllCriteria) foundAffordable = true;
 
-        // Kiểm tra giờ mở cửa sau khi đến
+        // Kiểm tra giờ mở cửa (lỏng lẻo hơn)
         DateTime arrivalTime = currentTime.add(Duration(minutes: travelTime.toInt()));
-        if (!isLocationOpen(location, arrivalTime)) continue;
+        bool isOpen = isLocationOpen(location, arrivalTime);
 
-        // Tính score với bonus cho đa dạng type
+        // Tính score với nhiều yếu tố
         double score = scores[location]!;
+        
+        // Bonus cho đa dạng type
         if (!visitedTypes.contains(location.type)) {
-          score *= 1.5; // Bonus cho type mới
+          score *= 1.5;
+        }
+        
+        // Bonus cho location đáp ứng đủ điều kiện
+        if (meetsAllCriteria) {
+          score *= 2.0;
+        }
+        
+        // Bonus nhỏ cho location mở cửa
+        if (isOpen) {
+          score *= 1.1;
+        }
+        
+        // Penalty cho location quá xa hoặc quá tốn thời gian
+        if (totalTime > remainingTime) {
+          score *= 0.3;
         }
 
         if (score > bestScore) {
@@ -206,7 +274,11 @@ class RoutePlannerService {
         }
       }
 
-      if (bestLocation == null) break;
+      // Nếu không tìm thấy location nào phù hợp, dừng
+      if (bestLocation == null) {
+        print('⚠️ Không tìm thấy location phù hợp tiếp theo');
+        break;
+      }
 
       // Thêm vào route
       int selectedMissionId = bestLocation.missionID[
@@ -238,17 +310,126 @@ class RoutePlannerService {
       
       double visitTime = calculateVisitDuration(mission.difficulty);
       
+      // Cập nhật remaining
       remainingTime -= (travelTime + visitTime);
+      try {
+        double locationPrice = double.parse(
+          bestLocation.price.replaceAll('.', '').replaceAll(',', '').toLowerCase().replaceAll('free', '0')
+        );
+        remainingBudget -= locationPrice;
+      } catch (e) {
+        // Nếu parse lỗi, giữ nguyên budget
+      }
+      
       currentPosition = LatLng(bestLocation.latitude, bestLocation.longitude);
       currentTime = currentTime.add(Duration(minutes: (travelTime + visitTime).toInt()));
       visitedTypes.add(bestLocation.type);
-      filteredLocations.remove(bestLocation);
+      availableLocations.remove(bestLocation);
 
-      // Giới hạn 5-6 địa điểm
-      if (route.length >= 6) break;
+      // Nếu đã đủ thời gian cho ít nhất 1 location nữa nhưng không tìm thấy, dừng
+      if (remainingTime <= 0) {
+        print('⏰ Hết thời gian khả dụng');
+        break;
+      }
     }
-
+    
+    print('✅ Route created with ${route.length} locations');
     return route;
+  }
+
+  /// HÀM CHÍNH: Tạo route từ UserInput - LUÔN TRẢ VỀ KẾT QUẢ
+  Future<List<LocationModel>> generateRouteFromUserInput({
+    required LatLng userGPS,
+    required List<String> selectedInterests,
+    required double budget,
+    required int durationDays,
+    required List<LocationModel> allLocations,
+    required List<MissionModel> allMissions,
+  }) async {
+    print('\n🚀 === BẮT ĐẦU TẠO ROUTE ===');
+    print('📍 GPS: ${userGPS.latitude}, ${userGPS.longitude}');
+    print('💰 Budget: $budget VNĐ');
+    print('📅 Duration: $durationDays days');
+    print('🎯 Interests: $selectedInterests');
+    print('📊 Total locations: ${allLocations.length}');
+    print('🎮 Total missions: ${allMissions.length}');
+    
+    // Kiểm tra dataset
+    if (allLocations.isEmpty) {
+      print('❌ Dataset rỗng!');
+      return [];
+    }
+    
+    // Chuyển đổi duration từ ngày sang phút (giả sử 8 giờ hoạt động/ngày)
+    double maxDurationMinutes = durationDays * 8 * 60.0;
+    print('⏱️ Max duration: ${maxDurationMinutes.toStringAsFixed(0)} minutes');
+    
+    // Gọi thuật toán tìm đường
+    List<RouteResult> routeResults = await planOptimalRoute(
+      userGPS: userGPS,
+      interests: selectedInterests,
+      budget: budget,
+      maxDuration: maxDurationMinutes,
+      allLocations: allLocations,
+      allMissions: allMissions,
+    );
+    
+    // Nếu không tìm thấy route nào, trả về top 5-6 locations gần nhất
+    if (routeResults.isEmpty) {
+      print('⚠️ Không tìm được route phù hợp, trả về locations gần nhất');
+      
+      // Sắp xếp theo khoảng cách
+      List<LocationModel> sortedByDistance = List.from(allLocations);
+      sortedByDistance.sort((a, b) {
+        double distA = calculateDistance(userGPS, LatLng(a.latitude, a.longitude));
+        double distB = calculateDistance(userGPS, LatLng(b.latitude, b.longitude));
+        return distA.compareTo(distB);
+      });
+      
+      // Lấy tối đa 6 locations
+      List<LocationModel> fallbackLocations = sortedByDistance.take(6).toList();
+      print('✅ Fallback: Trả về ${fallbackLocations.length} locations gần nhất');
+      
+      return fallbackLocations;
+    }
+    
+    // Chuyển đổi RouteResult thành List<LocationModel>
+    List<LocationModel> selectedLocations = [];
+    for (var result in routeResults) {
+      LocationModel? location = allLocations.firstWhere(
+        (loc) => loc.id == result.locationId,
+        orElse: () => LocationModel(
+          id: '',
+          name: '',
+          address: '',
+          type: '',
+          description: '',
+          openTime: '',
+          closeTime: '',
+          price: '',
+          imageURLs: [],
+          missionID: [],
+          latitude: 0,
+          longitude: 0,
+        ),
+      );
+      
+      if (location.id.isNotEmpty) {
+        selectedLocations.add(location);
+      }
+    }
+    
+    print('✅ Tạo route thành công với ${selectedLocations.length} locations');
+    
+    // In thông tin debug
+    printRouteDetails(
+      route: routeResults,
+      allLocations: allLocations,
+      allMissions: allMissions,
+      startPoint: userGPS,
+    );
+    
+    return selectedLocations;
   }
 
   /// Helper: In thông tin chi tiết route
