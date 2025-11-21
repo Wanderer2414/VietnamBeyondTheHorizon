@@ -67,7 +67,6 @@ class _PanelState extends State<Panel> {
               ),
             ),
             TextboxT2(
-              controller: nameCrl,
               size: Size(widget.size.width * 0.8, widget.size.height * 0.06),
               hint: "Nguyen Van A",
             ),

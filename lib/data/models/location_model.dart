@@ -1,20 +1,19 @@
 import 'package:latlong2/latlong.dart';
 
 class LocationModel {
-  final String id; // "1", "2",...
-  final String name; // "University of Science,...."
-  final String address; // "227, NVC,...."
-  final String type; // "culture", "entertainment",...        FORMATED
-  final String description; // "........"
-  final String openTime; // "HH:mm"                           FORMATED
-  final String closeTime; // "HH:mm"                          FORMATED
-  final String price; // "0", "20.000"                        FORMATED
-  final List<String> imageURLs; //URLs to image
+  final int id;
+  final String name;
+  final String address;
+  final String type;
+  final String description;
+  final String openTime;
+  final String closeTime;
+  final double price;
+  final List<String> imageURLs;
+  final List<int> missionID;
+  final double latitude;
+  final double longitude;
 
-  final List<String> missionID; // "101"
-  final double latitude; // "10.0001010"
-  final double longitude; // "20.1234123"
-  //trie
   LocationModel({
     required this.id,
     required this.name,
@@ -32,18 +31,22 @@ class LocationModel {
 
   factory LocationModel.fromJson(Map<String, dynamic> json) {
     return LocationModel(
-      id: json['id'],
-      name: json['name'],
-      address: json['address'],
-      type: json['type'],
-      description: json['description'],
-      openTime: json['openTime'],
-      closeTime: json['closeTime'],
-      price: json['price'],
-      imageURLs: List<String>.from(json['imageURLs']),
-      missionID: json['missionID'],
-      latitude: json['latitude'],
-      longitude: json['longitude'],
+      id: json['id'] as int,
+      name: json['name'] as String,
+      address: json['address'] as String,
+      type: json['type'] as String,
+      description: json['description'] as String,
+      openTime: json['openTime'] as String,
+      closeTime: json['closeTime'] as String,
+      price: (json['price'] as num).toDouble(),
+      latitude: (json['latitude'] as num).toDouble(),
+      longitude: (json['longitude'] as num).toDouble(),
+      imageURLs: (json['images'] as List<dynamic>)
+          .map((e) => e['url'] as String)
+          .toList(),
+      missionID: (json['missions'] as List<dynamic>)
+          .map((e) => e['id'] as int)
+          .toList(),
     );
   }
 
@@ -56,12 +59,11 @@ class LocationModel {
     'openTime': openTime,
     'closeTime': closeTime,
     'price': price,
-    'imageURLs': imageURLs,
-    'missionID': missionID,
     'latitude': latitude,
     'longitude': longitude,
+    'images': imageURLs.map((url) => {'url': url}).toList(),
+    'missions': missionID.map((id) => {'id': id}).toList(),
   };
-
   LatLng get coordinates {
     return LatLng(latitude, longitude);
   }

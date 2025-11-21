@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_down_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile/avatar_panel.dart';
@@ -9,14 +11,14 @@ import 'package:vietnambeyondthehorizon/presentation/widgets/profile/start_panel
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile/tab_content_panel.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile/tab_panel.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends ConsumerState<ProfilePage> {
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
   final SideBox _box = SideBox();
 
@@ -63,19 +65,21 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
-class _Content extends StatefulWidget {
+class _Content extends ConsumerStatefulWidget {
   const _Content({required this.photos});
 
   final List<String> photos;
 
   @override
-  State<_Content> createState() => _ContentState();
+  ConsumerState<_Content> createState() => _ContentState();
 }
 
-class _ContentState extends State<_Content> {
+class _ContentState extends ConsumerState<_Content> {
   int _selectedIndex = 0;
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(userProvider);
+    final username = user!.username!;
     return Column(
       children: [
         // Header with gradient + avatar stacked on top
@@ -84,8 +88,8 @@ class _ContentState extends State<_Content> {
         SizedBox(height: 20),
 
         // Name & Location
-        const Text(
-          'Nguyen Van A',
+        Text(
+          username,
           style: TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.bold,
@@ -96,7 +100,7 @@ class _ContentState extends State<_Content> {
         ),
         const SizedBox(height: 6),
         Text(
-          'Thanh pho Ho Chi Minh',
+          user.city!,
           style: TextStyle(
             fontSize: 15,
             color: Colors.grey.shade600,

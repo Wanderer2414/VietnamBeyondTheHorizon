@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:vietnambeyondthehorizon/data/models/city_map.dart';
 import 'package:vietnambeyondthehorizon/data/user/player_data.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 
@@ -55,66 +56,106 @@ class AuthController extends ChangeNotifier {
     if (password != confirmPassword) {
       throw Exception("Passwords do not match");
     }
+    try {
+      final response = await _dio.post(
+        "/auth/signup",
+        data: {"email": email, "password": password},
+      );
 
-    final response = await _dio.post(
-      "/auth/signup",
-      data: {"email": email, "password": password},
-    );
+      if (response.data['status'] == "success") {
+        _token = response.data['data']['access_token'];
+        notifyListeners();
+        await _saveToken(_token!);
+      } else {
+        throw Exception("Sign up error: ${response.data['error']['message']}");
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final msg = e.response!.data['error']['message'];
 
-    if (response.data['status'] == "success") {
-      _token = response.data['data']['access_token'];
-      notifyListeners();
-      await _saveToken(_token!);
-    } else {
-      throw Exception("Sign up error: ${response.data['error']['message']}");
+        if (msg is List) {
+          throw Exception(msg.join(", "));
+        } else {
+          throw Exception(msg.toString());
+        }
+      } else {
+        throw Exception("Network error: ${e.message}");
+      }
     }
   }
 
   Future<void> login(String email, String password) async {
-    final response = await _dio.post(
-      "/auth/login",
-      data: {"email": email, "password": password},
-    );
+    try {
+      final response = await _dio.post(
+        "/auth/login",
+        data: {"email": email, "password": password},
+      );
 
-    if (response.data['status'] == "success") {
-      _token = response.data['data']['access_token'];
-      notifyListeners();
-      await _saveToken(_token!);
-    } else {
-      throw Exception("Login error: ${response.data['error']['message']}");
+      if (response.data["status"] == "success") {
+        _token = response.data['data']['access_token'];
+        notifyListeners();
+        await _saveToken(_token!);
+        return;
+      }
+
+      throw Exception("Unexpected server format.");
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final msg = e.response!.data['error']['message'];
+
+        if (msg is List) {
+          throw Exception(msg.join(", "));
+        } else {
+          throw Exception(msg.toString());
+        }
+      } else {
+        throw Exception("Network error: ${e.message}");
+      }
     }
   }
 
   Future<void> updateProfile({
     required String name,
     required int age,
-    required int cityCode,
+    required String city,
   }) async {
-    final response = await _dio.patch(
-      "/user/profile",
-      data: {"name": name, "age": age, "city": 1},
-    );
-    if (response.data['status'] == "success") {
-      notifyListeners();
-    } else {
-      throw Exception(
-        "Update profile error: ${response.data['error']['message']}",
+    try {
+      final response = await _dio.patch(
+        "/user/profile",
+        data: {"name": name, "age": age, "city": city},
       );
+      if (response.data['status'] == "success") {
+        notifyListeners();
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final msg = e.response!.data['error']['message'];
+
+        if (msg is List) {
+          throw Exception(msg.join(", "));
+        } else {
+          throw Exception(msg.toString());
+        }
+      } else {
+        throw Exception("Network error: ${e.message}");
+      }
     }
   }
 
-  Future<void> fetchUserData() async {
+  Future<UserAccount?> fetchUserData() async {
     final response = await _dio.get("/user/info");
 
     if (response.data['status'] == "success") {
-      final userJson = response.data['data']['user'];
-      final playerJson = response.data['data']['player'];
+      final userJson = response.data['data'];
 
-      if (userJson != null) _user = UserAccount.fromJson(userJson);
-      if (playerJson != null) _player = PlayerData.fromJson(playerJson);
+      if (userJson != null) {
+        _user = UserAccount.fromJson(userJson);
+        return _user;
+      }
     } else {
       throw Exception("Fetch user data failed");
     }
+    return null;
   }
 
   Future<void> _saveToken(String token) async {

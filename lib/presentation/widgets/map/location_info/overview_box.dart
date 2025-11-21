@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 class OverviewBox extends StatelessWidget {
   final String address;
-  final String cost;
+  final double cost;
   final String openTime; // "07:30"
   final String closeTime; // "20:00"
 
@@ -37,6 +37,8 @@ class OverviewBox extends StatelessWidget {
     final bool isOpen = _isOpenNow();
     final Color statusColor = isOpen ? Colors.green : Colors.red;
     final String statusText = isOpen ? "OPENING" : "CLOSED";
+
+    final price = cost.toString();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -71,7 +73,7 @@ class OverviewBox extends StatelessWidget {
             SizedBox(width: 15),
             Expanded(
               child: Text(
-                cost + ((cost != "Free") ? " VND" : ""),
+                price + ((price != "0") ? " VND" : "Free"),
                 style: TextStyle(fontFamily: "Kay Pho Du", fontSize: 13),
               ),
             ),
