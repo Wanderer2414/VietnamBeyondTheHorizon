@@ -9,7 +9,7 @@ import 'package:vietnambeyondthehorizon/presentation/screens/log_navigator.dart'
 import 'package:vietnambeyondthehorizon/presentation/screens/splash_begin_screen.dart';
 
 class MainRoute {
-  static const String home = "/";
+  static const String home = "home";
   static Route newRoute(String? name) {
     switch (name) {
       case "/":
