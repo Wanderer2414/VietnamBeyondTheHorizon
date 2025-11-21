@@ -17,12 +17,10 @@ final authProvider = ChangeNotifierProvider<AuthController>((ref) {
 class AuthController extends ChangeNotifier {
   String? _token;
   UserAccount? _user;
-  PlayerData? _player;
   Dio _dio;
 
   String? get token => _token;
   UserAccount? get user => _user;
-  PlayerData? get player => _player;
 
   bool get isLoggedIn => _token != null;
 
@@ -171,7 +169,6 @@ class AuthController extends ChangeNotifier {
   Future<void> logout() async {
     _token = null;
     _user = null;
-    _player = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
     notifyListeners();
