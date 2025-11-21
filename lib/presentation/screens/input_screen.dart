@@ -1,6 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transitionRL.dart';
+import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
+import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/gen_routes_algo_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/map_screen.dart';
+
+// Class lưu trữ thông tin đầu vào của user
+class UserInput {
+  LatLng? gpsLocation; // GPS (địa điểm)
+  double budget; // Tiền (VNĐ)
+  int durationDays; // Duration (Ngày)
+  Map<String, bool> interests; // Interest (Yes/No cho attraction, food, culture, entertainment)
+  final MyMapController myMapController = MyMapController();
+
+  UserInput({
+    this.gpsLocation,
+    this.budget = 0.0,
+    this.durationDays = 0,
+    Map<String, bool>? interests,
+  }) : interests = interests ??
+            {
+              'Attractions': true,
+              'Culture': true,
+              'Food': true,
+              'Entertainment': true,
+            };
+
+  // Lấy danh sách các interests được chọn
+  List<String> getSelectedInterests() {
+    return interests.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key.toLowerCase())
+        .toList();
+  }
+
+  // Parse budget từ string (có thể có đơn vị $)
+  static double parseBudget(String budgetText) {
+    String cleaned = budgetText.replaceAll(RegExp(r'[^\d.]'), '');
+    return double.tryParse(cleaned) ?? 0.0;
+  }
+
+  // Parse duration từ string (có thể có từ "days")
+  static int parseDuration(String durationText) {
+    String cleaned = durationText.replaceAll(RegExp(r'[^\d]'), '');
+    return int.tryParse(cleaned) ?? 0;
+  }
+
+  @override
+  String toString() {
+    return 'UserInput{gpsLocation: $gpsLocation, budget: $budget, durationDays: $durationDays, interests: $interests}';
+  }
+}
 
 class InputPage extends StatefulWidget {
   const InputPage({Key? key}) : super(key: key);
@@ -10,7 +62,6 @@ class InputPage extends StatefulWidget {
 }
 
 class _InputPageState extends State<InputPage> {
-  final TextEditingController _locationController = TextEditingController();
   final TextEditingController _budgetController = TextEditingController(
     text: '20\$',
   );
@@ -18,19 +69,131 @@ class _InputPageState extends State<InputPage> {
     text: '2 days',
   );
 
-  Map<String, bool> interests = {
-    'Attractions': true,
-    'Culture': true,
-    'Food': true,
-    'Entertainment': true,
-  };
+  // UserInput instance để lưu trữ dữ liệu
+  late UserInput userInput;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    userInput = UserInput(
+      budget: 20.0,
+      durationDays: 2,
+    );
+  }
+
+  final RoutePlannerService _routePlanner = RoutePlannerService();
 
   @override
   void dispose() {
-    _locationController.dispose();
     _budgetController.dispose();
     _durationController.dispose();
     super.dispose();
+  }
+
+  // Hàm xử lý khi nhấn nút NEXT
+  void _handleNext() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Lấy GPS location khi nhấn nút NEXT
+      await userInput.myMapController.initLocation();
+      
+      if (userInput.myMapController.value.currentLocation != null) {
+        userInput.gpsLocation = userInput.myMapController.value.currentLocation!;
+        
+        // Cập nhật UserInput với dữ liệu từ các controllers
+        userInput.budget = UserInput.parseBudget(_budgetController.text);
+        userInput.durationDays = UserInput.parseDuration(_durationController.text);
+
+        // Debug: In ra thông tin
+        print('User Input: ${userInput.toString()}');
+        print('GPS Location: ${userInput.gpsLocation}');
+        print('Selected Interests: ${userInput.getSelectedInterests()}');
+
+        // TODO: Gửi User.input, Maplist.input -> Xử lý -> output list
+        // Ví dụ: gọi controller để xử lý
+        // GenRoutesAlgoController.processUserInput(userInput);
+
+        // ====== PHẦN MỚI: GỌI THUẬT TOÁN TÌM ĐƯỜNG ======
+        
+        // Lấy danh sách locations và missions từ controller
+        List<LocationModel> allLocations = userInput.myMapController.locationsList;
+        List<MissionModel> allMissions = userInput.myMapController.missionList;
+        
+        // Gọi thuật toán để tạo route
+        List<LocationModel> selectedRoute = await _routePlanner.generateRouteFromUserInput(
+          userGPS: userInput.gpsLocation!,
+          selectedInterests: userInput.getSelectedInterests(),
+          budget: userInput.budget,
+          durationDays: userInput.durationDays,
+          allLocations: allLocations,
+          allMissions: allMissions,
+        );
+        
+        print('\n=== SELECTED ROUTE ===');
+        print('Found ${selectedRoute.length} locations');
+        for (int i = 0; i < selectedRoute.length; i++) {
+          print('${i + 1}. ${selectedRoute[i].name} (${selectedRoute[i].type})');
+        }
+        
+        // Vẽ đường đi trên bản đồ
+        if (selectedRoute.isNotEmpty) {
+          await userInput.myMapController.fetchFullRoute(selectedRoute);
+          print('Route drawn on map successfully!');
+        } else {
+          print('No suitable locations found for your criteria');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('No suitable locations found. Please adjust your criteria.'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
+        }
+        
+        // ====== KẾT THÚC PHẦN XỬ LÝ THUẬT TOÁN ======
+
+
+        // Chuyển hướng sang MapScreen
+        if (mounted) {
+          Navigator.of(context).push(
+            TransitionRLPageRoute(
+              nextScreen: const MapScreen(),
+            ),
+          );
+        }
+      } else {
+        // Không lấy được location
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Unable to get your location. Please enable GPS.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error getting location: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -134,15 +297,6 @@ class _InputPageState extends State<InputPage> {
 
                               const SizedBox(height: 40),
 
-                              // Location Field
-                              _buildInputField(
-                                'Location',
-                                '(GPS)',
-                                _locationController,
-                              ),
-
-                              const SizedBox(height: 20),
-
                               // Budget Field
                               _buildInputField(
                                 'Budget',
@@ -174,7 +328,7 @@ class _InputPageState extends State<InputPage> {
                                       ),
                                     ),
                                     const SizedBox(height: 16),
-                                    ...interests.entries.map((entry) {
+                                    ...userInput.interests.entries.map((entry) {
                                       bool isOrange =
                                           entry.key == 'Culture' ||
                                           entry.key == 'Entertainment';
@@ -185,7 +339,7 @@ class _InputPageState extends State<InputPage> {
                                         child: InkWell(
                                           onTap: () {
                                             setState(() {
-                                              interests[entry.key] =
+                                              userInput.interests[entry.key] =
                                                   !entry.value;
                                             });
                                           },
@@ -256,45 +410,57 @@ class _InputPageState extends State<InputPage> {
 
                               // Next Button
                               InkWell(
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    TransitionRLPageRoute(
-                                      nextScreen: MapScreen(),
-                                    ),
-                                  );
-                                },
+                                onTap: _isLoading ? null : _handleNext,
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 50,
                                     vertical: 16,
                                   ),
                                   decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        Color(0xFFF59E0B),
-                                        Color(0xFFFF6B6B),
-                                      ],
+                                    gradient: LinearGradient(
+                                      colors: _isLoading
+                                          ? [
+                                              Colors.grey.shade400,
+                                              Colors.grey.shade500,
+                                            ]
+                                          : [
+                                              const Color(0xFFF59E0B),
+                                              const Color(0xFFFF6B6B),
+                                            ],
                                     ),
                                     borderRadius: BorderRadius.circular(30),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(
-                                          0xFFF59E0B,
-                                        ).withOpacity(0.4),
+                                        color: _isLoading
+                                            ? Colors.grey.withOpacity(0.4)
+                                            : const Color(0xFFF59E0B)
+                                                .withOpacity(0.4),
                                         blurRadius: 15,
                                         offset: const Offset(0, 6),
                                       ),
                                     ],
                                   ),
-                                  child: const Text(
-                                    'NEXT',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 1.5,
-                                    ),
-                                  ),
+                                  child: _isLoading
+                                      ? const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                          ),
+                                        )
+                                      : const Text(
+                                          'NEXT',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.w600,
+                                            letterSpacing: 1.5,
+                                          ),
+                                        ),
                                 ),
                               ),
                             ],
