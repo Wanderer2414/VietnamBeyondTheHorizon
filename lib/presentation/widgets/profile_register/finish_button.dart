@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vietnambeyondthehorizon/data/models/city_map.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/auth_controller.dart';
 
 class FinishButton extends ConsumerStatefulWidget {
@@ -23,15 +25,33 @@ class _FinishButtonState extends ConsumerState<FinishButton> {
   @override
   Widget build(BuildContext context) {
     final auth = ref.read(authProvider);
-
+    final user = ref.watch(userProvider);
     return ElevatedButton(
       onPressed: () async {
         final name = widget.nameCtrl.text.trim();
         final age = widget.age!;
         final cityCode = widget.cityCode!;
         try {
-          await auth.updateProfile(name: name, age: age, cityCode: cityCode);
-
+          await auth.updateProfile(
+            name: name,
+            age: age,
+            city: cityMap[cityCode] ?? "Unknown",
+          );
+          DateTime todayDateOnly = DateTime.now();
+          ref
+              .read(userProvider.notifier)
+              .updateUser(
+                user!.copyWith(
+                  username: name,
+                  age: age,
+                  city: cityMap[cityCode],
+                  createdAt: DateTime(
+                    todayDateOnly.year,
+                    todayDateOnly.month,
+                    todayDateOnly.day,
+                  ),
+                ),
+              );
           Navigator.of(context).pushReplacementNamed("home");
         } catch (e) {
           ScaffoldMessenger.of(

@@ -30,7 +30,7 @@ class MarkerLayerWidget extends StatelessWidget {
             },
             child: Icon(
               Icons.location_pin,
-              color: loc.type == "entertainment" ? Colors.purple : Colors.blue,
+              color: loc.type == "Entertainment" ? Colors.purple : Colors.blue,
               size: 45,
             ),
           ),

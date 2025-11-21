@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/auth_controller.dart';
 
 class LoginButton extends ConsumerStatefulWidget {
@@ -28,7 +29,15 @@ class _LoginButtonState extends ConsumerState<LoginButton> {
         final password = widget.passwordCtrl.text.trim();
         try {
           await auth.login(email, password);
-
+          try {
+            final user = await auth.fetchUserData();
+            if (user != null) {
+              ref.read(userProvider.notifier).setUser(user);
+              print("Fetch data successfully!");
+            }
+          } catch (e) {
+            print("Fetch user failed: $e");
+          }
           if (auth.isLoggedIn) {
             print("Move to Home");
             Navigator.of(context).pushReplacementNamed("home");

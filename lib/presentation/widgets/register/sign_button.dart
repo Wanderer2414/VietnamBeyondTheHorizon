@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transitionRL.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/auth_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/profile_register_screen.dart';
 
@@ -36,6 +37,8 @@ class _SignUpButtonState extends ConsumerState<SignUpButton> {
           await auth.signup(email, password, confirmPassword);
 
           if (auth.isLoggedIn) {
+            final user = UserAccount(email: email);
+            ref.read(userProvider.notifier).setUser(user);
             Navigator.of(
               context,
             ).push(TransitionRLPageRoute(nextScreen: ProfileRegister()));

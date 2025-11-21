@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 import 'package:flutter_compass/flutter_compass.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vietnambeyondthehorizon/animations/card/appear.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
@@ -20,6 +21,7 @@ class MapState {
   final LatLng? destination;
   final double? distance;
   final List<LocationModel> locationList;
+  late List<LocationModel> locationDataList;
   final List<LatLng>? routes;
   final double heading;
 
@@ -32,6 +34,7 @@ class MapState {
     this.routes = const [],
     this.heading = 0,
     this.locationList = const [],
+    this.locationDataList = const [],
   });
 
   MapState copyWith({
@@ -43,6 +46,7 @@ class MapState {
     List<LatLng>? routes,
     double? heading,
     List<LocationModel>? locationList,
+    List<LocationModel>? locationDataList,
   }) {
     return MapState(
       isPlaying: isPlaying ?? this.isPlaying,
@@ -53,6 +57,7 @@ class MapState {
       routes: routes ?? this.routes,
       heading: heading ?? this.heading,
       locationList: locationList ?? this.locationList,
+      locationDataList: locationDataList ?? this.locationDataList,
     );
   }
 }
@@ -68,41 +73,41 @@ class MyMapController {
   //___________________TEST____________________
   final List<LocationModel> locationsList = [
     LocationModel(
-      id: "1",
+      id: 1,
       name: "Bui Vien Street",
       address: "District 1, HCMC",
       type: "entertainment",
       description: "Famous nightlife street.",
       openTime: "18:00",
       closeTime: "02:00",
-      price: "Free",
+      price: 0,
       imageURLs: [
         "https://vietnamnightlife.com/uploads/images/2023/05/1685518065-single_product7-phodibobuiviencover.jpg",
       ],
-      missionID: ["101"],
+      missionID: [101],
       latitude: 10.7725,
       longitude: 106.6959,
     ),
 
     LocationModel(
-      id: "2",
+      id: 2,
       name: "Umbalala",
       address: "District 1, HCMC",
       type: "culture",
       description: "Famous",
       openTime: "18:00",
       closeTime: "02:00",
-      price: "20.000",
+      price: 20.000,
       imageURLs: [
         "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyAWrWppWahQZJDccRCPRX8ZIPn26P8R41au-eF1Rto6Bw_xpSeKuEikHLEI3iMq4u3uRE1bHdzqvduf0Fs5kyr_DBn7RWHT75BIUWuK2QftPbBIGn4Cku5Up25g8xYORAu2Vvs=w360-h256-p-k-no",
       ],
-      missionID: ["102"],
+      missionID: [102],
       latitude: 10.75,
       longitude: 106.66667,
     ),
   ];
 
-  final List<MissionModel> missionList = [
+  late List<MissionModel> missionList = [
     MissionModel(
       id: "101",
       name: "Hello nana",
@@ -126,7 +131,9 @@ class MyMapController {
 
   void initialize(BuildContext ctx) async {
     context = ctx;
-    await _initLocation();
+    await _fetchLocationData();
+    await _fetchMissionData();
+    //await _initLocation();
     FlutterCompass.events?.listen((event) {
       if (!mapReady || event.heading == null) return;
       value = value.copyWith(heading: event.heading!);
@@ -221,18 +228,59 @@ class MyMapController {
     return layers;
   }
 
-  Future<void> fetchLocationData() async {
+  Future<void> _fetchLocationData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null) {
+      _showError("User error: No token exists");
+    }
+
     final url = Uri.parse(
       "https://vnbth-backend.onrender.com/location/locations",
     );
     final response = await http.get(
       url,
-      headers: {'Authorization': 'Bearer <token>'},
+      headers: {
+        'Authorization': 'Bearer $token',
+        "Content-Type": "application/json",
+      },
     );
+    final jsonBody = jsonDecode(response.body);
 
-    if (response.statusCode == 200) {
-      final List locationData = json.decode(response.body);
-      if (locationData.isNotEmpty) {}
+    if (jsonBody['status'] == 'success') {
+      final List<dynamic> dataList = jsonBody['data'];
+      value.locationDataList = dataList
+          .map((e) => LocationModel.fromJson(e))
+          .toList();
+    } else {
+      _showError("Network error: ${jsonBody['error']['message']}");
+    }
+  }
+
+  Future<void> _fetchMissionData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null) {
+      _showError("User error: No token exists");
+    }
+
+    final url = Uri.parse(
+      "https://vnbth-backend.onrender.com/mission/missions",
+    );
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        "Content-Type": "application/json",
+      },
+    );
+    final jsonBody = jsonDecode(response.body);
+
+    if (jsonBody['status'] == 'success') {
+      final List<dynamic> dataList = jsonBody['data'];
+      missionList = dataList.map((e) => MissionModel.fromJson(e)).toList();
+    } else {
+      _showError("Network error: ${jsonBody['error']['message']}");
     }
   }
 

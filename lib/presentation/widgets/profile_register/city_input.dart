@@ -37,7 +37,7 @@ class _CityInputState extends State<CityInput> {
               value: 0,
               child: Align(
                 alignment: Alignment.center,
-                child: Text("Ho Chi Minh city"),
+                child: Text("Ho Chi Minh"),
               ),
             ),
           ],
