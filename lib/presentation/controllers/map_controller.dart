@@ -15,7 +15,6 @@ import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_share.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 class MyMapController {
   final MapController mapController = MapController();
@@ -26,42 +25,7 @@ class MyMapController {
   LocationModel? selectedLocation;
 
   //___________________TEST____________________
-  final List<LocationModel> locationsList = [
-    LocationModel(
-      id: "1",
-      name: "Bui Vien Street",
-      address: "District 1, HCMC",
-      type: "entertainment",
-      description: "Famous nightlife street.",
-      openTime: "18:00",
-      closeTime: "02:00",
-      price: "Free",
-      imageURLs: [
-        "https://vietnamnightlife.com/uploads/images/2023/05/1685518065-single_product7-phodibobuiviencover.jpg",
-      ],
-      missionID: ["101"],
-      latitude: 10.7725,
-      longitude: 106.6959,
-    ),
-
-    LocationModel(
-      id: "2",
-      name: "Umbalala",
-      address: "District 1, HCMC",
-      type: "culture",
-      description: "Famous",
-      openTime: "18:00",
-      closeTime: "02:00",
-      price: "20.000",
-      imageURLs: [
-        "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyAWrWppWahQZJDccRCPRX8ZIPn26P8R41au-eF1Rto6Bw_xpSeKuEikHLEI3iMq4u3uRE1bHdzqvduf0Fs5kyr_DBn7RWHT75BIUWuK2QftPbBIGn4Cku5Up25g8xYORAu2Vvs=w360-h256-p-k-no",
-      ],
-      missionID: ["102"],
-      latitude: 10.75,
-      longitude: 106.66667,
-    ),
-  ];
-
+  List<LocationModel>? locationsList;
   // late List<MissionModel> missionList;
   List<MissionModel> missionList = [
     MissionModel(
@@ -235,7 +199,7 @@ class MyMapController {
 
     layers.add(
       MarkerLayerWidget(
-        locations: locationsList,
+        locations: locationsList!,
         onMarkerTap: toggleMissionCard,
         onMovingToLocation: moveToLocation,
       ),

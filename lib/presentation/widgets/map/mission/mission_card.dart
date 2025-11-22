@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transitionRL.dart';
@@ -8,7 +11,7 @@ import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/image_upload.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/information_location.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission/challenge_box.dart';
-
+import 'package:http/http.dart' as http;
 class MissionCard extends StatelessWidget {
   final MyMapController controller;
   final LocationModel location;
@@ -128,46 +131,113 @@ class MissionCard extends StatelessWidget {
             ),
           ),
 
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[300],
-                    foregroundColor: Colors.black87,
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () {
-                    //onSkip
-                  },
-                  child: Text("Skip"),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.amber,
-                    foregroundColor: Colors.black,
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () {
-                    //Reward
-                  },
-                  child: Text("Claim Reward"),
-                ),
-              ],
-            ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: _ControlPanel(),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ControlPanel extends StatefulWidget {
+  @override
+  State<_ControlPanel> createState() => _ControlPanelState();
+}
+
+class _ControlPanelState extends State<_ControlPanel> {
+  bool _isSubmited = false;
+
+  Future<void> _submitImage(String imagePath) async {
+
+    try {
+      var uri = Uri.parse('http://<YOUR_SERVER_IP>:5000/check_image');
+      var request = http.MultipartRequest('POST', uri);
+      request.files.add(
+        await http.MultipartFile.fromPath('image', imagePath),
+      );
+
+      var response = await request.send();
+      var responseBody = await response.stream.bytesToString();
+
+    } catch(e) {};
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget container;
+    if (_isSubmited) {
+      container = _ClaimButton(onPressed: () => setState(() => _isSubmited = true));
+    }
+    else {
+      container = _SubmitButton(onPressed: () => setState(() {
+          _isSubmited = true; 
+          // _submitImage()
+      }));
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.grey[300],
+            foregroundColor: Colors.black87,
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          onPressed: () {
+            //onSkip
+          },
+          child: Text("Skip"),
+        ),
+        container
+      ],
+    );
+  }
+}
+
+class _ClaimButton extends StatelessWidget {
+  final void Function() onPressed;
+  const _ClaimButton({required this.onPressed});
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.amber,
+        foregroundColor: Colors.black,
+        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      onPressed: onPressed,
+      child: Text("Claim Reward"),
+    );
+  }
+}
+
+
+class _SubmitButton extends StatelessWidget {
+  final void Function() onPressed;
+  const _SubmitButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.amber,
+        foregroundColor: Colors.black,
+        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      onPressed: onPressed,
+      child: Text("Submit"),
     );
   }
 }

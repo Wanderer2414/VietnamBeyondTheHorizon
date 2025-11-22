@@ -40,73 +40,25 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
       });
     }
   }
-
-  Future<void> _submitImage() async {
-    if (_selectedImage == null) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      var uri = Uri.parse('http://<YOUR_SERVER_IP>:5000/check_image');
-      var request = http.MultipartRequest('POST', uri);
-      request.files.add(
-        await http.MultipartFile.fromPath('image', _selectedImage!.path),
-      );
-
-      var response = await request.send();
-      var responseBody = await response.stream.bytesToString();
-
-      var data = jsonDecode(responseBody);
-      setState(() {
-        _isLoading = false;
-      });
-
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: Text('Server Response'),
-          content: Text(data['message'] ?? 'No message'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('OK'),
-            ),
-          ],
-        ),
-      );
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error uploading: $e')));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     _selectedImage = (widget.mission.imagePath != null
         ? File(widget.mission.imagePath!)
         : null);
-
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: _pickImage,
-          child: _selectedImage != null
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.file(
-                    _selectedImage!,
-                    width: 150,
-                    height: 150,
-                    fit: BoxFit.cover,
-                  ),
-                )
-              : Container(
+    Widget? container;
+    if (_selectedImage != null) {
+        container = ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Image.file(
+            _selectedImage!,
+            width: 150,
+            height: 150,
+            fit: BoxFit.cover,
+          ),
+        );
+    }
+    else {
+      container = Container(
                   width: 150,
                   height: 150,
                   decoration: BoxDecoration(
@@ -118,28 +70,18 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
                     size: 48,
                     color: Colors.grey[700],
                   ),
-                ),
-        ),
+                );
 
-        const SizedBox(height: 20),
-
-        // Nút submit
-        ElevatedButton.icon(
-          onPressed: _isLoading ? null : _submitImage,
-          icon: _isLoading
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Color.fromARGB(255, 160, 7, 7),
-                  ),
-                )
-              : const Icon(Icons.send),
-          label: Text(_isLoading ? "Uploading..." : "Submit"),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blueAccent,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+    }
+    Size screenSize = MediaQuery.of(context).size;
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: _pickImage,
+          child: SizedBox(
+            width: screenSize.width*0.8,
+            height: screenSize.width*0.8,
+            child: container,
           ),
         ),
       ],

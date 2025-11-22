@@ -108,23 +108,11 @@ class _InputPageState extends State<InputPage> {
         userInput.budget = UserInput.parseBudget(_budgetController.text);
         userInput.durationDays = UserInput.parseDuration(_durationController.text);
 
-        // Debug: In ra thông tin
-        print('User Input: ${userInput.toString()}');
-        print('GPS Location: ${userInput.gpsLocation}');
-        print('Selected Interests: ${userInput.getSelectedInterests()}');
-
-        // TODO: Gửi User.input, Maplist.input -> Xử lý -> output list
-        // Ví dụ: gọi controller để xử lý
-        // GenRoutesAlgoController.processUserInput(userInput);
-
-        // ====== PHẦN MỚI: GỌI THUẬT TOÁN TÌM ĐƯỜNG ======
-        
-        // Lấy danh sách locations và missions từ controller
-        List<LocationModel> allLocations = userInput.myMapController.locationsList;
+        List<LocationModel> allLocations = userInput.myMapController.value.locationDataList;
         List<MissionModel> allMissions = userInput.myMapController.missionList;
         
         // Gọi thuật toán để tạo route
-        List<LocationModel> selectedRoute = await _routePlanner.generateRouteFromUserInput(
+        userInput.myMapController.locationsList = await _routePlanner.generateRouteFromUserInput(
           userGPS: userInput.gpsLocation!,
           selectedInterests: userInput.getSelectedInterests(),
           budget: userInput.budget,
@@ -132,61 +120,23 @@ class _InputPageState extends State<InputPage> {
           allLocations: allLocations,
           allMissions: allMissions,
         );
-        
-        print('\n=== SELECTED ROUTE ===');
-        print('Found ${selectedRoute.length} locations');
-        for (int i = 0; i < selectedRoute.length; i++) {
-          print('${i + 1}. ${selectedRoute[i].name} (${selectedRoute[i].type})');
+        print("\n");
+        print("\n");
+        print("\n");
+        print(allLocations.length);
+        for (LocationModel model in allLocations) {
+          print(model.toString());
         }
-        
-        // Vẽ đường đi trên bản đồ
-        if (selectedRoute.isNotEmpty) {
-          await userInput.myMapController.fetchFullRoute(selectedRoute);
-          print('Route drawn on map successfully!');
-        } else {
-          print('No suitable locations found for your criteria');
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('No suitable locations found. Please adjust your criteria.'),
-                backgroundColor: Colors.orange,
-              ),
-            );
-          }
-        }
-        
-        // ====== KẾT THÚC PHẦN XỬ LÝ THUẬT TOÁN ======
-
-
-        // Chuyển hướng sang MapScreen
         if (mounted) {
           Navigator.of(context).push(
             TransitionRLPageRoute(
-              nextScreen: const MapScreen(),
+              nextScreen: MapScreen(controller: userInput.myMapController),
             ),
           );
         }
-      } else {
-        // Không lấy được location
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Unable to get your location. Please enable GPS.'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
+      } 
     } catch (e) {
-      print('Error getting location: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      //
     } finally {
       if (mounted) {
         setState(() {

@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/main_content.dart';
 import '../controllers/map_controller.dart';
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+  final MyMapController controller;
+  const MapScreen({super.key, required this.controller});
 
   @override
   State<MapScreen> createState() => _MapScreenState();
 }
 
 class _MapScreenState extends State<MapScreen> {
-  late final controller = MyMapController();
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
   late Drawer _sidePanel;
   HomeAppbar? _homeBar;
@@ -22,9 +25,8 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-    controller.initialize(context);
     _myLocation = FloatingActionButton(
-      onPressed: () => controller.moveToCurrentLocation(),
+      onPressed: widget.controller.moveToCurrentLocation,
       backgroundColor: Colors.blue,
       child: const Icon(Icons.my_location, size: 30, color: Colors.white),
     );
@@ -40,7 +42,7 @@ class _MapScreenState extends State<MapScreen> {
         superKey: _key,
         size: Size(screenSize.width, screenSize.height * 0.06),
       );
-      _content = Content(controller: controller, screenSize: screenSize);
+      _content = Content(controller: widget.controller, screenSize: screenSize);
     }
   }
 
