@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final userProvider = StateNotifierProvider<UserNotifier, UserAccount?>(
   (ref) => UserNotifier(),
@@ -79,16 +82,22 @@ class UserAccount {
 class UserNotifier extends StateNotifier<UserAccount?> {
   UserNotifier() : super(null);
 
-  void setUser(UserAccount user) {
+  void setUser(UserAccount user) async {
     state = user;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("user_data", jsonEncode(user.toJson()));
   }
 
-  void updateUser(UserAccount updated) {
+  void updateUser(UserAccount updated) async {
     state = updated;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("user_data", jsonEncode(updated.toJson()));
   }
 
-  void clearUser() {
+  void clearUser() async {
     state = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove("user_data");
   }
 }
 

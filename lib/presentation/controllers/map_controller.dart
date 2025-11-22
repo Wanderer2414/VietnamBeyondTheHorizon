@@ -7,7 +7,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
-import 'package:flutter_compass/flutter_compass.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vietnambeyondthehorizon/animations/card/appear.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
@@ -90,12 +89,12 @@ class MyMapController {
     context = ctx;
     await loadProgress();
     // await _fetchLocationData();
-    if (!kIsWeb) {
-      FlutterCompass.events?.listen((event) {
-        if (!mapReady || event.heading == null) return;
-        value = value.copyWith(heading: event.heading!);
-      });
-    }
+    // if (!kIsWeb) {
+    //   FlutterCompass.events?.listen((event) {
+    //     if (!mapReady || event.heading == null) return;
+    //     value = value.copyWith(heading: event.heading!);
+    //   });
+    // }
     //await initLocation();
     final userGPS = await loadGPS();
     value = value.copyWith(
@@ -110,14 +109,17 @@ class MyMapController {
       value = value.copyWith(
         locationDataList: data.map((e) => LocationModel.fromJson(e)).toList(),
       );
+    } else {
+      await _fetchLocationData();
     }
     if (cached_mis != null) {
       final data = jsonDecode(cached_mis) as List;
 
       missionList = data.map((e) => MissionModel.fromJson(e)).toList();
+    } else {
+      await _fetchMissionData();
     }
-    await _fetchMissionData();
-    await _fetchLocationData();
+    print(missionList);
   }
 
   Future<void> initLocation() async {
@@ -226,7 +228,7 @@ class MyMapController {
             child: Icon(Icons.location_pin, color: Colors.red),
           ),
           markerSize: Size(35, 35),
-          markerDirection: MarkerDirection.heading,
+          // markerDirection: MarkerDirection.heading,
         ),
       ),
     );
@@ -269,7 +271,7 @@ class MyMapController {
         "cached_locationData",
         jsonEncode(value.locationDataList.map((e) => e.toJson()).toList()),
       );
-      // print(jsonEncode(value.locationDataList.map((e) => e.toJson()).toList()));
+      //print(jsonEncode(value.locationDataList.map((e) => e.toJson()).toList()));
     } else {
       _showError("Network error: ${jsonBody['error']['message']}");
     }
@@ -301,6 +303,7 @@ class MyMapController {
         "cached_missions",
         jsonEncode(missionList.map((e) => e.toJson()).toList()),
       );
+      print(jsonEncode(missionList.map((e) => e.toJson()).toList()));
     } else {
       _showError("Network error: ${jsonBody['error']['message']}");
     }

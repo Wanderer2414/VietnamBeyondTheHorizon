@@ -79,7 +79,7 @@ class _ContentState extends ConsumerState<_Content> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(userProvider);
-    final username = user!.username!;
+    final username = user!.username;
     return Column(
       children: [
         // Header with gradient + avatar stacked on top
@@ -100,7 +100,7 @@ class _ContentState extends ConsumerState<_Content> {
         ),
         const SizedBox(height: 6),
         Text(
-          user.city!,
+          user.city,
           style: TextStyle(
             fontSize: 15,
             color: Colors.grey.shade600,
