@@ -21,18 +21,21 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   void navigateNext() async {
-    // final prefs = await SharedPreferences.getInstance();
-    // final bool isLoggedIn = prefs.getString('token')?.isNotEmpty == true;
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('token');
 
-    // if (isLoggedIn) {
-    //   final raw = prefs.getString("user_data");
-    //   if (raw != null) {
-    //     final data = jsonDecode(raw);
-    //     final user = UserAccount.fromJson(data);
-    //     ref.read(userProvider.notifier).setUser(user);
-    //   }
-    //   Navigator.pushReplacementNamed(context, "home");
-    // }
+    print("token = $token");
+
+    if (token != null && token.isNotEmpty) {
+      final raw = prefs.getString("user_data");
+      if (raw != null) {
+        final data = jsonDecode(raw);
+        final user = UserAccount.fromJson(data);
+        ref.read(userProvider.notifier).setUser(user);
+      }
+      Navigator.pushReplacementNamed(context, "home");
+      return;
+    }
 
     Navigator.pushReplacementNamed(context, "intro");
   }
