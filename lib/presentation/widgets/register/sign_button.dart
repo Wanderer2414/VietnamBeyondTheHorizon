@@ -23,32 +23,47 @@ class SignUpButton extends ConsumerStatefulWidget {
 }
 
 class _SignUpButtonState extends ConsumerState<SignUpButton> {
+  bool _loading = false;
+
   @override
   Widget build(BuildContext context) {
     final auth = ref.read(authProvider);
 
     return ElevatedButton(
-      onPressed: () async {
-        final email = widget.emailCtrl.text.trim();
-        final password = widget.passwordCtrl.text.trim();
-        final confirmPassword = widget.confirmPasswordCtrl.text.trim();
+      onPressed: _loading
+          ? null
+          : () async {
+              setState(() {
+                _loading = true;
+              });
+              final email = widget.emailCtrl.text.trim();
+              final password = widget.passwordCtrl.text.trim();
+              final confirmPassword = widget.confirmPasswordCtrl.text.trim();
 
-        try {
-          await auth.signup(email, password, confirmPassword);
+              try {
+                await auth.signup(email, password, confirmPassword);
+                if (!mounted) return;
 
-          if (auth.isLoggedIn) {
-            final user = UserAccount(email: email);
-            ref.read(userProvider.notifier).setUser(user);
-            Navigator.of(
-              context,
-            ).push(TransitionRLPageRoute(nextScreen: ProfileRegister()));
-          }
-        } catch (e) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("Sign up failed: $e")));
-        }
-      },
+                if (auth.isLoggedIn) {
+                  final user = UserAccount(email: email);
+                  ref.read(userProvider.notifier).setUser(user);
+                  Navigator.of(
+                    context,
+                  ).push(TransitionRLPageRoute(nextScreen: ProfileRegister()));
+                }
+              } catch (e) {
+                if (!mounted) return;
+
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text("Sign up failed: $e")));
+              } finally {
+                if (mounted)
+                  setState(() {
+                    _loading = false;
+                  });
+              }
+            },
       style: ButtonStyle(
         backgroundColor: WidgetStatePropertyAll(Colors.transparent),
         shadowColor: WidgetStatePropertyAll(Colors.transparent),
@@ -67,7 +82,9 @@ class _SignUpButtonState extends ConsumerState<SignUpButton> {
         height: widget.size.height,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFFA6C6F), Color(0xFFD99100)],
+            colors: _loading
+                ? [Colors.grey.shade400, Colors.grey.shade500]
+                : [Color(0xFFFA6C6F), Color(0xFFD99100)],
             begin: AlignmentGeometry.xy(-2.5, 0),
             end: AlignmentGeometry.xy(1, 0),
           ),
@@ -82,15 +99,21 @@ class _SignUpButtonState extends ConsumerState<SignUpButton> {
         ),
         child: FittedBox(
           fit: BoxFit.scaleDown,
-          child: Text(
-            "Sign up",
-            style: TextStyle(
-              fontFamily: "Jost",
-              fontWeight: FontWeight.w300,
-              fontSize: 20,
-              color: Colors.white,
-            ),
-          ),
+          child: _loading
+              ? const CircularProgressIndicator(
+                  color: Color.fromARGB(255, 0, 0, 0),
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                )
+              : Text(
+                  "Sign up",
+                  style: TextStyle(
+                    fontFamily: "Jost",
+                    fontWeight: FontWeight.w300,
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
+                ),
         ),
       ),
     );

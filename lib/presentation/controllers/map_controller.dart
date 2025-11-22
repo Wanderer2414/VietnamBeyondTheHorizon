@@ -119,7 +119,7 @@ class MyMapController {
     } else {
       await _fetchMissionData();
     }
-    print(missionList);
+    print("Number of Missions: ${missionList.length}");
   }
 
   Future<void> initLocation() async {
