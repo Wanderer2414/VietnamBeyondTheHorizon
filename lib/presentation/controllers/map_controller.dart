@@ -11,59 +11,12 @@ import 'package:flutter_compass/flutter_compass.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vietnambeyondthehorizon/animations/card/appear.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
+import 'package:vietnambeyondthehorizon/data/models/map_state.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_share.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-
-class MapState {
-  final bool isPlaying;
-  final bool isLoading;
-  final LatLng? currentLocation;
-  final LatLng? destination;
-  final double? distance;
-  final List<LocationModel> locationList;
-  late List<LocationModel> locationDataList;
-  final List<LatLng>? routes;
-  final double heading;
-
-  MapState({
-    this.isPlaying = false,
-    this.isLoading = true,
-    this.currentLocation,
-    this.destination,
-    this.distance,
-    this.routes = const [],
-    this.heading = 0,
-    this.locationList = const [],
-    this.locationDataList = const [],
-  });
-
-  MapState copyWith({
-    bool? isPlaying,
-    bool? isLoading,
-    LatLng? currentLocation,
-    LatLng? destination,
-    double? distance,
-    List<LatLng>? routes,
-    double? heading,
-    List<LocationModel>? locationList,
-    List<LocationModel>? locationDataList,
-  }) {
-    return MapState(
-      isPlaying: isPlaying ?? this.isPlaying,
-      isLoading: isLoading ?? this.isLoading,
-      currentLocation: currentLocation ?? this.currentLocation,
-      destination: destination ?? this.destination,
-      distance: distance ?? this.distance,
-      routes: routes ?? this.routes,
-      heading: heading ?? this.heading,
-      locationList: locationList ?? this.locationList,
-      locationDataList: locationDataList ?? this.locationDataList,
-    );
-  }
-}
 
 class MyMapController {
   final MapController mapController = MapController();
@@ -135,6 +88,7 @@ class MyMapController {
 
   void initialize(BuildContext ctx) async {
     context = ctx;
+    await loadProgress();
     // await _fetchLocationData();
     if (!kIsWeb) {
       FlutterCompass.events?.listen((event) {
@@ -147,13 +101,28 @@ class MyMapController {
     value = value.copyWith(
       currentLocation: LatLng(userGPS['lat']!, userGPS['lng']!),
     );
-    //await _fetchMissionData();
+
+    final prefs = await SharedPreferences.getInstance();
+    final cached_loc = prefs.getString("cached_locationData");
+    final cached_mis = prefs.getString("cached_missions");
+    if (cached_loc != null) {
+      final data = jsonDecode(cached_loc) as List;
+      value = value.copyWith(
+        locationDataList: data.map((e) => LocationModel.fromJson(e)).toList(),
+      );
+    }
+    if (cached_mis != null) {
+      final data = jsonDecode(cached_mis) as List;
+
+      missionList = data.map((e) => MissionModel.fromJson(e)).toList();
+    }
+    await _fetchMissionData();
+    await _fetchLocationData();
   }
 
   Future<void> initLocation() async {
     if (!await _checkPermission()) return;
 
-    // Lấy ngay vị trí hiện tại
     final locData = await location.getLocation();
     if (locData.latitude != null && locData.longitude != null) {
       value = value.copyWith(
@@ -161,15 +130,16 @@ class MyMapController {
         isLoading: false,
       );
       saveGPS(locData.latitude!, locData.longitude!);
+      saveProgress();
     }
 
-    // Lắng nghe vị trí thay đổi liên tục sau đó
     location.onLocationChanged.listen((loc) {
       if (loc.latitude != null && loc.longitude != null) {
         value = value.copyWith(
           currentLocation: LatLng(loc.latitude!, loc.longitude!),
         );
         saveGPS(loc.latitude!, loc.longitude!);
+        saveProgress();
       }
     });
   }
@@ -190,6 +160,27 @@ class MyMapController {
     return true;
   }
 
+  Future<void> saveProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = jsonEncode(value.toJson());
+    await prefs.setString('map_progress', jsonString);
+    debugPrint("Progress saved: $jsonString");
+  }
+
+  Future<void> loadProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString('map_progress');
+    if (jsonString == null) return;
+
+    try {
+      final data = jsonDecode(jsonString);
+      value = MapState.fromJson(data);
+      debugPrint("Progress loaded!");
+    } catch (e) {
+      debugPrint("Failed to load progress: $e");
+    }
+  }
+
   MapOptions mapOptions({
     required Function() onMapReady,
     required BuildContext context,
@@ -198,8 +189,8 @@ class MyMapController {
       initialCenter:
           value.currentLocation ?? const LatLng(10.762622, 106.660172),
       initialZoom: 15,
-      minZoom: 10,
-      maxZoom: 20,
+      minZoom: 8,
+      maxZoom: 15,
       onTap: (tapPosition, point) => {
         toggleLocationInfoPanel(null),
         toggleMissionCard(null, context),
@@ -270,10 +261,15 @@ class MyMapController {
     final jsonBody = jsonDecode(response.body);
 
     if (jsonBody['status'] == 'success') {
-      final List<dynamic> dataList = jsonBody['data'];
-      value.locationDataList = dataList
-          .map((e) => LocationModel.fromJson(e))
-          .toList();
+      final List<dynamic> data = jsonBody['data'];
+      value = value.copyWith(
+        locationDataList: data.map((e) => LocationModel.fromJson(e)).toList(),
+      );
+      prefs.setString(
+        "cached_locationData",
+        jsonEncode(value.locationDataList.map((e) => e.toJson()).toList()),
+      );
+      // print(jsonEncode(value.locationDataList.map((e) => e.toJson()).toList()));
     } else {
       _showError("Network error: ${jsonBody['error']['message']}");
     }
@@ -301,6 +297,10 @@ class MyMapController {
     if (jsonBody['status'] == 'success') {
       final List<dynamic> dataList = jsonBody['data'];
       missionList = dataList.map((e) => MissionModel.fromJson(e)).toList();
+      prefs.setString(
+        "cached_missions",
+        jsonEncode(missionList.map((e) => e.toJson()).toList()),
+      );
     } else {
       _showError("Network error: ${jsonBody['error']['message']}");
     }
