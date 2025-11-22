@@ -1,11 +1,7 @@
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:vietnambeyondthehorizon/data/models/city_map.dart';
-import 'package:vietnambeyondthehorizon/data/user/player_data.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 
 final authProvider = ChangeNotifierProvider<AuthController>((ref) {
@@ -158,7 +154,10 @@ class AuthController extends ChangeNotifier {
 
   Future<void> _saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', true);
     await prefs.setString('token', token);
+    // await prefs.setString("user_data", jsonEncode(_user!.toJson()));
+    // await prefs.setString("map_data", jsonEncode(mapData.toJson()));
   }
 
   Future<void> loadToken() async {
@@ -170,7 +169,9 @@ class AuthController extends ChangeNotifier {
     _token = null;
     _user = null;
     final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
     await prefs.remove('token');
+
     notifyListeners();
   }
 }

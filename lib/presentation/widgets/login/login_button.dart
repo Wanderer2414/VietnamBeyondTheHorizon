@@ -40,6 +40,7 @@ class _LoginButtonState extends ConsumerState<LoginButton> {
                   final user = await auth.fetchUserData();
                   if (user != null) {
                     if (!mounted) return;
+
                     ref.read(userProvider.notifier).setUser(user);
                     print("Fetch data successfully!");
                   }
