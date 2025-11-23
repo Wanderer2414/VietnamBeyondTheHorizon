@@ -6,6 +6,7 @@ import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/gen_routes_algo_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/map_screen.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/submit_route_screen.dart';
 
 // Class lưu trữ thông tin đầu vào của user
 class UserInput {
@@ -97,10 +98,7 @@ class _InputPageState extends State<InputPage> {
       _isLoading = true;
     });
 
-    try {
-      // Lấy GPS location khi nhấn nút NEXT
-      await userInput.myMapController.initLocation();
-      
+    try {      
       if (userInput.myMapController.value.currentLocation != null) {
         userInput.gpsLocation = userInput.myMapController.value.currentLocation!;
         
@@ -112,7 +110,7 @@ class _InputPageState extends State<InputPage> {
         List<MissionModel> allMissions = userInput.myMapController.missionList;
         
         // Gọi thuật toán để tạo route
-        userInput.myMapController.locationsList = await _routePlanner.generateRouteFromUserInput(
+        var route = await _routePlanner.generateRouteFromUserInput(
           userGPS: userInput.gpsLocation!,
           selectedInterests: userInput.getSelectedInterests(),
           budget: userInput.budget,
@@ -120,17 +118,10 @@ class _InputPageState extends State<InputPage> {
           allLocations: allLocations,
           allMissions: allMissions,
         );
-        print("\n");
-        print("\n");
-        print("\n");
-        print(allLocations.length);
-        for (LocationModel model in allLocations) {
-          print(model.toString());
-        }
         if (mounted) {
-          Navigator.of(context).push(
+          Navigator.of(context).push(            
             TransitionRLPageRoute(
-              nextScreen: MapScreen(controller: userInput.myMapController),
+              nextScreen: SubmitRouteScreen(controller: userInput.myMapController, route: route),
             ),
           );
         }

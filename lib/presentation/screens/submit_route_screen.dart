@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/map/main_content.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/submit_route_map/main_content.dart';
 import '../controllers/map_controller.dart';
 
-class MapScreen extends StatefulWidget {
+class SubmitRouteScreen extends StatefulWidget {
   final MyMapController controller;
-  MapScreen({super.key, required this.controller}) {
-    controller.fetchFullRoute();
+  final List<LocationModel> route;
+  SubmitRouteScreen({super.key, required this.controller, required this.route}) {
+    controller.fetchFullRoute(route: route);
   }
 
   @override
-  State<MapScreen> createState() => _MapScreenState();
+  State<SubmitRouteScreen> createState() => _SubmitRouteScreenState();
 }
 
-class _MapScreenState extends State<MapScreen> {
+class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
   late Drawer _sidePanel;
   HomeAppbar? _homeBar;
@@ -44,7 +47,19 @@ class _MapScreenState extends State<MapScreen> {
         superKey: _key,
         size: Size(screenSize.width, screenSize.height * 0.06),
       );
-      _content = Content(controller: widget.controller, screenSize: screenSize);
+      _content = Content(
+        controller: widget.controller, 
+        screenSize: screenSize, 
+        route: widget.route, 
+        onSubmit: (route) {},
+        onLocationPress: (location) {
+          widget.controller.moveToLocation(LatLng(location.latitude, location.longitude), 15);
+          widget.controller.toggleMissionCard(location, context);
+        },
+        onStart: () {
+
+        },
+      );
     }
   }
 

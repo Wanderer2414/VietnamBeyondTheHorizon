@@ -73,8 +73,8 @@ class RoutePlannerService {
   /// Kiểm tra giá phù hợp với ngân sách
   bool isPriceAffordable(LocationModel location, double budget) {
     try {
-      if (location.price.toLowerCase() == "free") return true;
-      final price = double.parse(location.price);
+      if (location.price.toLowerCase() == 'free') return true;
+      final price = double.parse(location.price.replaceAll('.', '').replaceAll(',', ''));
       return price <= budget;
     } catch (e) {
       return true;
@@ -113,7 +113,6 @@ class RoutePlannerService {
     }).toList();
     
     if (relaxedFiltered.isNotEmpty) {
-      print('⚠️ Relaxed filter: Bỏ qua giờ mở cửa');
       return relaxedFiltered;
     }
     
@@ -124,12 +123,10 @@ class RoutePlannerService {
     }).toList();
     
     if (interestOnly.isNotEmpty) {
-      print('⚠️ Interest-only filter: Bỏ qua budget và giờ mở cửa');
       return interestOnly;
     }
     
     // Cuối cùng, trả về tất cả locations sẵn có
-    print('⚠️ Returning all locations: Không đủ điều kiện lọc');
     return allLocations;
   }
 
@@ -147,7 +144,6 @@ class RoutePlannerService {
     
     // Kiểm tra dataset có rỗng không
     if (allLocations.isEmpty) {
-      print('❌ Dataset rỗng: Không có location nào');
       return [];
     }
     
@@ -163,11 +159,8 @@ class RoutePlannerService {
     );
 
     if (filteredLocations.isEmpty) {
-      print('⚠️ Không có location nào sau khi lọc, nhưng đây là trường hợp không thể xảy ra');
       return [];
     }
-
-    print('✅ Filtered locations: ${filteredLocations.length}/${allLocations.length}');
 
     // Bước 2: Tính điểm cho mỗi địa điểm
     Map<LocationModel, double> scores = {};
@@ -276,7 +269,6 @@ class RoutePlannerService {
 
       // Nếu không tìm thấy location nào phù hợp, dừng
       if (bestLocation == null) {
-        print('⚠️ Không tìm thấy location phù hợp tiếp theo');
         break;
       }
 
@@ -328,12 +320,10 @@ class RoutePlannerService {
 
       // Nếu đã đủ thời gian cho ít nhất 1 location nữa nhưng không tìm thấy, dừng
       if (remainingTime <= 0) {
-        print('⏰ Hết thời gian khả dụng');
         break;
       }
     }
     
-    print('✅ Route created with ${route.length} locations');
     return route;
   }
 
@@ -346,23 +336,14 @@ class RoutePlannerService {
     required List<LocationModel> allLocations,
     required List<MissionModel> allMissions,
   }) async {
-    print('\n🚀 === BẮT ĐẦU TẠO ROUTE ===');
-    print('📍 GPS: ${userGPS.latitude}, ${userGPS.longitude}');
-    print('💰 Budget: $budget VNĐ');
-    print('📅 Duration: $durationDays days');
-    print('🎯 Interests: $selectedInterests');
-    print('📊 Total locations: ${allLocations.length}');
-    print('🎮 Total missions: ${allMissions.length}');
     
     // Kiểm tra dataset
     if (allLocations.isEmpty) {
-      print('❌ Dataset rỗng!');
       return [];
     }
     
     // Chuyển đổi duration từ ngày sang phút (giả sử 8 giờ hoạt động/ngày)
     double maxDurationMinutes = durationDays * 8 * 60.0;
-    print('⏱️ Max duration: ${maxDurationMinutes.toStringAsFixed(0)} minutes');
     
     // Gọi thuật toán tìm đường
     List<RouteResult> routeResults = await planOptimalRoute(
@@ -376,7 +357,6 @@ class RoutePlannerService {
     
     // Nếu không tìm thấy route nào, trả về top 5-6 locations gần nhất
     if (routeResults.isEmpty) {
-      print('⚠️ Không tìm được route phù hợp, trả về locations gần nhất');
       
       // Sắp xếp theo khoảng cách
       List<LocationModel> sortedByDistance = List.from(allLocations);
@@ -388,7 +368,6 @@ class RoutePlannerService {
       
       // Lấy tối đa 6 locations
       List<LocationModel> fallbackLocations = sortedByDistance.take(6).toList();
-      print('✅ Fallback: Trả về ${fallbackLocations.length} locations gần nhất');
       
       return fallbackLocations;
     }
@@ -419,7 +398,6 @@ class RoutePlannerService {
       }
     }
     
-    print('✅ Tạo route thành công với ${selectedLocations.length} locations');
     
     // In thông tin debug
     printRouteDetails(
@@ -439,8 +417,6 @@ class RoutePlannerService {
     required List<MissionModel> allMissions,
     required LatLng startPoint,
   }) {
-    print('\n=== ROUTE PLAN ===');
-    print('Total locations: ${route.length}\n');
 
     LatLng currentPos = startPoint;
     double totalDistance = 0;
@@ -461,22 +437,7 @@ class RoutePlannerService {
       totalDistance += distance;
       totalTime += (travelTime + visitTime);
 
-      print('${i + 1}. ${location.name}');
-      print('   Type: ${location.type}');
-      print('   Address: ${location.address}');
-      print('   Price: ${location.price}');
-      print('   Open: ${location.openTime} - ${location.closeTime}');
-      print('   Distance from previous: ${(distance / 1000).toStringAsFixed(2)} km');
-      print('   Travel time: ${travelTime.toStringAsFixed(0)} min');
-      print('   Mission: ${mission.name} (Difficulty: ${mission.difficulty})');
-      print('   Visit duration: ${visitTime.toStringAsFixed(0)} min');
-      print('');
-
       currentPos = LatLng(location.latitude, location.longitude);
     }
-
-    print('=== SUMMARY ===');
-    print('Total distance: ${(totalDistance / 1000).toStringAsFixed(2)} km');
-    print('Total time: ${totalTime.toStringAsFixed(0)} minutes (${(totalTime / 60).toStringAsFixed(1)} hours)');
   }
 }

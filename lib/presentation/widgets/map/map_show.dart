@@ -3,7 +3,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 
 class MapShow extends StatefulWidget {
-  const MapShow({required this.controller});
+  final Size size;
+  const MapShow({super.key, required this.controller, required this.size});
 
   final MyMapController controller;
 
@@ -13,17 +14,29 @@ class MapShow extends StatefulWidget {
 
 class _MapShowState extends State<MapShow> {
   @override
+  void initState() {
+    super.initState();
+    widget.controller.resetMap = () {
+      setState(() {
+        
+      });
+    };
+  }
+  @override
   Widget build(BuildContext context) {
-    return FlutterMap(
-      mapController: widget.controller.mapController,
-      options: widget.controller.mapOptions(
-        onMapReady: () {
-          widget.controller.onMapReady();
-          setState(() {});
-        },
-        context: context,
+    return SizedBox(
+      width: widget.size.width,
+      height: widget.size.height,
+      child: FlutterMap(
+        mapController: widget.controller.mapController,
+        options: widget.controller.mapOptions(
+          onMapReady: () {
+            setState(() {});
+          },
+          context: context,
+        ),
+        children: widget.controller.mapLayers(context),
       ),
-      children: widget.controller.mapLayers(context),
     );
   }
 }

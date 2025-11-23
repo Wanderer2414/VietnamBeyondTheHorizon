@@ -19,7 +19,7 @@ class _ContentState extends State<Content> {
     final Size screenSize = MediaQuery.of(context).size;
     return Stack(
       children: [
-        MapShow(controller: widget.controller),
+        MapShow(controller: widget.controller, size: screenSize),
         SearchBarWidget(
           controller: widget.controller,
           size: Size(screenSize.width * 0.9, screenSize.height * 0.05),
