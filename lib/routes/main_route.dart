@@ -7,9 +7,10 @@ import 'package:vietnambeyondthehorizon/presentation/screens/input_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/introduction_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/log_navigator.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/splash_begin_screen.dart';
+import 'package:vietnambeyondthehorizon/test_page.dart';
 
 class MainRoute {
-  static const String home = "/";
+  static const String home = "test";
   static Route newRoute(String? name) {
     switch (name) {
       case "/":
@@ -32,7 +33,8 @@ class MainRoute {
 
       case "home":
         return TransitionRLPageRoute(nextScreen: HomeScreen());
-
+      case "test":
+        return TransitionRLPageRoute(nextScreen: TestPage());
       default:
         return newRoute("/");
     }
