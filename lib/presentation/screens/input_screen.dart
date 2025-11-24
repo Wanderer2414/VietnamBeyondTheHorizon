@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:vietnambeyondthehorizon/animations/screen/transitionRL.dart';
+import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/gen_routes_algo_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/map_screen.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/submit_route_screen.dart';
 
 // Class lưu trữ thông tin đầu vào của user
 class UserInput {
@@ -110,12 +111,8 @@ class _InputPageState extends State<InputPage> {
     });
 
     try {
-      // Lấy GPS location khi nhấn nút NEXT
-      await userInput.myMapController.initLocation();
-
-      if (userInput.myMapController.value.currentLocation != null) {
-        userInput.gpsLocation =
-            userInput.myMapController.value.currentLocation!;
+      if (userInput.myMapController.currentLocation != null) {
+        userInput.gpsLocation = userInput.myMapController.currentLocation!;
 
         // Cập nhật UserInput với dữ liệu từ các controllers
         userInput.budget = UserInput.parseBudget(_budgetController.text);
@@ -123,88 +120,28 @@ class _InputPageState extends State<InputPage> {
           _durationController.text,
         );
 
-        // Debug: In ra thông tin
-        print('User Input: ${userInput.toString()}');
-        print('GPS Location: ${userInput.gpsLocation}');
-        print('Selected Interests: ${userInput.getSelectedInterests()}');
-
-        // TODO: Gửi User.input, Maplist.input -> Xử lý -> output list
-        // Ví dụ: gọi controller để xử lý
-        // GenRoutesAlgoController.processUserInput(userInput);
-
-        // ====== PHẦN MỚI: GỌI THUẬT TOÁN TÌM ĐƯỜNG ======
-
-        // Lấy danh sách locations và missions từ controller
-        List<LocationModel> allLocations =
-            userInput.myMapController.locationsList;
-        List<MissionModel> allMissions = userInput.myMapController.missionList;
-
         // Gọi thuật toán để tạo route
-        List<LocationModel> selectedRoute = await _routePlanner
-            .generateRouteFromUserInput(
-              userGPS: userInput.gpsLocation!,
-              selectedInterests: userInput.getSelectedInterests(),
-              budget: userInput.budget,
-              durationDays: userInput.durationDays,
-              allLocations: allLocations,
-              allMissions: allMissions,
-            );
-
-        print('\n=== SELECTED ROUTE ===');
-        print('Found ${selectedRoute.length} locations');
-        for (int i = 0; i < selectedRoute.length; i++) {
-          print(
-            '${i + 1}. ${selectedRoute[i].name} (${selectedRoute[i].type})',
-          );
-        }
-
-        // Vẽ đường đi trên bản đồ
-        if (selectedRoute.isNotEmpty) {
-          await userInput.myMapController.fetchFullRoute(selectedRoute);
-          print('Route drawn on map successfully!');
-        } else {
-          print('No suitable locations found for your criteria');
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'No suitable locations found. Please adjust your criteria.',
-                ),
-                backgroundColor: Colors.orange,
+        var route = await _routePlanner.generateRouteFromUserInput(
+          userGPS: userInput.gpsLocation!,
+          selectedInterests: userInput.getSelectedInterests(),
+          budget: userInput.budget,
+          durationDays: userInput.durationDays,
+          allLocations: userInput.myMapController.allLocationn,
+          allMissions: userInput.myMapController.allMission,
+        );
+        if (mounted) {
+          Navigator.of(context).push(
+            TransitionRLPageRoute(
+              nextScreen: SubmitRouteScreen(
+                controller: userInput.myMapController,
+                route: route,
               ),
-            );
-          }
-        }
-
-        // ====== KẾT THÚC PHẦN XỬ LÝ THUẬT TOÁN ======
-
-        // Chuyển hướng sang MapScreen
-        if (mounted) {
-          Navigator.of(
-            context,
-          ).push(TransitionRLPageRoute(nextScreen: const MapScreen()));
-        }
-      } else {
-        // Không lấy được location
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Unable to get your location. Please enable GPS.'),
-              backgroundColor: Colors.red,
             ),
           );
         }
       }
     } catch (e) {
-      print('Error getting location: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      //
     } finally {
       if (mounted) {
         setState(() {

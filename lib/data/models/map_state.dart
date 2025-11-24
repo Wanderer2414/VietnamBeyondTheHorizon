@@ -1,20 +1,20 @@
 import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
+import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 
 class MapState {
-  final bool isPlaying;
-  final bool isLoading;
-  final LatLng? currentLocation;
-  final LatLng? destination;
-  final double? distance;
-  final List<LocationModel> locationList;
-  final List<LocationModel> locationDataList;
-  final List<LatLng>? routes;
-  final double heading;
+  int currentIndex = 0;
+  LatLng? currentLocation;
+  LatLng? destination;
+  double? distance;
+  List<LocationModel> locationList;
+  List<LocationModel> locationDataList;
+  List<LatLng>? routes;
+  double heading;
+  List<MissionModel> missionList;
 
   MapState({
-    this.isPlaying = false,
-    this.isLoading = true,
+    this.currentIndex = 0,
     this.currentLocation,
     this.destination,
     this.distance,
@@ -22,37 +22,12 @@ class MapState {
     this.heading = 0,
     this.locationList = const [],
     this.locationDataList = const [],
+    this.missionList = const [],
   });
-
-  MapState copyWith({
-    bool? isPlaying,
-    bool? isLoading,
-    LatLng? currentLocation,
-    LatLng? destination,
-    double? distance,
-    List<LatLng>? routes,
-    double? heading,
-    List<LocationModel>? locationList,
-    List<LocationModel>? locationDataList,
-  }) {
-    return MapState(
-      isPlaying: isPlaying ?? this.isPlaying,
-      isLoading: isLoading ?? this.isLoading,
-      currentLocation: currentLocation ?? this.currentLocation,
-      destination: destination ?? this.destination,
-      distance: distance ?? this.distance,
-      routes: routes ?? this.routes,
-      heading: heading ?? this.heading,
-      locationList: locationList ?? this.locationList,
-      locationDataList: locationDataList ?? this.locationDataList,
-    );
-  }
 
   // ---------------------- JSON ------------------------
   Map<String, dynamic> toJson() {
     return {
-      'isPlaying': isPlaying,
-      'isLoading': isLoading,
       'currentLocation': currentLocation != null
           ? {
               'lat': currentLocation!.latitude,
@@ -69,18 +44,17 @@ class MapState {
           .toList(),
       'locationList': locationList.map((e) => e.toJson()).toList(),
       'locationDataList': locationDataList.map((e) => e.toJson()).toList(),
+      'missionList': missionList.map((e) => e.toJson()).toList(),
     };
   }
 
   factory MapState.fromJson(Map<String, dynamic> json) {
-    LatLng? _latLng(dynamic data) =>
+    LatLng? latLng(dynamic data) =>
         data == null ? null : LatLng(data['lat'], data['lng']);
 
     return MapState(
-      isPlaying: json['isPlaying'] ?? false,
-      isLoading: json['isLoading'] ?? true,
-      currentLocation: _latLng(json['currentLocation']),
-      destination: _latLng(json['destination']),
+      currentLocation: latLng(json['currentLocation']),
+      destination: latLng(json['destination']),
       distance: (json['distance'] as num?)?.toDouble(),
       heading: (json['heading'] as num?)?.toDouble() ?? 0,
       routes:
@@ -96,6 +70,11 @@ class MapState {
       locationDataList:
           (json['locationDataList'] as List?)
               ?.map((e) => LocationModel.fromJson(e))
+              .toList() ??
+          [],
+      missionList:
+          (json['missionList'] as List?)
+              ?.map((e) => MissionModel.fromJson(e))
               .toList() ??
           [],
     );

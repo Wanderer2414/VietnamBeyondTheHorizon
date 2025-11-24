@@ -22,78 +22,82 @@ class LocationInfoWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     return Container(
+      width: screenSize.width,
+      height: screenSize.height*0.5,
       padding: EdgeInsets.all(25),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  location.name,
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    location.name,
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ),
-
-              IconButton(
-                icon: const Icon(
-                  Icons.directions,
-                  color: ColorPalette.primaryColor,
-                  size: 35,
+        
+                IconButton(
+                  icon: const Icon(
+                    Icons.directions,
+                    color: ColorPalette.primaryColor,
+                    size: 35,
+                  ),
+                  onPressed: () => onNavigate(location.coordinates),
                 ),
-                onPressed: () => onNavigate(location.coordinates),
-              ),
-              IconButton(
-                onPressed: onClose,
-                icon: Icon(
-                  Icons.close_rounded,
-                  size: 35,
-                  color: ColorPalette.primaryColor,
+                IconButton(
+                  onPressed: onClose,
+                  icon: Icon(
+                    Icons.close_rounded,
+                    size: 35,
+                    color: ColorPalette.primaryColor,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Divider(
-            color: ColorPalette.dividerColor,
-            thickness: 1,
-            indent: screenSize.width * 0.1,
-            endIndent: screenSize.width * 0.1,
-          ),
-
-          OverviewBox(
-            address: location.address,
-            cost: location.price,
-            openTime: location.openTime,
-            closeTime: location.closeTime,
-          ),
-
-          SizedBox(height: 8),
-          Divider(
-            color: ColorPalette.dividerColor,
-            thickness: 1,
-            indent: screenSize.width * 0.1,
-            endIndent: screenSize.width * 0.1,
-          ),
-
-          PhotoBoxWidget(imageURLs: location.imageURLs),
-
-          SizedBox(height: 8),
-          Divider(
-            color: ColorPalette.dividerColor,
-            thickness: 1,
-            indent: screenSize.width * 0.1,
-            endIndent: screenSize.width * 0.1,
-          ),
-
-          DescriptionBox(description: location.description),
-        ],
+              ],
+            ),
+            SizedBox(height: 8),
+            Divider(
+              color: ColorPalette.dividerColor,
+              thickness: 1,
+              indent: screenSize.width * 0.1,
+              endIndent: screenSize.width * 0.1,
+            ),
+        
+            OverviewBox(
+              address: location.address,
+              cost: location.price,
+              openTime: location.openTime,
+              closeTime: location.closeTime,
+            ),
+        
+            SizedBox(height: 8),
+            Divider(
+              color: ColorPalette.dividerColor,
+              thickness: 1,
+              indent: screenSize.width * 0.1,
+              endIndent: screenSize.width * 0.1,
+            ),
+        
+            PhotoBoxWidget(imageURLs: location.imageURLs),
+        
+            SizedBox(height: 8),
+            Divider(
+              color: ColorPalette.dividerColor,
+              thickness: 1,
+              indent: screenSize.width * 0.1,
+              endIndent: screenSize.width * 0.1,
+            ),
+        
+            DescriptionBox(description: location.description),
+          ],
+        ),
       ),
     );
   }
