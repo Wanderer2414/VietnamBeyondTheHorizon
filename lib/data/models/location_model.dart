@@ -1,19 +1,20 @@
 import 'package:latlong2/latlong.dart';
 
 class LocationModel {
-  final String id;
-  final String name;
-  final String address;
-  final String type;
-  final String description;
-  final String openTime;
-  final String closeTime;
-  final String price;
-  final List<String> imageURLs;
-  final List<String> missionID;
-  final double latitude;
-  final double longitude;
+  final String id; // "1", "2",...
+  final String name; // "University of Science,...."
+  final String address; // "227, NVC,...."
+  final String type; // "culture", "entertainment",...        FORMATED
+  final String description; // "........"
+  final String openTime; // "HH:mm"                           FORMATED
+  final String closeTime; // "HH:mm"                          FORMATED
+  final String price; // "0", "20.000"                        FORMATED
+  final List<String> imageURLs; //URLs to image
 
+  final List<String> missionID; // "101"
+  final double latitude; // "10.0001010"
+  final double longitude; // "20.1234123"
+  //trie
   LocationModel({
     required this.id,
     required this.name,

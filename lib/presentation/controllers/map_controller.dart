@@ -444,7 +444,11 @@ class MyMapController {
       Navigator.of(context).push(
         ApearAnimation(
           opaque: false,
-          nextScreen: MissionScreen(controller: this, locationModel: location,onNavigate: (location) => Navigator.of(context).pop(),),
+          nextScreen: MissionScreen(
+            controller: this,
+            locationModel: location,
+            onNavigate: (location) => Navigator.of(context).pop(),
+          ),
         ),
       );
     }

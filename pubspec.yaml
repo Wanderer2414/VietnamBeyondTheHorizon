@@ -26,6 +26,7 @@ dependencies:
   image_picker: ^1.2.0
   shared_preferences: ^2.5.3
   dio: ^5.9.0
+  flutter_spinkit: ^5.2.2
 
 dev_dependencies:
   flutter_test:
@@ -112,16 +113,6 @@ flutter:
           weight: 500
         - asset: assets/fonts/KayPhoDu/KayPhoDu-Regular.ttf
           weight: 400
-    - family: Gantari
-      fonts:
-        - asset: assets/fonts/Gantari/Gantari-Italic-VariableFont_wght.ttf
-          style: italic
-        - asset: assets/fonts/Gantari/Gantari-VariableFont_wght.ttf
-        - asset: assets/fonts/Gantari/Gantari-Thin.ttf
-          weight: 100
-        - asset: assets/fonts/Gantari/Gantari-Light.ttf
-          weight: 200
-          
   assets:
     - assets/icons/camera-icon.png
     - assets/icons/diamond-icon.png
@@ -139,7 +130,3 @@ flutter:
     - assets/temporary/lorem_ipsum_background.png
     - assets/backgrounds/blur_map.png
     - assets/backgrounds/log_navigator.png
-    - assets/backgrounds/Result screen.png
-    - assets/backgrounds/mountains.png
-    - assets/backgrounds/Vietnam flag.png
-    - assets/backgrounds/Vietnam map.png
