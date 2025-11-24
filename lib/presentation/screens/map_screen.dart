@@ -6,9 +6,7 @@ import '../controllers/map_controller.dart';
 
 class MapScreen extends StatefulWidget {
   final MyMapController controller;
-  MapScreen({super.key, required this.controller}) {
-    controller.fetchFullRoute();
-  }
+  MapScreen({super.key, required this.controller}) {}
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -30,9 +28,10 @@ class _MapScreenState extends State<MapScreen> {
       child: const Icon(Icons.my_location, size: 30, color: Colors.white),
     );
     _sidePanel = Drawer(child: SideBox());
-    widget.controller.resetMap = () {
-      setState(() {});
-    };
+    widget.controller.fetchRoute(
+      widget.controller.currentLocation,
+      widget.controller.currentMissionLocation.coordinates,
+    );
   }
 
   @override

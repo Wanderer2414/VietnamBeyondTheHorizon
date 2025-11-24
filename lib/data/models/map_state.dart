@@ -3,23 +3,18 @@ import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 
 class MapState {
-
-  final LatLng? currentLocation;
-  final LatLng? destination;
-  final double? distance;
-  final List<LocationModel> locationList;
-  final List<LocationModel> locationDataList;
-  final List<LatLng>? routes;
-  final double heading;
-  final List<MissionModel> missionList;
-  set location(LatLng l) {
-
-  }
-  LatLng get location {
-    return LatLng(0,0);
-  }
+  int currentIndex = 0;
+  LatLng? currentLocation;
+  LatLng? destination;
+  double? distance;
+  List<LocationModel> locationList;
+  List<LocationModel> locationDataList;
+  List<LatLng>? routes;
+  double heading;
+  List<MissionModel> missionList;
 
   MapState({
+    this.currentIndex = 0,
     this.currentLocation,
     this.destination,
     this.distance,
@@ -27,30 +22,8 @@ class MapState {
     this.heading = 0,
     this.locationList = const [],
     this.locationDataList = const [],
-    this.missionList = const []
+    this.missionList = const [],
   });
-
-  MapState copyWith({
-    LatLng? currentLocation,
-    LatLng? destination,
-    double? distance,
-    List<LatLng>? routes,
-    double? heading,
-    List<LocationModel>? locationList,
-    List<LocationModel>? locationDataList,
-    List<MissionModel>? missionList
-  }) {
-    return MapState(
-      currentLocation: currentLocation ?? this.currentLocation,
-      destination: destination ?? this.destination,
-      distance: distance ?? this.distance,
-      routes: routes ?? this.routes,
-      heading: heading ?? this.heading,
-      locationList: locationList ?? this.locationList,
-      locationDataList: locationDataList ?? this.locationDataList,
-      missionList: missionList ?? this.missionList
-    );
-  }
 
   // ---------------------- JSON ------------------------
   Map<String, dynamic> toJson() {
@@ -71,7 +44,7 @@ class MapState {
           .toList(),
       'locationList': locationList.map((e) => e.toJson()).toList(),
       'locationDataList': locationDataList.map((e) => e.toJson()).toList(),
-      'missionList': missionList.map((e) => e.toJson()).toList()
+      'missionList': missionList.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -100,7 +73,7 @@ class MapState {
               .toList() ??
           [],
       missionList:
-          (json['missionList'] as List?) 
+          (json['missionList'] as List?)
               ?.map((e) => MissionModel.fromJson(e))
               .toList() ??
           [],

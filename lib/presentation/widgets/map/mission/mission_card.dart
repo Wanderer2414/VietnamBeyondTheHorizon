@@ -1,26 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/image_upload.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission/challenge_box.dart';
-import 'package:http/http.dart' as http;
-class MissionCard extends StatelessWidget {
+
+class MissionCard extends StatefulWidget {
   final MyMapController controller;
   final LocationModel location;
   final Function() onNavigate;
 
-  const MissionCard({
+  MissionCard({
     super.key,
     required this.location,
     required this.controller,
     required this.onNavigate,
   });
 
+  @override
+  State<MissionCard> createState() => _MissionCardState();
+}
+
+class _MissionCardState extends State<MissionCard> {
+  String? _currentFile = null;
+  late final MissionModel? _mission;
+  @override
+  void initState() {
+    super.initState();
+    _mission = retrieveMission();
+    if (_mission != null) {
+      SharedPreferences.getInstance().then((value) {
+        _currentFile = value.getString(_mission.id);
+        setState(() {});
+      });
+    }
+  }
+
   MissionModel? retrieveMission() {
-    for (var mission in controller.allMission) {
-      for (var correspondingMission in location.missionID) {
+    for (var mission in widget.controller.allMission) {
+      for (var correspondingMission in widget.location.missionID) {
         if (mission.id == correspondingMission) {
           return mission;
         }
@@ -29,12 +49,36 @@ class MissionCard extends StatelessWidget {
     return null;
   }
 
+  Future<bool> _claimed() async {
+    return true;
+  }
+
+  Future<bool> _submitImage(String imagePath) async {
+    return true;
+    // final String? token = (await SharedPreferences.getInstance()).getString(
+    //   "token",
+    // );
+    // if (token == null) throw Exception("Please login again!");
+    // var uri = Uri.parse("https://vnbth-backend.onrender.com/location/image");
+    // var request = http.MultipartRequest('POST', uri);
+
+    // request.headers["Authorization"] = 'Bearer $token';
+    // request.headers["Content-Type"] = "application/json";
+    // request.fields["missionID"] = _mission!.id;
+    // request.files.add(await http.MultipartFile.fromPath('file', imagePath));
+    // print(request.toString());
+
+    // var response = await request.send();
+    // var responseBody = await response.stream.bytesToString();
+    // print(responseBody);
+    // if (responseBody.isEmpty) throw Exception("Null error!");
+  }
+
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
-    final mission = retrieveMission();
     final double cardHeight = screenSize.height * 0.65;
-    if (mission == null) {
+    if (_mission == null) {
       return SizedBox(height: 20);
     }
     return Container(
@@ -63,7 +107,7 @@ class MissionCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        location.name,
+                        widget.location.name,
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -73,12 +117,12 @@ class MissionCard extends StatelessWidget {
 
                     IconButton(
                       onPressed: () {
-                        controller.toggleLocationInfo(
-                          context, location, onNavigate, 
-                          () {
-                            // controller.toggleMissionCard(context, location);
-                          },
-                          isReplace: true
+                        widget.controller.toggleLocationInfo(
+                          context,
+                          widget.location,
+                          widget.onNavigate,
+                          () {},
+                          isReplace: true,
                         );
                       },
                       icon: Icon(
@@ -100,7 +144,7 @@ class MissionCard extends StatelessWidget {
                   "Mission",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
                 ),
-                ChallengeBoxWidget(mission: mission),
+                ChallengeBoxWidget(mission: _mission),
                 SizedBox(height: 8),
                 Divider(
                   color: ColorPalette.dividerColor,
@@ -113,14 +157,41 @@ class MissionCard extends StatelessWidget {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
                 ),
 
-                ImageUploadWidget(controller: controller, mission: mission),
+                ImageUploadWidget(
+                  selectedImage: _currentFile,
+                  onPicked: (file) {
+                    _currentFile = file.path;
+                    SharedPreferences.getInstance().then(
+                      (value) => value.setString(_mission.id, file.path),
+                    );
+                    setState(() {});
+                  },
+                ),
+                SizedBox(
+                  width: screenSize.width,
+                  height: screenSize.height * 0.07,
+                ),
               ],
             ),
           ),
 
           Align(
             alignment: Alignment.bottomCenter,
-            child: _ControlPanel(),
+            child: _ControlPanel(
+              onClaim: () {
+                _claimed().then((value) {
+                  if (value) {
+                    widget.controller.nextMission();
+                    Navigator.of(context).pop();
+                  }
+                });
+              },
+              onSubmit: () async {
+                if (_currentFile == null) return false;
+                return _submitImage(_currentFile!);
+              },
+              isSubmited: _mission.isCompleted,
+            ),
           ),
         ],
       ),
@@ -129,41 +200,42 @@ class MissionCard extends StatelessWidget {
 }
 
 class _ControlPanel extends StatefulWidget {
+  final Future<bool> Function() onSubmit;
+  final void Function() onClaim;
+  final bool isSubmited;
+  _ControlPanel({
+    required this.onSubmit,
+    required this.onClaim,
+    this.isSubmited = false,
+  });
+
   @override
   State<_ControlPanel> createState() => _ControlPanelState();
 }
 
 class _ControlPanelState extends State<_ControlPanel> {
-  bool _isSubmited = false;
-
-  Future<void> _submitImage(String imagePath) async {
-
-    try {
-      var uri = Uri.parse('http://<YOUR_SERVER_IP>:5000/check_image');
-      var request = http.MultipartRequest('POST', uri);
-      request.files.add(
-        await http.MultipartFile.fromPath('image', imagePath),
+  late Widget _controlButton;
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isSubmited)
+      _controlButton = _SubmitedButton();
+    else
+      _controlButton = _SubmitButton(
+        onPressed: () {
+          widget.onSubmit().then((value) {
+            if (value) {
+              setState(() {
+                _controlButton = _ClaimButton(onPressed: widget.onClaim);
+              });
+            }
+          });
+        },
       );
-
-      var response = await request.send();
-      var responseBody = await response.stream.bytesToString();
-
-    } catch(e) {};
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget container;
-    if (_isSubmited) {
-      container = _ClaimButton(onPressed: () => setState(() => _isSubmited = true));
-    }
-    else {
-      container = _SubmitButton(onPressed: () => setState(() {
-          _isSubmited = true; 
-          // _submitImage()
-      }));
-    }
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -181,7 +253,7 @@ class _ControlPanelState extends State<_ControlPanel> {
           },
           child: Text("Skip"),
         ),
-        container
+        _controlButton,
       ],
     );
   }
@@ -197,16 +269,13 @@ class _ClaimButton extends StatelessWidget {
         backgroundColor: Colors.amber,
         foregroundColor: Colors.black,
         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       onPressed: onPressed,
       child: Text("Claim Reward"),
     );
   }
 }
-
 
 class _SubmitButton extends StatelessWidget {
   final void Function() onPressed;
@@ -219,12 +288,26 @@ class _SubmitButton extends StatelessWidget {
         backgroundColor: Colors.amber,
         foregroundColor: Colors.black,
         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       onPressed: onPressed,
       child: Text("Submit"),
+    );
+  }
+}
+
+class _SubmitedButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.grey,
+        foregroundColor: Colors.black,
+        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      onPressed: () {},
+      child: Text("Submited"),
     );
   }
 }

@@ -11,7 +11,11 @@ import '../controllers/map_controller.dart';
 class SubmitRouteScreen extends StatefulWidget {
   final MyMapController controller;
   final List<LocationModel> route;
-  SubmitRouteScreen({super.key, required this.controller, required this.route}) {
+  SubmitRouteScreen({
+    super.key,
+    required this.controller,
+    required this.route,
+  }) {
     controller.fetchFullRoute(route: route);
   }
 
@@ -50,22 +54,28 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
         size: Size(screenSize.width, screenSize.height * 0.06),
       );
       _content = Content(
-        controller: widget.controller, 
-        screenSize: screenSize, 
-        route: widget.route, 
+        controller: widget.controller,
+        screenSize: screenSize,
+        route: widget.route,
         onSubmit: (route) {},
         onLocationPress: (location) {
-          widget.controller.moveToLocation(LatLng(location.latitude, location.longitude), 15);
-          widget.controller.toggleLocationInfo(context, location, () {
-            widget.controller.fetchRoute(widget.controller.currentLocation, location.coordinates);
-            },
-            () {},
+          widget.controller.moveToLocation(
+            LatLng(location.latitude, location.longitude),
+            15,
           );
+          widget.controller.toggleLocationInfo(context, location, () {
+            widget.controller.fetchRoute(
+              widget.controller.currentLocation,
+              location.coordinates,
+            );
+          }, () {});
         },
         onStart: () {
           widget.controller.userRoute = widget.route;
           Navigator.of(context).pushReplacement(
-            TransitionLRPageRoute(nextScreen: MapScreen(controller: widget.controller))
+            TransitionLRPageRoute(
+              nextScreen: MapScreen(controller: widget.controller),
+            ),
           );
         },
       );
