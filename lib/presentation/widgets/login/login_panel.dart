@@ -4,19 +4,33 @@ import 'package:vietnambeyondthehorizon/presentation/widgets/login/extra_login.d
 import 'package:vietnambeyondthehorizon/presentation/widgets/login/forget_text.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/login/login_button.dart';
 
-class LoginPanel extends StatelessWidget {
+class LoginPanel extends StatefulWidget {
   final Size size;
   final Function()? onTap;
   const LoginPanel({super.key, required this.size, this.onTap});
 
   @override
+  State<LoginPanel> createState() => _LoginPanelState();
+}
+
+class _LoginPanelState extends State<LoginPanel> {
+  final emailCtrl = TextEditingController();
+  final passwordCtrl = TextEditingController();
+  @override
+  void dispose() {
+    emailCtrl.dispose();
+    passwordCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
-      height: size.height,
+      height: widget.size.height,
       alignment: Alignment.bottomCenter,
       child: Container(
-        width: size.width,
-        height: size.height * 0.7,
+        width: widget.size.width,
+        height: widget.size.height * 0.7,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
@@ -27,26 +41,38 @@ class LoginPanel extends StatelessWidget {
         padding: EdgeInsets.zero,
         child: Column(
           children: [
-            _LogInLabel(size: Size(size.width, size.height * 0.11)),
-            InputPanelT1(
-              size: Size(size.width, size.height * 0.1),
-              content: "Email",
-              onTap: onTap,
+            _LogInLabel(
+              size: Size(widget.size.width, widget.size.height * 0.11),
             ),
-            SizedBox(height: size.height * 0.01),
             InputPanelT1(
-              size: Size(size.width, size.height * 0.1),
+              controller: emailCtrl,
+              size: Size(widget.size.width, widget.size.height * 0.1),
+              content: "Email",
+              onTap: widget.onTap,
+            ),
+            SizedBox(height: widget.size.height * 0.01),
+            InputPanelT1(
+              controller: passwordCtrl,
+              size: Size(widget.size.width, widget.size.height * 0.1),
               content: "Password",
-              onTap: onTap,
+              onTap: widget.onTap,
             ),
             SizedBox(
-              width: size.width * 0.8,
-              height: size.height * 0.05,
-              child: ForgetBox(size: Size(size.width, size.height * 0.05)),
+              width: widget.size.width * 0.8,
+              height: widget.size.height * 0.05,
+              child: ForgetBox(
+                size: Size(widget.size.width, widget.size.height * 0.05),
+              ),
             ),
-            LoginButton(size: Size(size.width * 0.5, size.height * 0.05)),
-            SizedBox(height: size.height * 0.02),
-            ExtraLogin(size: Size(size.width, size.height * 0.25)),
+            LoginButton(
+              size: Size(widget.size.width * 0.5, widget.size.height * 0.05),
+              emailCtrl: emailCtrl,
+              passwordCtrl: passwordCtrl,
+            ),
+            SizedBox(height: widget.size.height * 0.02),
+            ExtraLogin(
+              size: Size(widget.size.width, widget.size.height * 0.25),
+            ),
           ],
         ),
       ),

@@ -1,182 +1,172 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
-import 'package:flutter_compass/flutter_compass.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vietnambeyondthehorizon/animations/card/appear.dart';
+import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
+import 'package:vietnambeyondthehorizon/data/models/map_state.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/map/information_location.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission_screen.dart';
-
-class MapState {
-  final bool isPlaying;
-  final bool isLoading;
-  final LatLng? currentLocation;
-  final LatLng? destination;
-  final double? distance;
-  final List<LocationModel> locationList;
-  final List<LatLng>? routes;
-  final double heading;
-
-  MapState({
-    this.isPlaying = false,
-    this.isLoading = true,
-    this.currentLocation,
-    this.destination,
-    this.distance,
-    this.routes = const [],
-    this.heading = 0,
-    this.locationList = const [],
-  });
-
-  MapState copyWith({
-    bool? isPlaying,
-    bool? isLoading,
-    LatLng? currentLocation,
-    LatLng? destination,
-    double? distance,
-    List<LatLng>? routes,
-    double? heading,
-    List<LocationModel>? locationList,
-  }) {
-    return MapState(
-      isPlaying: isPlaying ?? this.isPlaying,
-      isLoading: isLoading ?? this.isLoading,
-      currentLocation: currentLocation ?? this.currentLocation,
-      destination: destination ?? this.destination,
-      distance: distance ?? this.distance,
-      routes: routes ?? this.routes,
-      heading: heading ?? this.heading,
-      locationList: locationList ?? this.locationList,
-    );
-  }
-}
+import 'package:vietnambeyondthehorizon/presentation/controllers/map_share.dart';
 
 class MyMapController {
-  final MapController mapController = MapController();
-  final Location location = Location();
-  MapState value = MapState();
-  bool mapReady = false;
+  final MapController _mapController = MapController();
+  final Location _location = Location();
+  MapState _value = MapState();
+  void Function() resetMap = () {};
 
-  //___________________TEST____________________
-  final List<LocationModel> locationsList = [
-    LocationModel(
-      id: "1",
-      name: "Bui Vien Street",
-      address: "District 1, HCMC",
-      type: "entertainment",
-      description: "Famous nightlife street.",
-      openTime: "18:00",
-      closeTime: "02:00",
-      price: "Free",
-      imageURLs: [
-        "https://vietnamnightlife.com/uploads/images/2023/05/1685518065-single_product7-phodibobuiviencover.jpg",
-      ],
-      missionID: "101",
-      latitude: 10.7725,
-      longitude: 106.6959,
-    ),
+  List<LocationModel> get allLocationn {
+    return _value.locationDataList;
+  }
 
-    LocationModel(
-      id: "2",
-      name: "Umbalala",
-      address: "District 1, HCMC",
-      type: "culture",
-      description: "Famous",
-      openTime: "18:00",
-      closeTime: "02:00",
-      price: "20.000",
-      imageURLs: [
-        "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyAWrWppWahQZJDccRCPRX8ZIPn26P8R41au-eF1Rto6Bw_xpSeKuEikHLEI3iMq4u3uRE1bHdzqvduf0Fs5kyr_DBn7RWHT75BIUWuK2QftPbBIGn4Cku5Up25g8xYORAu2Vvs=w360-h256-p-k-no",
-      ],
-      missionID: "102",
-      latitude: 10.75,
-      longitude: 106.66667,
-    ),
-  ];
+  List<MissionModel> get allMission {
+    return _value.missionList;
+  }
 
-  final List<MissionModel> missionList = [
-    MissionModel(
-      id: "101",
-      description: "Take a photo involving yourself and the given image",
-      starReward: "2",
-      illustrationURL:
-          "https://static.vinwonders.com/production/pho-tay-bui-vien-3.jpg",
-    ),
-    MissionModel(
-      id: "102",
-      description:
-          "Take a photo involving yourself and the given image, and dance under the tree",
-      starReward: "5",
-      illustrationURL:
-          "https://cdn.thuvienphapluat.vn/uploads/tintuc/2025/07/17/truong-dai-hoc-khoa-hoc-tu-nhien-dhqg-tphcm.jpg",
-    ),
-  ];
+  LocationModel get currentMissionLocation {
+    return _value.locationList[_value.currentIndex];
+  }
 
-  MyMapController();
+  set userRoute(List<LocationModel> route) {
+    _value.locationList = route;
+  }
 
-  void initialize(BuildContext ctx) async {
+  List<LocationModel> get userRoute {
+    return _value.locationList;
+  }
+
+  LatLng? get currentLocation {
+    return _value.currentLocation;
+  }
+
+  MyMapController() {
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    await _loadProgress();
     await _initLocation();
-    FlutterCompass.events?.listen((event) {
-      if (!mapReady || event.heading == null) return;
-      value = value.copyWith(heading: event.heading!);
-    });
+    final userGPS = await loadGPS();
+    _value.currentLocation = LatLng(userGPS['lat']!, userGPS['lng']!);
+
+    final prefs = await SharedPreferences.getInstance();
+    final cachedLoc = prefs.getString("cached_locationData");
+    final cachedMis = prefs.getString("cached_missions");
+    if (cachedLoc != null) {
+      final data = jsonDecode(cachedLoc) as List;
+      _value.locationDataList = data
+          .map((e) => LocationModel.fromJson(e))
+          .toList();
+    } else {
+      await _fetchLocationData();
+    }
+    if (cachedMis != null) {
+      final data = jsonDecode(cachedMis) as List;
+
+      _value.missionList = data.map((e) => MissionModel.fromJson(e)).toList();
+    } else {
+      await _fetchMissionData();
+    }
   }
 
   Future<void> _initLocation() async {
     if (!await _checkPermission()) return;
-    location.onLocationChanged.listen((loc) {
+
+    final locData = await _location.getLocation();
+    if (locData.latitude != null && locData.longitude != null) {
+      _value.currentLocation = LatLng(locData.latitude!, locData.longitude!);
+      saveGPS(locData.latitude!, locData.longitude!);
+      saveProgress();
+    }
+
+    _location.onLocationChanged.listen((loc) {
       if (loc.latitude != null && loc.longitude != null) {
-        value = value.copyWith(
-          currentLocation: LatLng(loc.latitude!, loc.longitude!),
-          isLoading: false,
-        );
+        _value.currentLocation = LatLng(loc.latitude!, loc.longitude!);
+        saveGPS(loc.latitude!, loc.longitude!);
+        saveProgress();
       }
     });
   }
 
   Future<bool> _checkPermission() async {
-    bool serviceEnabled = await location.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
-      if (!serviceEnabled) return false;
-    }
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return false;
 
-    PermissionStatus permission = await location.hasPermission();
-    if (permission == PermissionStatus.denied ||
-        permission == PermissionStatus.deniedForever) {
-      permission = await location.requestPermission();
-      if (permission != PermissionStatus.granted) return false;
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      permission = await Geolocator.requestPermission();
+      if (permission != LocationPermission.whileInUse &&
+          permission != LocationPermission.always) {
+        return false;
+      }
     }
     return true;
   }
 
-  MapOptions mapOptions({
-    required Function() onMapReady,
+  Future<void> saveProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = jsonEncode(_value.toJson());
+    await prefs.setString('map_progress', jsonString);
+    // debugPrint("Progress saved: $jsonString");
+  }
+
+  Future<void> _loadProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString('map_progress');
+    if (jsonString == null) return;
+
+    try {
+      final data = jsonDecode(jsonString);
+      _value = MapState.fromJson(data);
+    } catch (e) {
+      throw Exception("Failed to load progress: $e");
+    }
+  }
+
+  FlutterMap map({
     required BuildContext context,
+    required List<LocationModel> locations,
+    required void Function() onReady,
+    required void Function(LocationModel model) onMissionTap,
+  }) {
+    return FlutterMap(
+      mapController: _mapController,
+      options: _mapOptions(onMapReady: onReady, context: context),
+      children: _mapLayers(context, locations, onMissionTap),
+    );
+  }
+
+  MapOptions _mapOptions({
+    required BuildContext context,
+    required Function() onMapReady,
   }) {
     return MapOptions(
       initialCenter:
-          value.currentLocation ?? const LatLng(10.762622, 106.660172),
+          _value.currentLocation ?? const LatLng(10.762622, 106.660172),
       initialZoom: 15,
-      minZoom: 10,
-      maxZoom: 20,
-      onTap: (tapPosition, point) => {
-        // toggleLocationInfoPanel(null),
-      },
-
+      minZoom: 8,
+      maxZoom: 15,
+      onTap: (tapPosition, point) => {},
       onMapReady: onMapReady,
     );
   }
 
-  void onMapReady() => mapReady = true;
-
-  List<Widget> mapLayers(BuildContext context, Function() onNavigate) {
+  List<Widget> _mapLayers(
+    BuildContext context,
+    List<LocationModel> locationList,
+    void Function(LocationModel location) onLocationTap,
+  ) {
     final layers = <Widget>[
       TileLayer(
         urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -184,11 +174,11 @@ class MyMapController {
       ),
     ];
 
-    if (value.routes != null && value.routes!.isNotEmpty) {
+    if (_value.routes != null && _value.routes!.isNotEmpty) {
       layers.add(
         PolylineLayer(
           polylines: [
-            Polyline(points: value.routes!, strokeWidth: 5, color: Colors.red),
+            Polyline(points: _value.routes!, strokeWidth: 5, color: Colors.red),
           ],
         ),
       );
@@ -201,31 +191,16 @@ class MyMapController {
             child: Icon(Icons.location_pin, color: Colors.red),
           ),
           markerSize: Size(35, 35),
-          markerDirection: MarkerDirection.heading,
+          // markerDirection: MarkerDirection.heading,
         ),
       ),
     );
+
     layers.add(
       MarkerLayerWidget(
-        locations: locationsList,
-        onMarkerTap: (loc, context) {
-          Navigator.of(context).push(
-            ApearAnimation(
-              opaque: false,
-              nextScreen: MissionScreen(
-                controller: this,
-                onNavigate: (location) {
-                  fetchRoute(context, value.currentLocation, location).then((
-                    value,
-                  ) {
-                    onNavigate();
-                  });
-                  Navigator.of(context).pop();
-                },
-                locationModel: loc,
-              ),
-            ),
-          );
+        locations: locationList,
+        onMarkerTap: (location, context) {
+          onLocationTap(location);
         },
         onMovingToLocation: moveToLocation,
       ),
@@ -233,10 +208,74 @@ class MyMapController {
     return layers;
   }
 
-  Future<bool> fetchCoordinates(
-    BuildContext context,
-    String locationName,
-  ) async {
+  Future<void> _fetchLocationData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null) {
+      throw Exception("User error: No token exists");
+    }
+
+    final url = Uri.parse(
+      "https://vnbth-backend.onrender.com/location/locations",
+    );
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        "Content-Type": "application/json",
+      },
+    );
+    final jsonBody = jsonDecode(response.body);
+
+    if (jsonBody['status'] == 'success') {
+      final List<dynamic> data = jsonBody['data'];
+      _value.locationDataList = data
+          .map((e) => LocationModel.fromJson(e))
+          .toList();
+      prefs.setString(
+        "cached_locationData",
+        jsonEncode(_value.locationDataList.map((e) => e.toJson()).toList()),
+      );
+      //print(jsonEncode(value.locationDataList.map((e) => e.toJson()).toList()));
+    } else {
+      throw Exception("Network error: ${jsonBody['error']['message']}");
+    }
+  }
+
+  Future<void> _fetchMissionData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null) {
+      throw Exception("User error: No token exists");
+    }
+
+    final url = Uri.parse(
+      "https://vnbth-backend.onrender.com/mission/missions",
+    );
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        "Content-Type": "application/json",
+      },
+    );
+    final jsonBody = jsonDecode(response.body);
+
+    if (jsonBody['status'] == 'success') {
+      final List<dynamic> dataList = jsonBody['data'];
+      _value.missionList = dataList
+          .map((e) => MissionModel.fromJson(e))
+          .toList();
+      prefs.setString(
+        "cached_missions",
+        jsonEncode(_value.missionList.map((e) => e.toJson()).toList()),
+      );
+    } else {
+      throw Exception("Network error: ${jsonBody['error']['message']}");
+    }
+  }
+
+  Future<void> fetchCoordinates(String locationName) async {
     final url = Uri.parse(
       "https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(locationName)}&format=json&limit=1",
     );
@@ -250,25 +289,20 @@ class MyMapController {
       if (data.isNotEmpty) {
         final lat = double.parse(data[0]['lat']);
         final lon = double.parse(data[0]['lon']);
-        value = value.copyWith(destination: LatLng(lat, lon));
-        await fetchRoute(context, value.currentLocation, value.destination);
-        return true;
+        _value.destination = LatLng(lat, lon);
+        await fetchRoute(_value.currentLocation, _value.destination);
+        resetMap();
       } else {
-        _showError(context, "Location not found.");
+        throw Exception("Location not found.");
       }
     } else {
-      _showError(context, "Failed to fetch location.");
+      throw Exception("Failed to fetch location.");
     }
-    return false;
   }
 
-  Future<void> fetchRoute(
-    BuildContext context,
-    LatLng? start,
-    LatLng? end,
-  ) async {
+  Future<void> fetchRoute(LatLng? start, LatLng? end) async {
     if (start == null || end == null) return;
-    moveToLocation(end, 15);
+
     final url = Uri.parse(
       'https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=polyline&alternatives=false&annotations=distance',
     );
@@ -281,20 +315,22 @@ class MyMapController {
         _decodePolyline,
         geometry,
       );
-      value = value.copyWith(routes: decodedRoute);
+      _value.routes = decodedRoute;
+      resetMap();
     } else {
-      _showError(context, 'Failed to fetch route.');
+      throw Exception('Failed to fetch route.');
     }
   }
 
-  Future<void> fetchFullRoute(List<LocationModel> locations) async {
-    if (locations.length < 2) return;
+  Future<void> fetchFullRoute({List<LocationModel>? route}) async {
+    route ??= _value.locationList;
+    if (route.length < 2) return;
 
     List<LatLng> fullRoute = [];
-
-    for (int i = 0; i < locations.length - 1; i++) {
-      final start = LatLng(locations[i].latitude, locations[i].longitude);
-      final end = LatLng(locations[i + 1].latitude, locations[i + 1].longitude);
+    LatLng end = _value.currentLocation!;
+    for (int i = 0; i < route.length; i++) {
+      final start = end;
+      end = LatLng(route[i].latitude, route[i].longitude);
 
       final url = Uri.parse(
         'https://router.project-osrm.org/route/v1/driving/'
@@ -317,12 +353,12 @@ class MyMapController {
 
         fullRoute.addAll(decodedRoute);
       } else {
-        print('Failed to fetch route between ${i} and ${i + 1}');
+        throw Exception('Failed to fetch route between $i and ${i + 1}');
       }
     }
-    value = value.copyWith(routes: fullRoute);
-
-    print("Full route length: ${fullRoute.length} points");
+    _value.routes = fullRoute;
+    resetMap();
+    throw Exception("Full route length: ${fullRoute.length} points");
   }
 
   // Future<double> fetchDistance(LatLng? start, LatLng? end) async {
@@ -344,17 +380,17 @@ class MyMapController {
   //   return 0;
   // }
 
-  void moveToCurrentLocation(BuildContext context) {
-    if (value.currentLocation == null) _initLocation();
-    if (value.currentLocation != null) {
-      mapController.move(value.currentLocation!, 15);
+  String moveToCurrentLocation() {
+    if (_value.currentLocation != null) {
+      _mapController.move(_value.currentLocation!, 15);
+      return "";
     } else {
-      _showError(context, "Current location not available");
+      return "Current location not available";
     }
   }
 
   void moveToLocation(LatLng destination, double zoom) {
-    mapController.move(destination, zoom);
+    _mapController.move(destination, zoom);
   }
 
   void _showError(BuildContext context, String message) {
@@ -363,8 +399,63 @@ class MyMapController {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  void toggleLocationInfo(
+    BuildContext context,
+    LocationModel location,
+    void Function() onNavigate,
+    void Function() onClose, {
+    bool isReplace = false,
+  }) {
+    Function(Route) func = Navigator.of(context).push;
+    if (isReplace) func = Navigator.of(context).pushReplacement;
+    func(
+      TransitionBTPageRoute(
+        nextScreen: InformationLocation(
+          onClose: () {
+            // Navigator.of(context).pop();
+            onClose();
+          },
+          onNavigate: (loc) {
+            onNavigate();
+          },
+          locationModel: location,
+        ),
+      ),
+    );
+  }
+
+  void toggleMissionCard(
+    BuildContext context,
+    LocationModel location, {
+    bool isReplace = false,
+  }) {
+    Function(Route) func = Navigator.of(context).push;
+    if (isReplace) func = Navigator.of(context).pushReplacement;
+    func(
+      ApearAnimation(
+        opaque: false,
+        nextScreen: MissionScreen(
+          controller: this,
+          locationModel: location,
+          onNavigate: () {},
+        ),
+      ),
+    );
+  }
+
+  void nextMission() {
+    if (_value.currentIndex >= userRoute.length) return;
+    _value.currentIndex++;
+    if (_value.currentIndex == userRoute.length)
+      completeRoute();
+    else
+      resetMap();
+  }
+
+  void completeRoute() {}
+
   void updateMissionImage(String missionId, String imagePath) {
-    for (var m in missionList) {
+    for (var m in _value.missionList) {
       if (m.id == missionId) {
         m.imagePath = imagePath;
         //notifyListeners();

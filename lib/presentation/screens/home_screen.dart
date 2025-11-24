@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/daily_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
@@ -6,18 +8,19 @@ import 'package:vietnambeyondthehorizon/presentation/widgets/home/visited_places
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/greeting_box.dart';
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
   @override
-  State<StatefulWidget> createState() => _HomeScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final sideBox = SideBox();
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
+    final user = ref.watch(userProvider);
     return Scaffold(
       key: _scaffoldKey,
       appBar: HomeAppbar(
@@ -42,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
               //Hi box
               GreetingBox(
                 size: Size(screenSize.width * 0.9, screenSize.height * 0.1),
-                userName: "Quoc Huy",
+                userName: user!.username,
               ),
               SizedBox(height: screenSize.height * 0.03),
 

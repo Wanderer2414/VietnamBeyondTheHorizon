@@ -6,7 +6,7 @@ class TextboxT2 extends StatefulWidget {
   final Function()? onTap;
   final Function(String value)? onUpdate;
 
-  TextboxT2({
+  const TextboxT2({
     super.key,
     required this.size,
     required this.hint,

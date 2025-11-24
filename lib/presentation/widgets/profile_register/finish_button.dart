@@ -1,14 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vietnambeyondthehorizon/data/models/city_map.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/auth_controller.dart';
 
-class FinishButton extends StatelessWidget {
+class FinishButton extends ConsumerStatefulWidget {
   final Size size;
-  const FinishButton({super.key, required this.size});
+  final TextEditingController nameCtrl;
+  final int? age;
+  final int? cityCode;
+  const FinishButton({
+    super.key,
+    required this.age,
+    required this.nameCtrl,
+    required this.cityCode,
+    required this.size,
+  });
 
   @override
+  ConsumerState<FinishButton> createState() => _FinishButtonState();
+}
+
+class _FinishButtonState extends ConsumerState<FinishButton> {
+  @override
   Widget build(BuildContext context) {
+    final auth = ref.read(authProvider);
+    final user = ref.watch(userProvider);
     return ElevatedButton(
-      onPressed: () {
-        Navigator.of(context).pushReplacementNamed("home");
+      onPressed: () async {
+        final name = widget.nameCtrl.text.trim();
+        final age = widget.age!;
+        final cityCode = widget.cityCode!;
+        try {
+          await auth.updateProfile(
+            name: name,
+            age: age,
+            city: cityMap[cityCode] ?? "Unknown",
+          );
+          DateTime todayDateOnly = DateTime.now();
+          ref
+              .read(userProvider.notifier)
+              .updateUser(
+                user!.copyWith(
+                  username: name,
+                  age: age,
+                  city: cityMap[cityCode],
+                  createdAt: DateTime(
+                    todayDateOnly.year,
+                    todayDateOnly.month,
+                    todayDateOnly.day,
+                  ),
+                ),
+              );
+          Navigator.of(context).pushReplacementNamed("home");
+        } catch (e) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Update profile failed: $e")));
+        }
       },
       style: ButtonStyle(
         backgroundColor: WidgetStatePropertyAll(Colors.transparent),
@@ -24,8 +73,8 @@ class FinishButton extends StatelessWidget {
         }),
       ),
       child: Container(
-        width: size.width,
-        height: size.height,
+        width: widget.size.width,
+        height: widget.size.height,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFFFA6C6F), Color(0xFFD99100)],

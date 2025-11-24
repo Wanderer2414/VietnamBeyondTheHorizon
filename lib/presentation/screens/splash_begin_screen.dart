@@ -1,22 +1,39 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
     Timer(const Duration(seconds: 2), navigateNext);
   }
 
-  void navigateNext() {
+  void navigateNext() async {
+    // final prefs = await SharedPreferences.getInstance();
+    // final bool isLoggedIn = prefs.getString('token')?.isNotEmpty == true;
+
+    // if (isLoggedIn) {
+    //   final raw = prefs.getString("user_data");
+    //   if (raw != null) {
+    //     final data = jsonDecode(raw);
+    //     final user = UserAccount.fromJson(data);
+    //     ref.read(userProvider.notifier).setUser(user);
+    //   }
+    //   Navigator.pushReplacementNamed(context, "home");
+    // }
+
     Navigator.pushReplacementNamed(context, "intro");
   }
 
@@ -41,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen> {
         children: [
           AppIcon(screenWidth: screenWidth),
           AppTitle(size: Size(screenWidth, screenHeight)),
-          Waiting4L(side: screenWidth * 0.15),
+          // Waiting4L(side: screenWidth * 0.15),
         ],
       ),
     );

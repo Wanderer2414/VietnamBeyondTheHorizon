@@ -28,10 +28,14 @@ class _MapShowState extends State<MapShow> {
       height: widget.size.height,
       child: widget.controller.map(
         context: context, 
-        locations: widget.controller.userRoute,
+        locations: widget.controller.allLocationn,
         onReady:() => setState(() {}), 
         onMissionTap: (location) => 
-          widget.controller.toggleMissionCard(context, location) 
+          widget.controller.toggleLocationInfo(context, location, () {
+            widget.controller.fetchRoute(widget.controller.currentLocation, location.coordinates);
+          },
+          () {},
+        )
       )
     );
   }

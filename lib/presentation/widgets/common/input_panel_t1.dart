@@ -5,10 +5,12 @@ class InputPanelT1 extends StatelessWidget {
   final Size size;
   final String content;
   final Function()? onTap;
+  final TextEditingController controller;
   const InputPanelT1({
     super.key,
     required this.size,
     required this.content,
+    required this.controller,
     this.onTap,
   });
 
@@ -36,6 +38,7 @@ class InputPanelT1 extends StatelessWidget {
               ),
             ),
             TextboxT1(
+              controller: controller,
               size: Size(size.width * 0.8, size.height * 0.6),
               onTap: onTap,
             ),

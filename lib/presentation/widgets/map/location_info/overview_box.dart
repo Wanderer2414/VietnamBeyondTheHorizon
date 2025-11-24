@@ -37,6 +37,7 @@ class OverviewBox extends StatelessWidget {
     final bool isOpen = _isOpenNow();
     final Color statusColor = isOpen ? Colors.green : Colors.red;
     final String statusText = isOpen ? "OPENING" : "CLOSED";
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -71,7 +72,7 @@ class OverviewBox extends StatelessWidget {
             SizedBox(width: 15),
             Expanded(
               child: Text(
-                cost + ((cost != "Free") ? " VND" : ""),
+                cost + ((cost.toLowerCase() != "free") ? " VND" : ""),
                 style: TextStyle(fontFamily: "Kay Pho Du", fontSize: 13),
               ),
             ),

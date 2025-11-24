@@ -12,7 +12,7 @@ class AccountLoginScreen extends StatefulWidget {
 }
 
 class _AccountLoginScreenState extends State<AccountLoginScreen> {
-  late final _content;
+  _Content? _content;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
