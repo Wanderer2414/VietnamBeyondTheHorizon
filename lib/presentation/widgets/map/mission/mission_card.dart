@@ -1,21 +1,15 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:vietnambeyondthehorizon/animations/screen/transitionRL.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/image_upload.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/map/information_location.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission/challenge_box.dart';
 import 'package:http/http.dart' as http;
 class MissionCard extends StatelessWidget {
   final MyMapController controller;
   final LocationModel location;
-  final Function(LatLng) onNavigate;
+  final Function() onNavigate;
 
   const MissionCard({
     super.key,
@@ -25,7 +19,7 @@ class MissionCard extends StatelessWidget {
   });
 
   MissionModel? retrieveMission() {
-    for (var mission in controller.missionList) {
+    for (var mission in controller.allMission) {
       for (var correspondingMission in location.missionID) {
         if (mission.id == correspondingMission) {
           return mission;
@@ -79,19 +73,12 @@ class MissionCard extends StatelessWidget {
 
                     IconButton(
                       onPressed: () {
-                        //controller.toggleMissionCard(null);
-                        // controller.toggleLocationInfoPanel(location);
-                        Navigator.of(context).push(
-                          TransitionBTPageRoute(
-                            nextScreen: InformationLocation(
-                              onClose: () => Navigator.of(context).pop(),
-                              onNavigate: (loc) {
-                                Navigator.of(context).pop();
-                                onNavigate(loc);
-                              },
-                              locationModel: location,
-                            ),
-                          ),
+                        controller.toggleLocationInfo(
+                          context, location, onNavigate, 
+                          () {
+                            // controller.toggleMissionCard(context, location);
+                          },
+                          isReplace: true
                         );
                       },
                       icon: Icon(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:vietnambeyondthehorizon/animations/screen/transitionRL.dart';
+import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/gen_routes_algo_controller.dart';
@@ -99,15 +99,12 @@ class _InputPageState extends State<InputPage> {
     });
 
     try {      
-      if (userInput.myMapController.value.currentLocation != null) {
-        userInput.gpsLocation = userInput.myMapController.value.currentLocation!;
+      if (userInput.myMapController.currentLocation != null) {
+        userInput.gpsLocation = userInput.myMapController.currentLocation!;
         
         // Cập nhật UserInput với dữ liệu từ các controllers
         userInput.budget = UserInput.parseBudget(_budgetController.text);
         userInput.durationDays = UserInput.parseDuration(_durationController.text);
-
-        List<LocationModel> allLocations = userInput.myMapController.value.locationDataList;
-        List<MissionModel> allMissions = userInput.myMapController.missionList;
         
         // Gọi thuật toán để tạo route
         var route = await _routePlanner.generateRouteFromUserInput(
@@ -115,8 +112,8 @@ class _InputPageState extends State<InputPage> {
           selectedInterests: userInput.getSelectedInterests(),
           budget: userInput.budget,
           durationDays: userInput.durationDays,
-          allLocations: allLocations,
-          allMissions: allMissions,
+          allLocations: userInput.myMapController.allLocationn,
+          allMissions: userInput.myMapController.allMission,
         );
         if (mounted) {
           Navigator.of(context).push(            

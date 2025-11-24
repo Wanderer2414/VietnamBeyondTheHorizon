@@ -17,6 +17,7 @@ class _ContentState extends State<Content> {
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
+    widget.controller.resetMap = () => setState(() {});
     return Stack(
       children: [
         MapShow(controller: widget.controller, size: screenSize),

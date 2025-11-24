@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/map/map_show.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/submit_route_map/map_show.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/search_bar.dart';
 
 class Content extends StatefulWidget {

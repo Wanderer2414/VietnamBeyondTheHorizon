@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vietnambeyondthehorizon/animations/screen/transitionRL.dart';
+import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/profile_page.dart';
 
 class UserButton extends StatelessWidget {

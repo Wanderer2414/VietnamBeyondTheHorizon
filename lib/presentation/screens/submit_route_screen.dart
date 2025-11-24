@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/map_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/submit_route_map/main_content.dart';
@@ -54,10 +56,17 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
         onSubmit: (route) {},
         onLocationPress: (location) {
           widget.controller.moveToLocation(LatLng(location.latitude, location.longitude), 15);
-          widget.controller.toggleMissionCard(location, context);
+          widget.controller.toggleLocationInfo(context, location, () {
+            widget.controller.fetchRoute(widget.controller.currentLocation, location.coordinates);
+            },
+            () {},
+          );
         },
         onStart: () {
-
+          widget.controller.userRoute = widget.route;
+          Navigator.of(context).pushReplacement(
+            TransitionLRPageRoute(nextScreen: MapScreen(controller: widget.controller))
+          );
         },
       );
     }

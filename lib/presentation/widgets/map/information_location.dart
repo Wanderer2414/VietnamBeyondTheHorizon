@@ -17,18 +17,30 @@ class InformationLocation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Size screenSize = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
+        width: screenSize.width,
+        height: screenSize.height,
         child: Stack(
           children: [
-            GestureDetector(onTap: onClose),
+            GestureDetector(onTap: () {
+              Navigator.of(context).pop();
+              onClose();
+            },),
             Align(
-              alignment: Alignment.center,
+              alignment: Alignment.bottomCenter,
               child: LocationInfoWidget(
                 location: locationModel,
-                onClose: onClose,
-                onNavigate: onNavigate,
+                onClose: () {
+                  Navigator.of(context).pop();
+                  onClose();
+                },
+                onNavigate: (loc) {
+                  Navigator.of(context).pop();
+                  onNavigate(loc);
+                }
               ),
             ),
           ],
