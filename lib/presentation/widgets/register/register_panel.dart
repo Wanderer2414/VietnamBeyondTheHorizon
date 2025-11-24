@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/input_panel_t1.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/register/extra_login.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/register/sign_button.dart';
@@ -15,6 +16,7 @@ class _RegisterPanelState extends State<RegisterPanel> {
   final emailCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
   final confirmPasswordCtrl = TextEditingController();
+  bool _isLoading = false;
   @override
   void dispose() {
     emailCtrl.dispose();
@@ -23,56 +25,73 @@ class _RegisterPanelState extends State<RegisterPanel> {
     super.dispose();
   }
 
+  void toggleLoading() {
+    setState(() {
+      _isLoading = true;
+    });
+  }
+
+  void stopLoading() {
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: widget.size.height,
-      alignment: Alignment.bottomCenter,
+    return LoadingWrapper(
+      isLoading: _isLoading,
       child: Container(
-        width: widget.size.width,
-        height: widget.size.height * 0.7,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
+        height: widget.size.height,
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          width: widget.size.width,
+          height: widget.size.height * 0.7,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
           ),
-        ),
-        padding: EdgeInsets.zero,
-        child: Column(
-          children: [
-            _LogInLabel(
-              size: Size(widget.size.width, widget.size.height * 0.11),
-            ),
-            InputPanelT1(
-              controller: emailCtrl,
-              size: Size(widget.size.width, widget.size.height * 0.1),
-              content: "Email",
-            ),
-            SizedBox(height: widget.size.height * 0.01),
-            InputPanelT1(
-              controller: passwordCtrl,
-              size: Size(widget.size.width, widget.size.height * 0.1),
-              content: "Password",
-            ),
-            SizedBox(height: widget.size.height * 0.01),
-            InputPanelT1(
-              controller: confirmPasswordCtrl,
-              size: Size(widget.size.width, widget.size.height * 0.1),
-              content: "Confirm password",
-            ),
-            SizedBox(height: widget.size.height * 0.02),
-            SignUpButton(
-              size: Size(widget.size.width * 0.5, widget.size.height * 0.05),
-              emailCtrl: emailCtrl,
-              passwordCtrl: passwordCtrl,
-              confirmPasswordCtrl: confirmPasswordCtrl,
-            ),
-            SizedBox(height: widget.size.height * 0.02),
-            ExtraLogin(
-              size: Size(widget.size.width, widget.size.height * 0.15),
-            ),
-          ],
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              _LogInLabel(
+                size: Size(widget.size.width, widget.size.height * 0.11),
+              ),
+              InputPanelT1(
+                controller: emailCtrl,
+                size: Size(widget.size.width, widget.size.height * 0.1),
+                content: "Email",
+              ),
+              SizedBox(height: widget.size.height * 0.01),
+              InputPanelT1(
+                controller: passwordCtrl,
+                size: Size(widget.size.width, widget.size.height * 0.1),
+                content: "Password",
+              ),
+              SizedBox(height: widget.size.height * 0.01),
+              InputPanelT1(
+                controller: confirmPasswordCtrl,
+                size: Size(widget.size.width, widget.size.height * 0.1),
+                content: "Confirm password",
+              ),
+              SizedBox(height: widget.size.height * 0.02),
+              SignUpButton(
+                size: Size(widget.size.width * 0.5, widget.size.height * 0.05),
+                emailCtrl: emailCtrl,
+                passwordCtrl: passwordCtrl,
+                confirmPasswordCtrl: confirmPasswordCtrl,
+                toggleLoading: toggleLoading,
+                stopLoading: stopLoading,
+              ),
+              SizedBox(height: widget.size.height * 0.02),
+              ExtraLogin(
+                size: Size(widget.size.width, widget.size.height * 0.15),
+              ),
+            ],
+          ),
         ),
       ),
     );

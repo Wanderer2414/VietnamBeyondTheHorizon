@@ -26,6 +26,7 @@ dependencies:
   image_picker: ^1.2.0
   shared_preferences: ^2.5.3
   dio: ^5.9.0
+  flutter_spinkit: ^5.2.2
 
 dev_dependencies:
   flutter_test:
@@ -143,3 +144,4 @@ flutter:
     - assets/backgrounds/mountains.png
     - assets/backgrounds/Vietnam flag.png
     - assets/backgrounds/Vietnam map.png
+    - assets/backgrounds/loading_screen_1.png

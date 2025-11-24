@@ -9,12 +9,16 @@ class FinishButton extends ConsumerStatefulWidget {
   final TextEditingController nameCtrl;
   final int? age;
   final int? cityCode;
+  final void Function() toggleLoading;
+  final void Function() stopLoading;
   const FinishButton({
     super.key,
     required this.age,
     required this.nameCtrl,
     required this.cityCode,
     required this.size,
+    required this.toggleLoading,
+    required this.stopLoading,
   });
 
   @override
@@ -28,6 +32,8 @@ class _FinishButtonState extends ConsumerState<FinishButton> {
     final user = ref.watch(userProvider);
     return ElevatedButton(
       onPressed: () async {
+        widget.toggleLoading();
+
         final name = widget.nameCtrl.text.trim();
         final age = widget.age!;
         final cityCode = widget.cityCode!;
@@ -52,11 +58,15 @@ class _FinishButtonState extends ConsumerState<FinishButton> {
                   ),
                 ),
               );
+          widget.stopLoading();
+
           Navigator.of(context).pushReplacementNamed("home");
         } catch (e) {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text("Update profile failed: $e")));
+        } finally {
+          widget.stopLoading();
         }
       },
       style: ButtonStyle(
