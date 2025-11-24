@@ -10,12 +10,16 @@ class SignUpButton extends ConsumerStatefulWidget {
   final TextEditingController emailCtrl;
   final TextEditingController passwordCtrl;
   final TextEditingController confirmPasswordCtrl;
+  final void Function() toggleLoading;
+  final void Function() stopLoading;
   const SignUpButton({
     super.key,
     required this.size,
     required this.emailCtrl,
     required this.passwordCtrl,
     required this.confirmPasswordCtrl,
+    required this.toggleLoading,
+    required this.stopLoading,
   });
 
   @override
@@ -29,12 +33,17 @@ class _SignUpButtonState extends ConsumerState<SignUpButton> {
 
     return ElevatedButton(
       onPressed: () async {
+        widget.toggleLoading();
+
         final email = widget.emailCtrl.text.trim();
         final password = widget.passwordCtrl.text.trim();
         final confirmPassword = widget.confirmPasswordCtrl.text.trim();
 
         try {
           await auth.signup(email, password, confirmPassword);
+          widget.stopLoading();
+
+          if (!mounted) return;
 
           if (auth.isLoggedIn) {
             final user = UserAccount(email: email);
@@ -44,9 +53,13 @@ class _SignUpButtonState extends ConsumerState<SignUpButton> {
             ).push(TransitionRLPageRoute(nextScreen: ProfileRegister()));
           }
         } catch (e) {
+          if (!mounted) return;
+
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text("Sign up failed: $e")));
+        } finally {
+          if (mounted) widget.stopLoading();
         }
       },
       style: ButtonStyle(

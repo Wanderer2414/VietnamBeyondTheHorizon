@@ -6,15 +6,19 @@ import 'package:vietnambeyondthehorizon/presentation/controllers/auth_controller
 
 class FinishButton extends ConsumerStatefulWidget {
   final Size size;
-  final TextEditingController nameCtrl;
+  final String name;
   final int? age;
   final int? cityCode;
+  final void Function() toggleLoading;
+  final void Function() stopLoading;
   const FinishButton({
     super.key,
     required this.age,
-    required this.nameCtrl,
+    required this.name,
     required this.cityCode,
     required this.size,
+    required this.toggleLoading,
+    required this.stopLoading,
   });
 
   @override
@@ -28,7 +32,9 @@ class _FinishButtonState extends ConsumerState<FinishButton> {
     final user = ref.watch(userProvider);
     return ElevatedButton(
       onPressed: () async {
-        final name = widget.nameCtrl.text.trim();
+        widget.toggleLoading();
+
+        final name = widget.name.trim();
         final age = widget.age!;
         final cityCode = widget.cityCode!;
         try {
@@ -52,11 +58,15 @@ class _FinishButtonState extends ConsumerState<FinishButton> {
                   ),
                 ),
               );
+          widget.stopLoading();
+
           Navigator.of(context).pushReplacementNamed("home");
         } catch (e) {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text("Update profile failed: $e")));
+        } finally {
+          widget.stopLoading();
         }
       },
       style: ButtonStyle(

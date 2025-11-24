@@ -15,7 +15,7 @@ class ProfileRegister extends StatefulWidget {
 }
 
 class _AccountLoginScreenState extends State<ProfileRegister> {
-  late final _Content _content;
+  late _Content _content; //Error: 'late final' throw Field aldready initialized
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
