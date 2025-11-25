@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 
 class MapShow extends StatefulWidget {
@@ -12,31 +13,33 @@ class MapShow extends StatefulWidget {
 }
 
 class _MapShowState extends State<MapShow> {
+  MapController _mapController = MapController();
   @override
   void initState() {
     super.initState();
     widget.controller.resetMap = () {
-      setState(() {
-        
-      });
+      setState(() {});
     };
   }
+
   @override
   Widget build(BuildContext context) {
+    widget.controller.mapController = _mapController;
     return SizedBox(
       width: widget.size.width,
       height: widget.size.height,
-      child: widget.controller.map(
-        context: context, 
-        locations: widget.controller.allLocationn,
-        onReady:() => setState(() {}), 
-        onMissionTap: (location) => 
-          widget.controller.toggleLocationInfo(context, location, () {
-            widget.controller.fetchRoute(widget.controller.currentLocation, location.coordinates);
-          },
-          () {},
-        )
-      )
+      child: FlutterMap(
+        mapController: _mapController,
+        options: widget.controller.mapOptions(
+          onMapReady: () => setState(() {}),
+          context: context,
+        ),
+        children: widget.controller.mapLayers(
+          context,
+          widget.controller.allLocationn,
+          (location) => widget.controller.toggleMissionCard(context, location),
+        ),
+      ),
     );
   }
 }

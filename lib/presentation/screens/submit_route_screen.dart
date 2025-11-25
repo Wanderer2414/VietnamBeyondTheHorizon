@@ -39,9 +39,6 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
       child: const Icon(Icons.my_location, size: 30, color: Colors.white),
     );
     _sidePanel = Drawer(child: SideBox());
-    widget.controller.resetMap = () {
-      setState(() {});
-    };
   }
 
   @override

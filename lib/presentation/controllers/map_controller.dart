@@ -20,7 +20,7 @@ import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission_screen.
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_share.dart';
 
 class MyMapController {
-  final MapController _mapController = MapController();
+  MapController? mapController;
   final Location _location = Location();
   MapState _value = MapState();
   void Function() resetMap = () {};
@@ -134,20 +134,7 @@ class MyMapController {
     }
   }
 
-  FlutterMap map({
-    required BuildContext context,
-    required List<LocationModel> locations,
-    required void Function() onReady,
-    required void Function(LocationModel model) onMissionTap,
-  }) {
-    return FlutterMap(
-      mapController: _mapController,
-      options: _mapOptions(onMapReady: onReady, context: context),
-      children: _mapLayers(context, locations, onMissionTap),
-    );
-  }
-
-  MapOptions _mapOptions({
+  MapOptions mapOptions({
     required BuildContext context,
     required Function() onMapReady,
   }) {
@@ -162,7 +149,7 @@ class MyMapController {
     );
   }
 
-  List<Widget> _mapLayers(
+  List<Widget> mapLayers(
     BuildContext context,
     List<LocationModel> locationList,
     void Function(LocationModel location) onLocationTap,
@@ -382,7 +369,7 @@ class MyMapController {
 
   String moveToCurrentLocation() {
     if (_value.currentLocation != null) {
-      _mapController.move(_value.currentLocation!, 15);
+      mapController?.move(_value.currentLocation!, 15);
       return "";
     } else {
       return "Current location not available";
@@ -390,7 +377,7 @@ class MyMapController {
   }
 
   void moveToLocation(LatLng destination, double zoom) {
-    _mapController.move(destination, zoom);
+    mapController?.move(destination, zoom);
   }
 
   void _showError(BuildContext context, String message) {
