@@ -58,10 +58,10 @@ class LoadingScreen extends StatelessWidget {
             children: [
               Container(
                 padding: EdgeInsets.all(15),
-                width: 300,
+                width: 250,
                 decoration: BoxDecoration(
                   color: const Color.fromARGB(109, 143, 44, 14),
-                  borderRadius: BorderRadius.circular(27),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   getQuote(),
@@ -73,7 +73,7 @@ class LoadingScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 25),
+              SizedBox(width: 15),
               SpinKitFadingCircle(
                 size: 80,
                 itemBuilder: (_, int index) {

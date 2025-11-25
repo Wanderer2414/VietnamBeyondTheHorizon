@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
 
 class LocationModel {
   final String id; // "1", "2",...
@@ -88,6 +90,40 @@ class LocationModel {
       //   return "assets/icons/food.png";
       default:
         return "assets/icons/default.png";
+    }
+  }
+
+  Color get typeColor {
+    switch (type.toLowerCase()) {
+      case "culture":
+        return ColorPalette.culture;
+      case "entertainment":
+        return ColorPalette.entertainment;
+      case "food":
+        return ColorPalette.food;
+      case "attraction":
+        return ColorPalette.attraction;
+      default:
+        return ColorPalette.accentColor;
+    }
+  }
+
+  IconData get typeIcon {
+    switch (type.toLowerCase()) {
+      case "culture":
+        return Icons.museum;
+
+      case "entertainment":
+        return Icons.theater_comedy;
+
+      case "food":
+        return Icons.restaurant;
+
+      case "attraction":
+        return Icons.attractions;
+
+      default:
+        return Icons.category;
     }
   }
 }

@@ -156,7 +156,7 @@ class MyMapController {
           _value.currentLocation ?? const LatLng(10.762622, 106.660172),
       initialZoom: 15,
       minZoom: 8,
-      maxZoom: 15,
+      maxZoom: 20,
       onTap: (tapPosition, point) => {},
       onMapReady: onMapReady,
     );
@@ -358,7 +358,7 @@ class MyMapController {
     }
     _value.routes = fullRoute;
     resetMap();
-    throw Exception("Full route length: ${fullRoute.length} points");
+    // throw Exception("Full route length: ${fullRoute.length} points");
   }
 
   // Future<double> fetchDistance(LatLng? start, LatLng? end) async {

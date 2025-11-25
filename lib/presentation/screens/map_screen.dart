@@ -28,6 +28,7 @@ class _MapScreenState extends State<MapScreen> {
       child: const Icon(Icons.my_location, size: 30, color: Colors.white),
     );
     _sidePanel = Drawer(child: SideBox());
+
     widget.controller.fetchRoute(
       widget.controller.currentLocation,
       widget.controller.currentMissionLocation.coordinates,

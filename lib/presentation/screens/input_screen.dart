@@ -381,6 +381,7 @@ class _InputPageState extends State<InputPage> {
                                 // Next Button
                                 InkWell(
                                   onTap: _isLoading ? null : _handleNext,
+
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 50,
@@ -411,27 +412,15 @@ class _InputPageState extends State<InputPage> {
                                         ),
                                       ],
                                     ),
-                                    child: _isLoading
-                                        ? const SizedBox(
-                                            height: 20,
-                                            width: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                    Colors.white,
-                                                  ),
-                                            ),
-                                          )
-                                        : const Text(
-                                            'NEXT',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.w600,
-                                              letterSpacing: 1.5,
-                                            ),
-                                          ),
+                                    child: const Text(
+                                      'NEXT',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 1.5,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],

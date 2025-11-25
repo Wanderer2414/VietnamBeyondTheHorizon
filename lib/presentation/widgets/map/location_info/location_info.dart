@@ -23,7 +23,7 @@ class LocationInfoWidget extends StatelessWidget {
     final Size screenSize = MediaQuery.of(context).size;
     return Container(
       width: screenSize.width,
-      height: screenSize.height*0.5,
+      height: screenSize.height * 0.5,
       padding: EdgeInsets.all(25),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -43,7 +43,7 @@ class LocationInfoWidget extends StatelessWidget {
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                 ),
-        
+
                 IconButton(
                   icon: const Icon(
                     Icons.directions,
@@ -69,14 +69,9 @@ class LocationInfoWidget extends StatelessWidget {
               indent: screenSize.width * 0.1,
               endIndent: screenSize.width * 0.1,
             ),
-        
-            OverviewBox(
-              address: location.address,
-              cost: location.price,
-              openTime: location.openTime,
-              closeTime: location.closeTime,
-            ),
-        
+
+            OverviewBox(location: location),
+
             SizedBox(height: 8),
             Divider(
               color: ColorPalette.dividerColor,
@@ -84,9 +79,9 @@ class LocationInfoWidget extends StatelessWidget {
               indent: screenSize.width * 0.1,
               endIndent: screenSize.width * 0.1,
             ),
-        
+
             PhotoBoxWidget(imageURLs: location.imageURLs),
-        
+
             SizedBox(height: 8),
             Divider(
               color: ColorPalette.dividerColor,
@@ -94,7 +89,7 @@ class LocationInfoWidget extends StatelessWidget {
               indent: screenSize.width * 0.1,
               endIndent: screenSize.width * 0.1,
             ),
-        
+
             DescriptionBox(description: location.description),
           ],
         ),

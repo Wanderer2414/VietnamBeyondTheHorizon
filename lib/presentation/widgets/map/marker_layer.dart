@@ -28,11 +28,7 @@ class MarkerLayerWidget extends StatelessWidget {
               onMarkerTap(loc, context);
               // onMovingToLocation(loc.coordinates, 15);
             },
-            child: Icon(
-              Icons.location_pin,
-              color: loc.type == "Entertainment" ? Colors.purple : Colors.blue,
-              size: 45,
-            ),
+            child: Icon(Icons.location_pin, color: loc.typeColor, size: 45),
           ),
         );
       }).toList(),

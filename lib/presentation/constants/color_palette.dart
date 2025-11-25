@@ -17,4 +17,8 @@ class ColorPalette {
   static const Color successColor = Color(0xFF4CAF50);
   static const Color errorColor = Color(0xFFF44336);
   static const Color dividerColor = Color.fromARGB(255, 226, 226, 226);
+  static const Color culture = Color.fromARGB(255, 243, 147, 87);
+  static const Color entertainment = Color.fromARGB(255, 65, 194, 162);
+  static const Color food = Color.fromARGB(255, 253, 121, 121);
+  static const Color attraction = Color(0xFF84B6F4);
 }
