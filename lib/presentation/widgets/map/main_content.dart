@@ -19,13 +19,6 @@ class _ContentState extends State<Content> {
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
-    widget.controller.resetMap = () {
-      widget.controller.fetchRoute(
-        widget.controller.currentLocation,
-        widget.controller.currentMissionLocation.coordinates,
-      );
-      setState(() {});
-    };
     return Stack(
       children: [
         MapShow(controller: widget.controller, size: screenSize),
