@@ -37,7 +37,9 @@ class _MapShowState extends State<MapShow> {
         children: widget.controller.mapLayers(
           context,
           widget.controller.userRoute,
-          (location) => widget.controller.toggleMissionCard(context, location),
+          (location) {
+            widget.controller.toggleMissionCard(context, location);
+          },
         ),
       ),
     );

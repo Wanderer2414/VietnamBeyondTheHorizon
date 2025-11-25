@@ -69,6 +69,7 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
         },
         onStart: () {
           widget.controller.userRoute = widget.route;
+          widget.controller.startRoute();
           Navigator.of(context).pushReplacement(
             TransitionLRPageRoute(
               nextScreen: MapScreen(controller: widget.controller),
