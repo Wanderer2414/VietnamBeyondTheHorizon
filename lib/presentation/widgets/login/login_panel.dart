@@ -17,19 +17,6 @@ class LoginPanel extends StatefulWidget {
 class _LoginPanelState extends State<LoginPanel> {
   final emailCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
-  bool _isLoading = false;
-
-  void toggleLoading() {
-    setState(() {
-      _isLoading = true;
-    });
-  }
-
-  void stopLoading() {
-    setState(() {
-      _isLoading = false;
-    });
-  }
 
   @override
   void dispose() {
@@ -40,60 +27,55 @@ class _LoginPanelState extends State<LoginPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return LoadingWrapper(
-      isLoading: _isLoading,
+    return Container(
+      height: widget.size.height,
+      alignment: Alignment.bottomCenter,
       child: Container(
-        height: widget.size.height,
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          width: widget.size.width,
-          height: widget.size.height * 0.7,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(30),
-              topRight: Radius.circular(30),
+        width: widget.size.width,
+        height: widget.size.height * 0.7,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+        ),
+        padding: EdgeInsets.zero,
+        child: Column(
+          children: [
+            _LogInLabel(
+              size: Size(widget.size.width, widget.size.height * 0.11),
             ),
-          ),
-          padding: EdgeInsets.zero,
-          child: Column(
-            children: [
-              _LogInLabel(
-                size: Size(widget.size.width, widget.size.height * 0.11),
+            InputPanelT1(
+              controller: emailCtrl,
+              size: Size(widget.size.width, widget.size.height * 0.1),
+              content: "Email",
+              onTap: widget.onTap,
+            ),
+            SizedBox(height: widget.size.height * 0.01),
+            InputPanelT1(
+              controller: passwordCtrl,
+              size: Size(widget.size.width, widget.size.height * 0.1),
+              content: "Password",
+              onTap: widget.onTap,
+            ),
+            SizedBox(
+              width: widget.size.width * 0.8,
+              height: widget.size.height * 0.05,
+              child: ForgetBox(
+                size: Size(widget.size.width, widget.size.height * 0.05),
               ),
-              InputPanelT1(
-                controller: emailCtrl,
-                size: Size(widget.size.width, widget.size.height * 0.1),
-                content: "Email",
-                onTap: widget.onTap,
-              ),
-              SizedBox(height: widget.size.height * 0.01),
-              InputPanelT1(
-                controller: passwordCtrl,
-                size: Size(widget.size.width, widget.size.height * 0.1),
-                content: "Password",
-                onTap: widget.onTap,
-              ),
-              SizedBox(
-                width: widget.size.width * 0.8,
-                height: widget.size.height * 0.05,
-                child: ForgetBox(
-                  size: Size(widget.size.width, widget.size.height * 0.05),
-                ),
-              ),
-              LoginButton(
-                size: Size(widget.size.width * 0.5, widget.size.height * 0.05),
-                emailCtrl: emailCtrl,
-                passwordCtrl: passwordCtrl,
-                toggleLoading: toggleLoading,
-                stopLoading: stopLoading,
-              ),
-              SizedBox(height: widget.size.height * 0.02),
-              ExtraLogin(
-                size: Size(widget.size.width, widget.size.height * 0.25),
-              ),
-            ],
-          ),
+            ),
+            LoginButton(
+              size: Size(widget.size.width * 0.5, widget.size.height * 0.05),
+              emailCtrl: emailCtrl,
+              passwordCtrl: passwordCtrl,
+            ),
+            SizedBox(height: widget.size.height * 0.02),
+            ExtraLogin(
+              size: Size(widget.size.width, widget.size.height * 0.25),
+            ),
+          ],
         ),
       ),
     );

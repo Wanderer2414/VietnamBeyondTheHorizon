@@ -18,7 +18,6 @@ class Panel extends StatefulWidget {
 class _PanelState extends State<Panel> {
   int? age;
   int? cityCode;
-  bool _isLoading = false;
   String _name = "";
 
   @override
@@ -33,88 +32,71 @@ class _PanelState extends State<Panel> {
     super.dispose();
   }
 
-  void toggleLoading() {
-    setState(() {
-      _isLoading = true;
-    });
-  }
-
-  void stopLoading() {
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return LoadingWrapper(
-      isLoading: _isLoading,
+    return Container(
+      height: widget.size.height,
+      alignment: Alignment.bottomCenter,
       child: Container(
-        height: widget.size.height,
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          width: widget.size.width,
-          height: widget.size.height * 0.7,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(30),
-              topRight: Radius.circular(30),
+        width: widget.size.width,
+        height: widget.size.height * 0.7,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+        ),
+        padding: EdgeInsets.zero,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: widget.size.width * 0.9,
+              height: widget.size.height * 0.19,
+              padding: EdgeInsets.only(
+                top: widget.size.height * 0.05,
+                bottom: widget.size.height * 0.03,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(width: 2),
+                ),
+                child: null,
+              ),
             ),
-          ),
-          padding: EdgeInsets.zero,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: widget.size.width * 0.9,
-                height: widget.size.height * 0.19,
-                padding: EdgeInsets.only(
-                  top: widget.size.height * 0.05,
-                  bottom: widget.size.height * 0.03,
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(width: 2),
-                  ),
-                  child: null,
-                ),
-              ),
-              TextboxT2(
-                onUpdate: (value) => _name = value,
-                size: Size(widget.size.width * 0.8, widget.size.height * 0.06),
-                hint: "Nguyen Van A",
-              ),
-              SizedBox(height: widget.size.height * 0.03),
-              AgeInput(
-                size: Size(widget.size.width, widget.size.height * 0.06),
-                onChanged: (value) {
-                  setState(() {
-                    age = value;
-                  });
-                },
-              ),
-              SizedBox(height: widget.size.height * 0.03),
-              CityInput(
-                size: Size(widget.size.width, widget.size.height * 0.06),
-                onChanged: (value) {
-                  setState(() {
-                    cityCode = value;
-                  });
-                },
-              ),
-              SizedBox(height: widget.size.height * 0.1),
-              FinishButton(
-                size: Size(widget.size.width * 0.66, widget.size.height * 0.05),
-                age: age,
-                cityCode: cityCode,
-                name: _name,
-                toggleLoading: toggleLoading,
-                stopLoading: stopLoading,
-              ),
-            ],
-          ),
+            TextboxT2(
+              onUpdate: (value) => _name = value,
+              size: Size(widget.size.width * 0.8, widget.size.height * 0.06),
+              hint: "Nguyen Van A",
+            ),
+            SizedBox(height: widget.size.height * 0.03),
+            AgeInput(
+              size: Size(widget.size.width, widget.size.height * 0.06),
+              onChanged: (value) {
+                setState(() {
+                  age = value;
+                });
+              },
+            ),
+            SizedBox(height: widget.size.height * 0.03),
+            CityInput(
+              size: Size(widget.size.width, widget.size.height * 0.06),
+              onChanged: (value) {
+                setState(() {
+                  cityCode = value;
+                });
+              },
+            ),
+            SizedBox(height: widget.size.height * 0.1),
+            FinishButton(
+              size: Size(widget.size.width * 0.66, widget.size.height * 0.05),
+              age: age,
+              cityCode: cityCode,
+              name: _name,
+            ),
+          ],
         ),
       ),
     );

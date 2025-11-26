@@ -75,9 +75,9 @@ class _SideBoxState extends ConsumerState<SideBox> {
           ),
           onTap: () {
             auth.logout();
-            Navigator.of(
-              context,
-            ).pushNamedAndRemoveUntil("log_navigator", (route) => false);
+            // Navigator.of(
+            //   context,
+            // ).pushNamedAndRemoveUntil("log_navigator", (route) => false);
           },
         ),
       ],

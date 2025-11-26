@@ -5,7 +5,7 @@ import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 
 class ImageUploadWidget extends StatefulWidget {
   final Function(XFile file) onPicked;
-  final String? selectedImage;
+  final XFile? selectedImage;
   const ImageUploadWidget({
     super.key,
     required this.onPicked,
@@ -39,7 +39,7 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
       container = ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: Image.file(
-          File(widget.selectedImage!),
+          File(widget.selectedImage!.path),
           width: 150,
           height: 150,
           fit: BoxFit.cover,

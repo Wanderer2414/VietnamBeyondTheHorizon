@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -14,6 +15,8 @@ import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/map_state.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/dio_service.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/result_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/information_location.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
@@ -56,47 +59,56 @@ class MyMapController {
   }
 
   Future<void> _initialize() async {
-    await _loadProgress();
-    await _initLocation();
-    final userGPS = await loadGPS();
-    _value.currentLocation = LatLng(userGPS['lat']!, userGPS['lng']!);
+    LoadingManager.show();
+    try {
+      await _initLocation();
 
-    final prefs = await SharedPreferences.getInstance();
-    final cachedLoc = prefs.getString("cached_locationData");
-    final cachedMis = prefs.getString("cached_missions");
-    if (cachedLoc != null) {
-      final data = jsonDecode(cachedLoc) as List;
-      _value.locationDataList = data
-          .map((e) => LocationModel.fromJson(e))
-          .toList();
-    } else {
-      await _fetchLocationData();
-    }
+      await _loadProgress();
 
-    _markerAppreances = Map.fromIterable(
-      _value.locationDataList,
-      key: (element) => element.id,
-      value: (element) {
-        switch (element.type) {
-          case "Entertainment":
-            return MarkerAppearance(color: Colors.purple);
-          case "Culture":
-            return MarkerAppearance(color: Colors.orange);
-          case "Attraction":
-            return MarkerAppearance(color: Colors.blue);
-          case "Food":
-            return MarkerAppearance(color: Colors.yellow);
-          default:
-            return MarkerAppearance();
-        }
-      },
-    );
-    if (cachedMis != null) {
-      final data = jsonDecode(cachedMis) as List;
+      final userGPS = await loadGPS();
+      _value.currentLocation = LatLng(userGPS['lat']!, userGPS['lng']!);
 
-      _value.missionList = data.map((e) => MissionModel.fromJson(e)).toList();
-    } else {
-      await _fetchMissionData();
+      final prefs = await SharedPreferences.getInstance();
+      final cachedLoc = prefs.getString("cached_locationData");
+      final cachedMis = prefs.getString("cached_missions");
+      if (cachedLoc != null) {
+        final data = jsonDecode(cachedLoc) as List;
+        _value.locationDataList = data
+            .map((e) => LocationModel.fromJson(e))
+            .toList();
+      } else {
+        await _fetchLocationData();
+      }
+
+      _markerAppreances = Map.fromIterable(
+        _value.locationDataList,
+        key: (element) => element.id,
+        value: (element) {
+          switch (element.type) {
+            case "Entertainment":
+              return MarkerAppearance(color: Colors.purple);
+            case "Culture":
+              return MarkerAppearance(color: Colors.orange);
+            case "Attraction":
+              return MarkerAppearance(color: Colors.blue);
+            case "Food":
+              return MarkerAppearance(color: Colors.yellow);
+            default:
+              return MarkerAppearance();
+          }
+        },
+      );
+      if (cachedMis != null) {
+        final data = jsonDecode(cachedMis) as List;
+
+        _value.missionList = data.map((e) => MissionModel.fromJson(e)).toList();
+      } else {
+        await _fetchMissionData();
+      }
+    } catch (e) {
+      print("Eror in initializing map: ${e}");
+    } finally {
+      LoadingManager.hide();
     }
   }
 
@@ -222,154 +234,167 @@ class MyMapController {
   }
 
   Future<void> _fetchLocationData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    if (token == null) {
-      throw Exception("User error: No token exists");
-    }
+    try {
+      final response = await DioService.dio.get("/location/locations");
 
-    final url = Uri.parse(
-      "https://vnbth-backend.onrender.com/location/locations",
-    );
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        "Content-Type": "application/json",
-      },
-    );
-    final jsonBody = jsonDecode(response.body);
+      final jsonBody = response.data;
 
-    if (jsonBody['status'] == 'success') {
-      final List<dynamic> data = jsonBody['data'];
-      _value.locationDataList = data
-          .map((e) => LocationModel.fromJson(e))
-          .toList();
-      prefs.setString(
-        "cached_locationData",
-        jsonEncode(_value.locationDataList.map((e) => e.toJson()).toList()),
-      );
-    } else {
-      throw Exception("Network error: ${jsonBody['error']['message']}");
+      if (jsonBody['status'] == 'success') {
+        final List<dynamic> data = jsonBody['data'];
+        _value.locationDataList = data
+            .map((e) => LocationModel.fromJson(e))
+            .toList();
+
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setString(
+          "cached_locationData",
+          jsonEncode(_value.locationDataList.map((e) => e.toJson()).toList()),
+        );
+      } else {
+        throw Exception("Network error: ${jsonBody['error']['message']}");
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        throw Exception(
+          "Network error: ${e.response?.data['error']['message'] ?? e.message}",
+        );
+      }
+      throw Exception("Network error: ${e.message}");
     }
   }
 
   Future<void> _fetchMissionData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    if (token == null) {
-      throw Exception("User error: No token exists");
-    }
+    try {
+      final response = await DioService.dio.get("/mission/missions");
 
-    final url = Uri.parse(
-      "https://vnbth-backend.onrender.com/mission/missions",
-    );
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        "Content-Type": "application/json",
-      },
-    );
-    final jsonBody = jsonDecode(response.body);
+      final jsonBody = response.data;
 
-    if (jsonBody['status'] == 'success') {
-      final List<dynamic> dataList = jsonBody['data'];
-      _value.missionList = dataList
-          .map((e) => MissionModel.fromJson(e))
-          .toList();
-      prefs.setString(
-        "cached_missions",
-        jsonEncode(_value.missionList.map((e) => e.toJson()).toList()),
-      );
-    } else {
-      throw Exception("Network error: ${jsonBody['error']['message']}");
-    }
+      if (jsonBody['status'] == 'success') {
+        final List<dynamic> dataList = jsonBody['data'];
+        _value.missionList = dataList
+            .map((e) => MissionModel.fromJson(e))
+            .toList();
+
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setString(
+          "cached_missions",
+          jsonEncode(_value.missionList.map((e) => e.toJson()).toList()),
+        );
+      } else {
+        throw Exception("Network error: ${jsonBody['error']['message']}");
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        throw Exception(
+          "Network error: ${e.response?.data['error']['message'] ?? e.message}",
+        );
+      }
+      throw Exception("Network error: ${e.message}");
+    } finally {}
   }
 
   Future<void> fetchCoordinates(String locationName) async {
-    final url = Uri.parse(
-      "https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(locationName)}&format=json&limit=1",
-    );
+    final dio = Dio();
+    final url =
+        "https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(locationName)}&format=json&limit=1";
 
-    final response = await http.get(
-      url,
-      headers: {'User-Agent': 'my_map/1.0 (khangthinh111555@gmail.com)'},
-    );
-    if (response.statusCode == 200) {
-      final List data = json.decode(response.body);
-      if (data.isNotEmpty) {
-        final lat = double.parse(data[0]['lat']);
-        final lon = double.parse(data[0]['lon']);
-        _value.destination = LatLng(lat, lon);
-        await fetchRoute(_value.currentLocation, _value.destination);
-        resetMap();
+    try {
+      final response = await dio.get(
+        url,
+        options: Options(
+          headers: {'User-Agent': 'my_map/1.0 (khangthinh111555@gmail.com)'},
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final List data = response.data;
+        if (data.isNotEmpty) {
+          final lat = double.parse(data[0]['lat']);
+          final lon = double.parse(data[0]['lon']);
+          _value.destination = LatLng(lat, lon);
+          await fetchRoute(_value.currentLocation, _value.destination);
+          resetMap();
+        } else {
+          throw Exception("Location not found.");
+        }
       } else {
-        throw Exception("Location not found.");
+        throw Exception("Failed to fetch location.");
       }
-    } else {
-      throw Exception("Failed to fetch location.");
-    }
+    } catch (e) {
+      throw Exception("Failed to fetch location: $e");
+    } finally {}
   }
 
   Future<void> fetchRoute(LatLng? start, LatLng? end) async {
     if (start == null || end == null) return;
 
-    final url = Uri.parse(
-      'https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=polyline&alternatives=false&annotations=distance',
-    );
+    final dio = Dio();
+    final url =
+        'https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=polyline&alternatives=false&annotations=distance';
 
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final geometry = data['routes'][0]['geometry'];
-      final List<LatLng> decodedRoute = await compute<String, List<LatLng>>(
-        _decodePolyline,
-        geometry,
-      );
-      _value.routes = decodedRoute;
-      resetMap();
-    } else {
-      throw Exception('Failed to fetch route.');
-    }
+    try {
+      final response = await dio.get(url);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final geometry = data['routes'][0]['geometry'];
+        final List<LatLng> decodedRoute = await compute<String, List<LatLng>>(
+          _decodePolyline,
+          geometry,
+        );
+        _value.routes = decodedRoute;
+        resetMap();
+      } else {
+        throw Exception('Failed to fetch route.');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch route: $e');
+    } finally {}
   }
 
   Future<void> fetchFullRoute({List<LocationModel>? route}) async {
     route ??= _value.locationList;
     if (route.length < 2) return;
 
+    final dio = Dio();
     List<LatLng> fullRoute = [];
     LatLng end = _value.currentLocation!;
+
     for (int i = 0; i < route.length; i++) {
       final start = end;
       end = LatLng(route[i].latitude, route[i].longitude);
 
-      final url = Uri.parse(
-        'https://router.project-osrm.org/route/v1/driving/'
-        '${start.longitude},${start.latitude};'
-        '${end.longitude},${end.latitude}'
-        '?overview=full&geometries=polyline',
-      );
+      final url =
+          'https://router.project-osrm.org/route/v1/driving/'
+          '${start.longitude},${start.latitude};'
+          '${end.longitude},${end.latitude}'
+          '?overview=full&geometries=polyline';
 
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final geometry = data['routes'][0]['geometry'];
+      try {
+        final response = await dio.get(url);
 
-        final List<LatLng> decodedRoute = await compute<String, List<LatLng>>(
-          _decodePolyline,
-          geometry,
-        );
+        if (response.statusCode == 200) {
+          final data = response.data;
+          final geometry = data['routes'][0]['geometry'];
 
-        if (i > 0) decodedRoute.removeAt(0);
+          final List<LatLng> decodedRoute = await compute<String, List<LatLng>>(
+            _decodePolyline,
+            geometry,
+          );
 
-        fullRoute.addAll(decodedRoute);
-      } else {
-        throw Exception('Failed to fetch route between $i and ${i + 1}');
-      }
+          if (i > 0) decodedRoute.removeAt(0);
+
+          fullRoute.addAll(decodedRoute);
+        } else {
+          throw Exception('Failed to fetch route between $i and ${i + 1}');
+        }
+      } catch (e) {
+        throw Exception('Failed to fetch route: $e');
+      } finally {}
     }
     _value.routes = fullRoute;
     resetMap();
+
     // throw Exception("Full route length: ${fullRoute.length} points");
   }
 

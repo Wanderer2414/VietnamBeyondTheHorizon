@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/auth_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/profile_register_screen.dart';
 
 class SignUpButton extends ConsumerStatefulWidget {
@@ -10,16 +11,12 @@ class SignUpButton extends ConsumerStatefulWidget {
   final TextEditingController emailCtrl;
   final TextEditingController passwordCtrl;
   final TextEditingController confirmPasswordCtrl;
-  final void Function() toggleLoading;
-  final void Function() stopLoading;
   const SignUpButton({
     super.key,
     required this.size,
     required this.emailCtrl,
     required this.passwordCtrl,
     required this.confirmPasswordCtrl,
-    required this.toggleLoading,
-    required this.stopLoading,
   });
 
   @override
@@ -33,7 +30,7 @@ class _SignUpButtonState extends ConsumerState<SignUpButton> {
 
     return ElevatedButton(
       onPressed: () async {
-        widget.toggleLoading();
+        LoadingManager.show();
 
         final email = widget.emailCtrl.text.trim();
         final password = widget.passwordCtrl.text.trim();
@@ -41,7 +38,7 @@ class _SignUpButtonState extends ConsumerState<SignUpButton> {
 
         try {
           await auth.signup(email, password, confirmPassword);
-          widget.stopLoading();
+          LoadingManager.hide();
 
           if (!mounted) return;
 
@@ -59,7 +56,7 @@ class _SignUpButtonState extends ConsumerState<SignUpButton> {
             context,
           ).showSnackBar(SnackBar(content: Text("Sign up failed: $e")));
         } finally {
-          if (mounted) widget.stopLoading();
+          if (mounted) LoadingManager.hide();
         }
       },
       style: ButtonStyle(

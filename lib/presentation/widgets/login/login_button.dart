@@ -3,20 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/retry.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/auth_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 
 class LoginButton extends ConsumerStatefulWidget {
   final Size size;
   final TextEditingController emailCtrl;
   final TextEditingController passwordCtrl;
-  final void Function() toggleLoading;
-  final void Function() stopLoading;
   const LoginButton({
     super.key,
     required this.size,
     required this.emailCtrl,
     required this.passwordCtrl,
-    required this.toggleLoading,
-    required this.stopLoading,
   });
 
   @override
@@ -30,7 +27,7 @@ class _LoginButtonState extends ConsumerState<LoginButton> {
 
     return ElevatedButton(
       onPressed: () async {
-        widget.toggleLoading();
+        LoadingManager.show();
         final email = widget.emailCtrl.text.trim();
         final password = widget.passwordCtrl.text.trim();
         try {
@@ -39,7 +36,7 @@ class _LoginButtonState extends ConsumerState<LoginButton> {
             final user = await auth.fetchUserData();
             if (user != null) {
               if (!mounted) return;
-              widget.stopLoading();
+              LoadingManager.hide();
 
               ref.read(userProvider.notifier).setUser(user);
               print("Fetch data successfully!");
@@ -59,7 +56,7 @@ class _LoginButtonState extends ConsumerState<LoginButton> {
           ).showSnackBar(SnackBar(content: Text("Login failed: $e")));
         } finally {
           if (mounted) {
-            widget.stopLoading();
+            LoadingManager.hide();
           }
         }
       },

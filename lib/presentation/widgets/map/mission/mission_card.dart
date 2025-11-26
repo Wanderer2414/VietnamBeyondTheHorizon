@@ -1,8 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/dio_service.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/image_upload.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission/challenge_box.dart';
@@ -25,15 +29,16 @@ class MissionCard extends StatefulWidget {
 }
 
 class _MissionCardState extends State<MissionCard> {
-  String? _currentFile = null;
   late final MissionModel? _mission;
+  XFile? imageFile;
   @override
   void initState() {
     super.initState();
     _mission = retrieveMission();
     if (_mission != null) {
       SharedPreferences.getInstance().then((value) {
-        _currentFile = value.getString(_mission.id);
+        imageFile = XFile(value.getString(_mission.id)!);
+
         setState(() {});
       });
     }
@@ -54,25 +59,49 @@ class _MissionCardState extends State<MissionCard> {
     return true;
   }
 
-  Future<bool> _submitImage(String imagePath) async {
-    return true;
-    // final String? token = (await SharedPreferences.getInstance()).getString(
-    //   "token",
-    // );
-    // if (token == null) throw Exception("Please login again!");
-    // var uri = Uri.parse("https://vnbth-backend.onrender.com/location/image");
-    // var request = http.MultipartRequest('POST', uri);
+  Future<XFile?> compressImage(XFile file) async {
+    final filePath = file.path;
+    final lastIndex = filePath.lastIndexOf(new RegExp(r'.jp'));
+    final splitted = filePath.substring(0, (lastIndex));
+    final outPath = "${splitted}_out${filePath.substring(lastIndex)}";
 
-    // request.headers["Authorization"] = 'Bearer $token';
-    // request.headers["Content-Type"] = "application/json";
-    // request.fields["missionID"] = _mission!.id;
-    // request.files.add(await http.MultipartFile.fromPath('file', imagePath));
-    // print(request.toString());
+    var result = await FlutterImageCompress.compressAndGetFile(
+      file.path,
+      outPath,
+      quality: 70,
+      minWidth: 800,
+      minHeight: 800,
+    );
+    return result;
+  }
 
-    // var response = await request.send();
-    // var responseBody = await response.stream.bytesToString();
-    // print(responseBody);
-    // if (responseBody.isEmpty) throw Exception("Null error!");
+  Future<bool> _submitImage(XFile? imagePath) async {
+    if (imagePath == null) throw Exception(("Please upload your image"));
+    var uploadUrl = "/mission/similarity";
+
+    final fileName = imagePath.path.split('/').last;
+
+    final compressedFile = await compressImage(imagePath);
+    FormData formData = FormData.fromMap({
+      "files": await MultipartFile.fromFile(
+        compressedFile!.path,
+        filename: fileName,
+        contentType: DioMediaType("image", "jpeg"),
+      ),
+      'missionID': int.parse(widget.controller.currentMissionLocation.id),
+    });
+
+    try {
+      final response = await DioService.dio.post(uploadUrl, data: formData);
+
+      print("Upload success: ${response.data}");
+      return true;
+    } catch (e) {
+      if (e is DioException) {
+        print("Lỗi server trả về: ${e.response?.data}");
+      }
+    } finally {}
+    return false;
   }
 
   @override
@@ -159,9 +188,9 @@ class _MissionCardState extends State<MissionCard> {
                 ),
 
                 ImageUploadWidget(
-                  selectedImage: _currentFile,
+                  selectedImage: imageFile,
                   onPicked: (file) {
-                    _currentFile = file.path;
+                    imageFile = file;
                     SharedPreferences.getInstance().then(
                       (value) => value.setString(_mission.id, file.path),
                     );
@@ -189,8 +218,7 @@ class _MissionCardState extends State<MissionCard> {
                 });
               },
               onSubmit: () async {
-                if (_currentFile == null) return false;
-                return _submitImage(_currentFile!);
+                return await _submitImage(imageFile);
               },
               isSubmited: _mission.isCompleted,
             ),
