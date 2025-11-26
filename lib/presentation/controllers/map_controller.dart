@@ -368,7 +368,6 @@ class MyMapController {
         throw Exception('Failed to fetch route between $i and ${i + 1}');
       }
     }
-    _value.routes = fullRoute;
     resetMap();
     // throw Exception("Full route length: ${fullRoute.length} points");
   }
