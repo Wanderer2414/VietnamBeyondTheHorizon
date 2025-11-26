@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/auth_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/dio_service.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -26,18 +28,31 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
     print("token = $token");
 
-    if (token != null && token.isNotEmpty) {
-      final raw = prefs.getString("user_data");
-      if (raw != null) {
-        final data = jsonDecode(raw);
-        final user = UserAccount.fromJson(data);
-        ref.read(userProvider.notifier).setUser(user);
-      }
-      Navigator.pushReplacementNamed(context, "home");
+    if (token == null || token.isEmpty) {
+      Navigator.pushReplacementNamed(context, "intro");
       return;
     }
 
-    Navigator.pushReplacementNamed(context, "intro");
+    DioService.setToken(token);
+
+    try {
+      final user = await ref.read(authProvider).fetchUserData();
+
+      if (user != null) {
+        ref.read(userProvider.notifier).setUser(user);
+        prefs.setString("user_data", jsonEncode(user.toJson()));
+
+        Navigator.pushReplacementNamed(context, "home");
+        return;
+      }
+    } catch (e) {
+      print("Token expired or verify error: $e");
+
+      await prefs.remove('token');
+      await prefs.remove('user_data');
+      DioService.removeToken();
+    }
+    Navigator.pushReplacementNamed(context, "log_navigator");
   }
 
   @override
