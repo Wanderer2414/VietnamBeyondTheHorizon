@@ -10,13 +10,14 @@ import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission/challen
 class MissionCard extends StatefulWidget {
   final MyMapController controller;
   final LocationModel location;
-  final Function() onNavigate;
+  final Function() onNavigate, onClose;
 
   MissionCard({
     super.key,
     required this.location,
     required this.controller,
     required this.onNavigate,
+    required this.onClose,
   });
 
   @override
@@ -181,8 +182,9 @@ class _MissionCardState extends State<MissionCard> {
               onClaim: () {
                 _claimed().then((value) {
                   if (value) {
-                    widget.controller.nextMission();
+                    widget.controller.nextMission(context);
                     Navigator.of(context).pop();
+                    widget.onClose();
                   }
                 });
               },

@@ -14,15 +14,17 @@ import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/map_state.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/result_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/information_location.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_share.dart';
 
 class MyMapController {
-  final MapController _mapController = MapController();
+  MapController? mapController;
   final Location _location = Location();
   MapState _value = MapState();
+  Map<String, MarkerAppearance> _markerAppreances = Map();
   void Function() resetMap = () {};
 
   List<LocationModel> get allLocationn {
@@ -70,6 +72,25 @@ class MyMapController {
     } else {
       await _fetchLocationData();
     }
+
+    _markerAppreances = Map.fromIterable(
+      _value.locationDataList,
+      key: (element) => element.id,
+      value: (element) {
+        switch (element.type) {
+          case "Entertainment":
+            return MarkerAppearance(color: Colors.purple);
+          case "Culture":
+            return MarkerAppearance(color: Colors.orange);
+          case "Attraction":
+            return MarkerAppearance(color: Colors.blue);
+          case "Food":
+            return MarkerAppearance(color: Colors.yellow);
+          default:
+            return MarkerAppearance();
+        }
+      },
+    );
     if (cachedMis != null) {
       final data = jsonDecode(cachedMis) as List;
 
@@ -134,20 +155,7 @@ class MyMapController {
     }
   }
 
-  FlutterMap map({
-    required BuildContext context,
-    required List<LocationModel> locations,
-    required void Function() onReady,
-    required void Function(LocationModel model) onMissionTap,
-  }) {
-    return FlutterMap(
-      mapController: _mapController,
-      options: _mapOptions(onMapReady: onReady, context: context),
-      children: _mapLayers(context, locations, onMissionTap),
-    );
-  }
-
-  MapOptions _mapOptions({
+  MapOptions mapOptions({
     required BuildContext context,
     required Function() onMapReady,
   }) {
@@ -162,7 +170,7 @@ class MyMapController {
     );
   }
 
-  List<Widget> _mapLayers(
+  List<Widget> mapLayers(
     BuildContext context,
     List<LocationModel> locationList,
     void Function(LocationModel location) onLocationTap,
@@ -197,12 +205,17 @@ class MyMapController {
     );
 
     layers.add(
-      MarkerLayerWidget(
-        locations: locationList,
-        onMarkerTap: (location, context) {
-          onLocationTap(location);
-        },
-        onMovingToLocation: moveToLocation,
+      MarkerLayer(
+        markers: locationList
+            .map(
+              (e) => LocationMarker(
+                context,
+                e,
+                _markerAppreances[e.id] ?? MarkerAppearance(),
+                (loc, context) => onLocationTap(loc),
+              ),
+            )
+            .toList(),
       ),
     );
     return layers;
@@ -236,7 +249,6 @@ class MyMapController {
         "cached_locationData",
         jsonEncode(_value.locationDataList.map((e) => e.toJson()).toList()),
       );
-      //print(jsonEncode(value.locationDataList.map((e) => e.toJson()).toList()));
     } else {
       throw Exception("Network error: ${jsonBody['error']['message']}");
     }
@@ -382,7 +394,7 @@ class MyMapController {
 
   String moveToCurrentLocation() {
     if (_value.currentLocation != null) {
-      _mapController.move(_value.currentLocation!, 15);
+      mapController?.move(_value.currentLocation!, 15);
       return "";
     } else {
       return "Current location not available";
@@ -390,7 +402,7 @@ class MyMapController {
   }
 
   void moveToLocation(LatLng destination, double zoom) {
-    _mapController.move(destination, zoom);
+    mapController?.move(destination, zoom);
   }
 
   void _showError(BuildContext context, String message) {
@@ -438,21 +450,45 @@ class MyMapController {
           controller: this,
           locationModel: location,
           onNavigate: () {},
+          onClose: () {
+            if (_value.currentIndex == userRoute.length) completeRoute(context);
+          },
         ),
       ),
     );
   }
 
-  void nextMission() {
-    if (_value.currentIndex >= userRoute.length) return;
+  void nextMission(BuildContext context) {
+    if (_value.currentIndex >= userRoute.length)
+      throw Exception("Out range of userRoute");
     _value.currentIndex++;
-    if (_value.currentIndex == userRoute.length)
-      completeRoute();
-    else
-      resetMap();
+    if (_value.currentIndex == userRoute.length) {
+      return;
+    } else {
+      _markerAppreances[userRoute[_value.currentIndex].id]?.color = Colors.red;
+      fetchRoute(
+        _value.currentLocation,
+        userRoute[_value.currentIndex].coordinates,
+      );
+    }
+    resetMap();
   }
 
-  void completeRoute() {}
+  void startRoute() {
+    for (int i = 0; i < userRoute.length; i++) {
+      if (i <= _value.currentIndex)
+        _markerAppreances[userRoute[i].id]?.color = Colors.red;
+      else
+        _markerAppreances[userRoute[i].id]?.color = Colors.black;
+    }
+    resetMap();
+  }
+
+  void completeRoute(BuildContext context) {
+    Navigator.of(
+      context,
+    ).pushReplacement(TransitionLRPageRoute(nextScreen: ResultAutoScreen()));
+  }
 
   void updateMissionImage(String missionId, String imagePath) {
     for (var m in _value.missionList) {
