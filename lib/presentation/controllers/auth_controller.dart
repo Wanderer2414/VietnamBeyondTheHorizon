@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
 
 final authProvider = ChangeNotifierProvider<AuthController>((ref) {
   final auth = AuthController();
@@ -144,6 +144,7 @@ class AuthController extends ChangeNotifier {
 
       if (userJson != null) {
         _user = UserAccount.fromJson(userJson);
+        await NetworkProxy.Account(_user!);
         return _user;
       }
     } else {
@@ -153,24 +154,15 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> _saveToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLoggedIn', true);
-    await prefs.setString('token', token);
-    // await prefs.setString("user_data", jsonEncode(_user!.toJson()));
-    // await prefs.setString("map_data", jsonEncode(mapData.toJson()));
+    await NetworkProxy.Token(token);
   }
 
   Future<void> loadToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    _token = prefs.getString('token');
+    _token = await NetworkProxy.token;
   }
 
   Future<void> logout() async {
-    _token = null;
-    _user = null;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLoggedIn', false);
-    await prefs.remove('token');
+    NetworkProxy.logout();
 
     notifyListeners();
   }

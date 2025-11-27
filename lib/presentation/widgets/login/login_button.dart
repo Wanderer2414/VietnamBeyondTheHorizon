@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/retry.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/auth_controller.dart';
 

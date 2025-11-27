@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/network_cookies.dart';
 
 class NetworkProxy {
@@ -19,6 +20,8 @@ class NetworkProxy {
       getToken: _getToken,
       getMission: _getMissions,
       setToken: _setToken,
+      getAcount: _getAccount,
+      setAccount: _setAccount,
     );
   }
   static void logout() async {
@@ -43,8 +46,16 @@ class NetworkProxy {
     return _getInstance()._cookies.token;
   }
 
-  static set token(String t) {
-    _getInstance()._cookies.token = t;
+  static Future<void> Token(String t) async {
+    await _getInstance()._cookies.Token(t);
+  }
+
+  static Future<UserAccount> get account async {
+    return _getInstance()._cookies.userAccount;
+  }
+
+  static Future<void> Account(UserAccount user) async {
+    await _getInstance()._cookies.Account(user);
   }
 
   static Future<void> _initialize() async {
@@ -81,22 +92,22 @@ class NetworkProxy {
     if (instance._cache == null)
       instance._cache = await SharedPreferences.getInstance();
     //Compare to last time saved
-    String? oldTStr = _instance!._cache!.getString("time");
-    if (oldTStr != null) {
-      DateTime oldtime = jsonDecode(oldTStr);
-      DateTime current = DateTime.now();
+    int? oldTInt = _instance!._cache!.getInt("time");
+    DateTime current = DateTime.now();
+    if (oldTInt != null) {
+      DateTime oldtime = DateTime.fromMillisecondsSinceEpoch(oldTInt);
       final dif = current.difference(oldtime);
       if (dif.inHours == 0) {
-        instance._cache!.setString(
-          "time",
-          jsonEncode(current),
-        ); //Cons: If user call it every hours, it will have never been valid checked!
         return instance._cache!;
       }
       //Check cache valid by comparing to server data, if valid, reset time
     }
     //Clear if over time or invalid
     _instance!._cache!.clear();
+    instance._cache!.setInt(
+      "time",
+      current.millisecondsSinceEpoch,
+    ); //Cons: If user call it every hours, it will have never been valid checked!
     return instance._cache!;
   }
 
@@ -134,6 +145,21 @@ class NetworkProxy {
       final data = jsonDecode(locsString) as List;
       return data.map((e) => LocationModel.fromJson(e)).toList();
     }
+  }
+
+  static Future<UserAccount> _getAccount() async {
+    final cache = await _getCache();
+
+    final raw = cache.getString("user");
+    if (raw == null) throw Exception(0);
+
+    final data = jsonDecode(raw);
+    return UserAccount.fromJson(data);
+  }
+
+  static Future<void> _setAccount(UserAccount account) async {
+    final cache = await _getCache();
+    cache.setString("user", jsonEncode(account));
   }
 
   static Future<List<MissionModel>> _getMissions() async {

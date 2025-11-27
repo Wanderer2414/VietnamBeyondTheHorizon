@@ -5,8 +5,6 @@ import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 class MapState {
   int currentIndex = 0;
   LatLng? currentLocation;
-  LatLng? destination;
-  double? distance;
   List<LocationModel> locationList;
   List<LocationModel> locationDataList;
   List<LatLng>? routes;
@@ -16,8 +14,6 @@ class MapState {
   MapState({
     this.currentIndex = 0,
     this.currentLocation,
-    this.destination,
-    this.distance,
     this.routes = const [],
     this.heading = 0,
     this.locationList = const [],
@@ -34,10 +30,6 @@ class MapState {
               'lng': currentLocation!.longitude,
             }
           : null,
-      'destination': destination != null
-          ? {'lat': destination!.latitude, 'lng': destination!.longitude}
-          : null,
-      'distance': distance,
       'heading': heading,
       'routes': routes
           ?.map((e) => {'lat': e.latitude, 'lng': e.longitude})
@@ -54,8 +46,6 @@ class MapState {
 
     return MapState(
       currentLocation: latLng(json['currentLocation']),
-      destination: latLng(json['destination']),
-      distance: (json['distance'] as num?)?.toDouble(),
       heading: (json['heading'] as num?)?.toDouble() ?? 0,
       routes:
           (json['routes'] as List?)

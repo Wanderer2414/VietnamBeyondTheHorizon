@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -21,23 +22,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   void navigateNext() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString('token');
-
-    print("token = $token");
-
-    if (token != null && token.isNotEmpty) {
-      final raw = prefs.getString("user_data");
-      if (raw != null) {
-        final data = jsonDecode(raw);
-        final user = UserAccount.fromJson(data);
-        ref.read(userProvider.notifier).setUser(user);
-      }
+    try {
+      final user = await NetworkProxy.account;
+      ref.read(userProvider.notifier).setUser(user);
       Navigator.pushReplacementNamed(context, "home");
-      return;
+    } catch (e) {
+      Navigator.pushReplacementNamed(context, "intro");
     }
-
-    Navigator.pushReplacementNamed(context, "intro");
   }
 
   @override

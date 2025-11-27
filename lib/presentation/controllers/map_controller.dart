@@ -8,12 +8,12 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vietnambeyondthehorizon/animations/card/appear.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/map_state.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/result_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/information_location.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
@@ -48,6 +48,9 @@ class MyMapController {
   }
 
   LatLng? get currentLocation {
+    if (_value.currentLocation == null) {
+      _initLocation();
+    }
     return _value.currentLocation;
   }
 
@@ -58,20 +61,9 @@ class MyMapController {
   Future<void> _initialize() async {
     await _loadProgress();
     await _initLocation();
-    final userGPS = await loadGPS();
-    _value.currentLocation = LatLng(userGPS['lat']!, userGPS['lng']!);
 
-    final prefs = await SharedPreferences.getInstance();
-    final cachedLoc = prefs.getString("cached_locationData");
-    final cachedMis = prefs.getString("cached_missions");
-    if (cachedLoc != null) {
-      final data = jsonDecode(cachedLoc) as List;
-      _value.locationDataList = data
-          .map((e) => LocationModel.fromJson(e))
-          .toList();
-    } else {
-      await _fetchLocationData();
-    }
+    await _fetchLocationData();
+    await _fetchMissionData();
 
     _markerAppreances = Map.fromIterable(
       _value.locationDataList,
@@ -91,37 +83,32 @@ class MyMapController {
         }
       },
     );
-    if (cachedMis != null) {
-      final data = jsonDecode(cachedMis) as List;
-
-      _value.missionList = data.map((e) => MissionModel.fromJson(e)).toList();
-    } else {
-      await _fetchMissionData();
-    }
   }
 
   Future<void> _initLocation() async {
     if (!await _checkPermission()) return;
 
     final locData = await _location.getLocation();
+    print(locData);
     if (locData.latitude != null && locData.longitude != null) {
       _value.currentLocation = LatLng(locData.latitude!, locData.longitude!);
-      saveGPS(locData.latitude!, locData.longitude!);
-      saveProgress();
+      // saveGPS(locData.latitude!, locData.longitude!);
+      // saveProgress();
     }
 
     _location.onLocationChanged.listen((loc) {
       if (loc.latitude != null && loc.longitude != null) {
         _value.currentLocation = LatLng(loc.latitude!, loc.longitude!);
-        saveGPS(loc.latitude!, loc.longitude!);
-        saveProgress();
+        // saveGPS(loc.latitude!, loc.longitude!);
+        // saveProgress();
       }
     });
   }
 
   Future<bool> _checkPermission() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return false;
+    if (!serviceEnabled)
+      if (!await Geolocator.openLocationSettings()) return false;
 
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied ||
@@ -136,23 +123,23 @@ class MyMapController {
   }
 
   Future<void> saveProgress() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = jsonEncode(_value.toJson());
-    await prefs.setString('map_progress', jsonString);
+    // final prefs = await SharedPreferences.getInstance();
+    // final jsonString = jsonEncode(_value.toJson());
+    // await prefs.setString('map_progress', jsonString);
     // debugPrint("Progress saved: $jsonString");
   }
 
   Future<void> _loadProgress() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString('map_progress');
-    if (jsonString == null) return;
+    // final prefs = await SharedPreferences.getInstance();
+    // final jsonString = prefs.getString('map_progress');
+    // if (jsonString == null) return;
 
-    try {
-      final data = jsonDecode(jsonString);
-      _value = MapState.fromJson(data);
-    } catch (e) {
-      throw Exception("Failed to load progress: $e");
-    }
+    // try {
+    //   final data = jsonDecode(jsonString);
+    //   _value = MapState.fromJson(data);
+    // } catch (e) {
+    //   throw Exception("Failed to load progress: $e");
+    // }
   }
 
   MapOptions mapOptions({
@@ -222,69 +209,11 @@ class MyMapController {
   }
 
   Future<void> _fetchLocationData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    if (token == null) {
-      throw Exception("User error: No token exists");
-    }
-
-    final url = Uri.parse(
-      "https://vnbth-backend.onrender.com/location/locations",
-    );
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        "Content-Type": "application/json",
-      },
-    );
-    final jsonBody = jsonDecode(response.body);
-
-    if (jsonBody['status'] == 'success') {
-      final List<dynamic> data = jsonBody['data'];
-      _value.locationDataList = data
-          .map((e) => LocationModel.fromJson(e))
-          .toList();
-      prefs.setString(
-        "cached_locationData",
-        jsonEncode(_value.locationDataList.map((e) => e.toJson()).toList()),
-      );
-    } else {
-      throw Exception("Network error: ${jsonBody['error']['message']}");
-    }
+    _value.locationDataList = await NetworkProxy.locations;
   }
 
   Future<void> _fetchMissionData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    if (token == null) {
-      throw Exception("User error: No token exists");
-    }
-
-    final url = Uri.parse(
-      "https://vnbth-backend.onrender.com/mission/missions",
-    );
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        "Content-Type": "application/json",
-      },
-    );
-    final jsonBody = jsonDecode(response.body);
-
-    if (jsonBody['status'] == 'success') {
-      final List<dynamic> dataList = jsonBody['data'];
-      _value.missionList = dataList
-          .map((e) => MissionModel.fromJson(e))
-          .toList();
-      prefs.setString(
-        "cached_missions",
-        jsonEncode(_value.missionList.map((e) => e.toJson()).toList()),
-      );
-    } else {
-      throw Exception("Network error: ${jsonBody['error']['message']}");
-    }
+    _value.missionList = await NetworkProxy.missions;
   }
 
   Future<void> fetchCoordinates(String locationName) async {
@@ -301,8 +230,7 @@ class MyMapController {
       if (data.isNotEmpty) {
         final lat = double.parse(data[0]['lat']);
         final lon = double.parse(data[0]['lon']);
-        _value.destination = LatLng(lat, lon);
-        await fetchRoute(_value.currentLocation, _value.destination);
+        await fetchRoute(_value.currentLocation, LatLng(lat, lon));
         resetMap();
       } else {
         throw Exception("Location not found.");
