@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/log_navigator.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/result_screen.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/result/result_mission.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/result/result_point.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/result/result_summary.dart';
 
 class TestPage extends StatefulWidget {
   const TestPage({super.key});

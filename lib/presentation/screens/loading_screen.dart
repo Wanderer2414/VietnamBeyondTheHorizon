@@ -2,19 +2,39 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
+class LoadingManager {
+  static final ValueNotifier<int> _loadingCount = ValueNotifier<int>(0);
+
+  static ValueNotifier<bool> get isLoadingNotifier =>
+      ValueNotifier(_loadingCount.value > 0);
+
+  static void show() {
+    _loadingCount.value++;
+    print("Loading count: ${_loadingCount.value}");
+  }
+
+  static void hide() {
+    if (_loadingCount.value > 0) {
+      _loadingCount.value--;
+    }
+    print("Loading count: ${_loadingCount.value}");
+  }
+}
+
 class LoadingWrapper extends StatelessWidget {
-  final bool isLoading;
   final Widget child;
 
-  const LoadingWrapper({
-    super.key,
-    required this.isLoading,
-    required this.child,
-  });
+  const LoadingWrapper({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [child, if (isLoading) const LoadingScreen()]);
+    return ValueListenableBuilder<int>(
+      valueListenable: LoadingManager._loadingCount,
+      builder: (context, count, _) {
+        bool isLoading = count > 0;
+        return Stack(children: [child, if (isLoading) const LoadingScreen()]);
+      },
+    );
   }
 }
 
@@ -58,10 +78,10 @@ class LoadingScreen extends StatelessWidget {
             children: [
               Container(
                 padding: EdgeInsets.all(15),
-                width: 300,
+                width: 250,
                 decoration: BoxDecoration(
                   color: const Color.fromARGB(109, 143, 44, 14),
-                  borderRadius: BorderRadius.circular(27),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   getQuote(),
@@ -73,7 +93,7 @@ class LoadingScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 25),
+              SizedBox(width: 15),
               SpinKitFadingCircle(
                 size: 80,
                 itemBuilder: (_, int index) {

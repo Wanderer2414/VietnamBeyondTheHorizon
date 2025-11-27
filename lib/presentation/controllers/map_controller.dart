@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 import 'package:vietnambeyondthehorizon/animations/card/appear.dart';
@@ -14,11 +14,11 @@ import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/map_state.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/result_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/information_location.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission_screen.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/map_share.dart';
 
 class MyMapController {
   MapController? mapController;
@@ -59,6 +59,7 @@ class MyMapController {
   }
 
   Future<void> _initialize() async {
+    LoadingManager.show();
     await _loadProgress();
     await _initLocation();
 
@@ -83,6 +84,7 @@ class MyMapController {
         }
       },
     );
+    LoadingManager.hide();
   }
 
   Future<void> _initLocation() async {
@@ -151,7 +153,7 @@ class MyMapController {
           _value.currentLocation ?? const LatLng(10.762622, 106.660172),
       initialZoom: 15,
       minZoom: 8,
-      maxZoom: 15,
+      maxZoom: 20,
       onTap: (tapPosition, point) => {},
       onMapReady: onMapReady,
     );
@@ -217,86 +219,105 @@ class MyMapController {
   }
 
   Future<void> fetchCoordinates(String locationName) async {
-    final url = Uri.parse(
-      "https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(locationName)}&format=json&limit=1",
-    );
+    final dio = Dio();
+    final url =
+        "https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(locationName)}&format=json&limit=1";
 
-    final response = await http.get(
-      url,
-      headers: {'User-Agent': 'my_map/1.0 (khangthinh111555@gmail.com)'},
-    );
-    if (response.statusCode == 200) {
-      final List data = json.decode(response.body);
-      if (data.isNotEmpty) {
-        final lat = double.parse(data[0]['lat']);
-        final lon = double.parse(data[0]['lon']);
-        await fetchRoute(_value.currentLocation, LatLng(lat, lon));
-        resetMap();
+    try {
+      final response = await dio.get(
+        url,
+        options: Options(
+          headers: {'User-Agent': 'my_map/1.0 (khangthinh111555@gmail.com)'},
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final List data = response.data;
+        if (data.isNotEmpty) {
+          final lat = double.parse(data[0]['lat']);
+          final lon = double.parse(data[0]['lon']);
+          await fetchRoute(_value.currentLocation, LatLng(lat, lon));
+          resetMap();
+        } else {
+          throw Exception("Location not found.");
+        }
       } else {
-        throw Exception("Location not found.");
+        throw Exception("Failed to fetch location.");
       }
-    } else {
-      throw Exception("Failed to fetch location.");
-    }
+    } catch (e) {
+      throw Exception("Failed to fetch location: $e");
+    } finally {}
   }
 
   Future<void> fetchRoute(LatLng? start, LatLng? end) async {
     if (start == null || end == null) return;
 
-    final url = Uri.parse(
-      'https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=polyline&alternatives=false&annotations=distance',
-    );
+    final dio = Dio();
+    final url =
+        'https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=polyline&alternatives=false&annotations=distance';
 
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final geometry = data['routes'][0]['geometry'];
-      final List<LatLng> decodedRoute = await compute<String, List<LatLng>>(
-        _decodePolyline,
-        geometry,
-      );
-      _value.routes = decodedRoute;
-      resetMap();
-    } else {
-      throw Exception('Failed to fetch route.');
-    }
+    try {
+      final response = await dio.get(url);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final geometry = data['routes'][0]['geometry'];
+        final List<LatLng> decodedRoute = await compute<String, List<LatLng>>(
+          _decodePolyline,
+          geometry,
+        );
+        _value.routes = decodedRoute;
+        resetMap();
+      } else {
+        throw Exception('Failed to fetch route.');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch route: $e');
+    } finally {}
   }
 
   Future<void> fetchFullRoute({List<LocationModel>? route}) async {
     route ??= _value.locationList;
     if (route.length < 2) return;
 
+    final dio = Dio();
     List<LatLng> fullRoute = [];
     LatLng end = _value.currentLocation!;
+
     for (int i = 0; i < route.length; i++) {
       final start = end;
       end = LatLng(route[i].latitude, route[i].longitude);
 
-      final url = Uri.parse(
-        'https://router.project-osrm.org/route/v1/driving/'
-        '${start.longitude},${start.latitude};'
-        '${end.longitude},${end.latitude}'
-        '?overview=full&geometries=polyline',
-      );
+      final url =
+          'https://router.project-osrm.org/route/v1/driving/'
+          '${start.longitude},${start.latitude};'
+          '${end.longitude},${end.latitude}'
+          '?overview=full&geometries=polyline';
 
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final geometry = data['routes'][0]['geometry'];
+      try {
+        final response = await dio.get(url);
 
-        final List<LatLng> decodedRoute = await compute<String, List<LatLng>>(
-          _decodePolyline,
-          geometry,
-        );
+        if (response.statusCode == 200) {
+          final data = response.data;
+          final geometry = data['routes'][0]['geometry'];
 
-        if (i > 0) decodedRoute.removeAt(0);
+          final List<LatLng> decodedRoute = await compute<String, List<LatLng>>(
+            _decodePolyline,
+            geometry,
+          );
 
-        fullRoute.addAll(decodedRoute);
-      } else {
-        throw Exception('Failed to fetch route between $i and ${i + 1}');
-      }
+          if (i > 0) decodedRoute.removeAt(0);
+
+          fullRoute.addAll(decodedRoute);
+        } else {
+          throw Exception('Failed to fetch route between $i and ${i + 1}');
+        }
+      } catch (e) {
+        throw Exception('Failed to fetch route: $e');
+      } finally {}
     }
     resetMap();
+
     // throw Exception("Full route length: ${fullRoute.length} points");
   }
 

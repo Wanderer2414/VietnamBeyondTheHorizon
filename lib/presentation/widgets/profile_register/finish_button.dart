@@ -3,22 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vietnambeyondthehorizon/data/models/city_map.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/auth_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 
 class FinishButton extends ConsumerStatefulWidget {
   final Size size;
   final String name;
   final int? age;
   final int? cityCode;
-  final void Function() toggleLoading;
-  final void Function() stopLoading;
   const FinishButton({
     super.key,
     required this.age,
     required this.name,
     required this.cityCode,
     required this.size,
-    required this.toggleLoading,
-    required this.stopLoading,
   });
 
   @override
@@ -32,7 +29,7 @@ class _FinishButtonState extends ConsumerState<FinishButton> {
     final user = ref.watch(userProvider);
     return ElevatedButton(
       onPressed: () async {
-        widget.toggleLoading();
+        LoadingManager.show();
 
         final name = widget.name.trim();
         final age = widget.age!;
@@ -58,7 +55,7 @@ class _FinishButtonState extends ConsumerState<FinishButton> {
                   ),
                 ),
               );
-          widget.stopLoading();
+          LoadingManager.hide();
 
           Navigator.of(context).pushReplacementNamed("home");
         } catch (e) {
@@ -66,7 +63,7 @@ class _FinishButtonState extends ConsumerState<FinishButton> {
             context,
           ).showSnackBar(SnackBar(content: Text("Update profile failed: $e")));
         } finally {
-          widget.stopLoading();
+          LoadingManager.hide();
         }
       },
       style: ButtonStyle(

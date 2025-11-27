@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
+import 'package:vietnambeyondthehorizon/main.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/dio_service.dart';
+import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
 final authProvider = ChangeNotifierProvider<AuthController>((ref) {
   final auth = AuthController();
@@ -13,35 +16,16 @@ final authProvider = ChangeNotifierProvider<AuthController>((ref) {
 class AuthController extends ChangeNotifier {
   String? _token;
   UserAccount? _user;
-  Dio _dio;
+  Dio get _dio => DioService.dio;
 
   String? get token => _token;
   UserAccount? get user => _user;
 
   bool get isLoggedIn => _token != null;
 
-  AuthController()
-    : _dio = Dio(BaseOptions(baseUrl: "https://vnbth-backend.onrender.com")) {
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) {
-          if (_token != null) {
-            options.headers["Authorization"] = "Bearer $_token";
-          }
-          options.headers["Content-Type"] = "application/json";
-          handler.next(options);
-        },
-        onError: (e, handler) {
-          if (e.response?.statusCode == 401) {
-            // token expired → logout
-            logout();
-          }
-          handler.next(e);
-        },
-      ),
-    );
+  AuthController() {
+    DioService.onTokenExpired = logout;
   }
-
   Future<void> signup(
     String email,
     String password,
@@ -165,5 +149,9 @@ class AuthController extends ChangeNotifier {
     NetworkProxy.logout();
 
     notifyListeners();
+    navigatorKey.currentState?.pushAndRemoveUntil(
+      MainRoute.newRoute("log_navigator"),
+      (route) => false,
+    );
   }
 }
