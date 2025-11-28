@@ -9,13 +9,10 @@ class DescriptionBox extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Description", style: TextStyle(fontSize: 15)),
+        Text("Description", style: TextStyle(fontSize: 20)),
         Padding(
           padding: const EdgeInsets.only(top: 8.0, bottom: 30),
-          child: Text(
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris efficitur ex sit amet elementum sagittis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris efficitur ex sit amet elementum sagittis.",
-            style: TextStyle(fontSize: 12),
-          ),
+          child: Text(description, style: TextStyle(fontSize: 15)),
         ),
       ],
     );

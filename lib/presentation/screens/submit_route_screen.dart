@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/map_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
@@ -11,13 +12,7 @@ import '../controllers/map_controller.dart';
 class SubmitRouteScreen extends StatefulWidget {
   final MyMapController controller;
   final List<LocationModel> route;
-  SubmitRouteScreen({
-    super.key,
-    required this.controller,
-    required this.route,
-  }) {
-    controller.fetchFullRoute(route: route);
-  }
+  SubmitRouteScreen({super.key, required this.controller, required this.route});
 
   @override
   State<SubmitRouteScreen> createState() => _SubmitRouteScreenState();
@@ -39,6 +34,10 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
       child: const Icon(Icons.my_location, size: 30, color: Colors.white),
     );
     _sidePanel = Drawer(child: SideBox());
+
+    // LoadingManager.run(context, (context) async {
+    //   widget.controller.fetchFullRoute(route: widget.route);
+    // });
   }
 
   @override
@@ -68,7 +67,8 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
           }, () {});
         },
         onStart: () {
-          widget.controller.userRoute = widget.route;
+          // widget.controller.userRoute = widget.route;
+          widget.controller.startRoute(widget.route);
           Navigator.of(context).pushReplacement(
             TransitionLRPageRoute(
               nextScreen: MapScreen(controller: widget.controller),
@@ -81,13 +81,18 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _key,
-      resizeToAvoidBottomInset: false,
-      appBar: _homeBar,
-      drawer: _sidePanel,
-      body: _content,
-      floatingActionButton: _myLocation,
+    return LoadingWrapper(
+      init: (context) async {
+        await widget.controller.fetchFullRoute(route: widget.route);
+      },
+      child: Scaffold(
+        key: _key,
+        resizeToAvoidBottomInset: false,
+        appBar: _homeBar,
+        drawer: _sidePanel,
+        body: _content,
+        floatingActionButton: _myLocation,
+      ),
     );
   }
 }

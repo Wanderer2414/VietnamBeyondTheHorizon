@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_down_bar.dart';
@@ -11,14 +10,15 @@ import 'package:vietnambeyondthehorizon/presentation/widgets/profile/start_panel
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile/tab_content_panel.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile/tab_panel.dart';
 
-class ProfilePage extends ConsumerStatefulWidget {
-  const ProfilePage({super.key});
+class ProfilePage extends StatefulWidget {
+  final UserAccount user;
+  const ProfilePage({super.key, required this.user});
 
   @override
-  ConsumerState<ProfilePage> createState() => _ProfilePageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends ConsumerState<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage> {
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
   final SideBox _box = SideBox();
 
@@ -53,7 +53,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               painter: profile.Decoration(),
               size: Size(size.width, size.height),
             ),
-            _Content(photos: photos),
+            _Content(photos: photos, user: widget.user),
           ],
         ),
       ),
@@ -65,21 +65,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 }
 
-class _Content extends ConsumerStatefulWidget {
-  const _Content({required this.photos});
+class _Content extends StatefulWidget {
+  final UserAccount user;
+  const _Content({required this.photos, required this.user});
 
   final List<String> photos;
 
   @override
-  ConsumerState<_Content> createState() => _ContentState();
+  State<_Content> createState() => _ContentState();
 }
 
-class _ContentState extends ConsumerState<_Content> {
+class _ContentState extends State<_Content> {
   int _selectedIndex = 0;
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(userProvider);
-    final username = user!.username;
     return Column(
       children: [
         // Header with gradient + avatar stacked on top
@@ -89,7 +88,7 @@ class _ContentState extends ConsumerState<_Content> {
 
         // Name & Location
         Text(
-          username,
+          widget.user.username,
           style: TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.bold,
@@ -100,7 +99,7 @@ class _ContentState extends ConsumerState<_Content> {
         ),
         const SizedBox(height: 6),
         Text(
-          user.city,
+          widget.user.city,
           style: TextStyle(
             fontSize: 15,
             color: Colors.grey.shade600,

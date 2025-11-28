@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
 
 class MapShow extends StatefulWidget {
   final Size size;
@@ -13,13 +15,21 @@ class MapShow extends StatefulWidget {
 }
 
 class _MapShowState extends State<MapShow> {
+  List<LocationModel>? _allLocation;
   MapController _mapController = MapController();
   @override
   void initState() {
     super.initState();
+    print("Set reset map");
     widget.controller.resetMap = () {
+      print("Reset map");
       setState(() {});
     };
+    NetworkProxy.locations.then(
+      (value) => setState(() {
+        _allLocation = value;
+      }),
+    );
   }
 
   @override
@@ -36,8 +46,15 @@ class _MapShowState extends State<MapShow> {
         ),
         children: widget.controller.mapLayers(
           context,
-          widget.controller.allLocationn,
-          (location) => widget.controller.toggleMissionCard(context, location),
+          _allLocation ?? [],
+          (location) =>
+              widget.controller.toggleLocationInfo(context, location, () {
+                widget.controller.fetchRoute(
+                  widget.controller.currentLocation,
+                  location.coordinates,
+                );
+              }, () {}),
+          isGameMode: false,
         ),
       ),
     );

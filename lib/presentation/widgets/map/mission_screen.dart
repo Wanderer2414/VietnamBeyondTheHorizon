@@ -5,12 +5,13 @@ import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission/mission
 
 class MissionScreen extends StatelessWidget {
   final MyMapController controller;
-  final Function() onNavigate;
+  final Function() onNavigate, onClose;
   final LocationModel locationModel;
   const MissionScreen({
     super.key,
     required this.controller,
     required this.onNavigate,
+    required this.onClose,
     required this.locationModel,
   });
 
@@ -34,6 +35,7 @@ class MissionScreen extends StatelessWidget {
                 location: locationModel,
                 controller: controller,
                 onNavigate: onNavigate,
+                onClose: onClose,
               ),
             ),
           ),

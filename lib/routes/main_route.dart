@@ -5,6 +5,7 @@ import 'package:vietnambeyondthehorizon/presentation/screens/account_register.da
 import 'package:vietnambeyondthehorizon/presentation/screens/home_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/input_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/introduction_screen.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/log_navigator.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/splash_begin_screen.dart';
 import 'package:vietnambeyondthehorizon/test_page.dart';
@@ -23,16 +24,23 @@ class MainRoute {
         return TransitionRLPageRoute(nextScreen: LogNavigatorScreen());
 
       case "login":
-        return TransitionRLPageRoute(nextScreen: AccountLoginScreen());
+        return TransitionRLPageRoute(
+          nextScreen: LoadingWrapper(child: AccountLoginScreen()),
+        );
 
       case "register":
-        return TransitionRLPageRoute(nextScreen: AccountRegisterScreen());
+        return TransitionRLPageRoute(
+          nextScreen: LoadingWrapper(child: AccountRegisterScreen()),
+        );
 
       case "filter":
-        return TransitionRLPageRoute(nextScreen: InputPage());
+        return TransitionRLPageRoute(
+          nextScreen: LoadingWrapper(child: InputPage()),
+        );
 
       case "home":
         return TransitionRLPageRoute(nextScreen: HomeScreen());
+
       case "test":
         return TransitionRLPageRoute(nextScreen: TestPage());
       default:

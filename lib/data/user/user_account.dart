@@ -1,23 +1,13 @@
-import 'dart:convert';
-
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-final userProvider = StateNotifierProvider<UserNotifier, UserAccount?>(
-  (ref) => UserNotifier(),
-);
-
-class UserAccount {
-  final String email;
-  final String username;
-  final int age;
-  final String avatarUrl;
-  final String city;
-  final int star;
-  final int diamond;
-  final DateTime? createdAt;
-
-  UserAccount({
+class UserAccountCore {
+  String email;
+  String username;
+  int age;
+  String avatarUrl;
+  String city;
+  int star;
+  int diamond;
+  DateTime? createdAt;
+  UserAccountCore._({
     required this.email,
     this.username = "",
     this.age = 0,
@@ -27,9 +17,8 @@ class UserAccount {
     this.star = 0,
     this.diamond = 0,
   });
-
-  factory UserAccount.fromJson(Map<String, dynamic> json) {
-    return UserAccount(
+  factory UserAccountCore.fromJson(Map<String, dynamic> json) {
+    return UserAccountCore._(
       email: json['email'] ?? "",
       username: json['name'] ?? "",
       age: json['age'] ?? 0,
@@ -56,50 +45,69 @@ class UserAccount {
     };
   }
 
-  UserAccount copyWith({
-    String? email,
-    String? username,
-    int? age,
-    int? star,
-    int? diamond,
-    String? avatarUrl,
-    String? city,
-    DateTime? createdAt,
-  }) {
-    return UserAccount(
-      email: email ?? this.email,
-      username: username ?? this.username,
-      age: age ?? this.age,
-      star: star ?? this.star,
-      diamond: diamond ?? this.diamond,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-      city: city ?? this.city,
-      createdAt: createdAt ?? this.createdAt,
-    );
+  UserAccount get userAccount {
+    return UserAccount._(this);
   }
 }
 
-class UserNotifier extends StateNotifier<UserAccount?> {
-  UserNotifier() : super(null);
-
-  void setUser(UserAccount user) async {
-    state = user;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("user_data", jsonEncode(user.toJson()));
+class UserAccount {
+  final UserAccountCore _core;
+  UserAccount._(UserAccountCore core) : _core = core;
+  String get email {
+    return _core.email;
   }
 
-  void updateUser(UserAccount updated) async {
-    state = updated;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("user_data", jsonEncode(updated.toJson()));
+  String get username {
+    return _core.username;
   }
 
-  void clearUser() async {
-    state = null;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove("user_data");
+  int get age {
+    return _core.age;
+  }
+
+  String get avatarUrl {
+    return _core.avatarUrl;
+  }
+
+  String get city {
+    return _core.city;
+  }
+
+  int get star {
+    return _core.star;
+  }
+
+  int get diamond {
+    return _core.diamond;
+  }
+
+  DateTime? get createdAt {
+    return _core.createdAt;
   }
 }
+
+//   UserAccount copyWith({
+//     String? email,
+//     String? username,
+//     int? age,
+//     int? star,
+//     int? diamond,
+//     String? avatarUrl,
+//     String? city,
+//     DateTime? createdAt,
+//   }) {
+//     return UserAccount(
+//       email: email ?? this.email,
+//       username: username ?? this.username,
+//       age: age ?? this.age,
+//       star: star ?? this.star,
+//       diamond: diamond ?? this.diamond,
+//       avatarUrl: avatarUrl ?? this.avatarUrl,
+//       city: city ?? this.city,
+//       createdAt: createdAt ?? this.createdAt,
+//     );
+//   }
+// }
 
 // {
 //     "status": "success",

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/input_screen.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 
 class PlayConfirmBox extends StatelessWidget {
   final Size size;

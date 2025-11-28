@@ -1,81 +1,68 @@
-import 'dart:async';
-import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vietnambeyondthehorizon/animations/card/appear.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
+import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/map_state.dart';
-import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/result_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/information_location.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission_screen.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/map_share.dart';
 
 class MyMapController {
   MapController? mapController;
   final Location _location = Location();
   MapState _value = MapState();
+  final GameProgressManager gameManager = GameProgressManager();
   void Function() resetMap = () {};
 
-  List<LocationModel> get allLocationn {
-    return _value.locationDataList;
-  }
-
-  List<MissionModel> get allMission {
-    return _value.missionList;
-  }
-
   LocationModel get currentMissionLocation {
-    return _value.locationList[_value.currentIndex];
+    return gameManager.userRoute[gameManager.currentIndex];
   }
 
-  set userRoute(List<LocationModel> route) {
-    _value.locationList = route;
-  }
+  // set userRoute(List<LocationModel> route) {
+  //   gameManager.userRoute = route;
+  // }
 
-  List<LocationModel> get userRoute {
-    return _value.locationList;
-  }
+  // List<LocationModel> get userRoute {
+  //   return _value.locationList;
+  // }
+  List<LocationModel> get userRoute => gameManager.userRoute;
 
   LatLng? get currentLocation {
+    if (_value.currentLocation == null) {
+      _initLocation();
+    }
     return _value.currentLocation;
   }
 
-  MyMapController() {
-    _initialize();
-  }
+  Future<void> initialize() async {
+    try {
+      await _initLocation();
+      await gameManager.loadProgress();
 
-  Future<void> _initialize() async {
-    await _loadProgress();
-    await _initLocation();
-    final userGPS = await loadGPS();
-    _value.currentLocation = LatLng(userGPS['lat']!, userGPS['lng']!);
+      // final userGPS = await loadGPS();
+      // _value.currentLocation = LatLng(userGPS['lat']!, userGPS['lng']!);
 
-    final prefs = await SharedPreferences.getInstance();
-    final cachedLoc = prefs.getString("cached_locationData");
-    final cachedMis = prefs.getString("cached_missions");
-    if (cachedLoc != null) {
-      final data = jsonDecode(cachedLoc) as List;
-      _value.locationDataList = data
-          .map((e) => LocationModel.fromJson(e))
-          .toList();
-    } else {
-      await _fetchLocationData();
-    }
-    if (cachedMis != null) {
-      final data = jsonDecode(cachedMis) as List;
-
-      _value.missionList = data.map((e) => MissionModel.fromJson(e)).toList();
-    } else {
-      await _fetchMissionData();
+      if (gameManager.userRoute.isNotEmpty &&
+          gameManager.currentTarget != null) {
+        await fetchRoute(
+          _value.currentLocation,
+          gameManager.currentTarget!.coordinates,
+        );
+      }
+    } catch (e) {
+      print("Eror in initializing map: ${e}");
+    } finally {
+      resetMap();
     }
   }
 
@@ -83,24 +70,27 @@ class MyMapController {
     if (!await _checkPermission()) return;
 
     final locData = await _location.getLocation();
+    print(locData.latitude);
+    print(locData.longitude);
     if (locData.latitude != null && locData.longitude != null) {
       _value.currentLocation = LatLng(locData.latitude!, locData.longitude!);
-      saveGPS(locData.latitude!, locData.longitude!);
-      saveProgress();
+      // saveGPS(locData.latitude!, locData.longitude!);
+      // saveProgress();
     }
 
     _location.onLocationChanged.listen((loc) {
       if (loc.latitude != null && loc.longitude != null) {
         _value.currentLocation = LatLng(loc.latitude!, loc.longitude!);
-        saveGPS(loc.latitude!, loc.longitude!);
-        saveProgress();
+        // saveGPS(loc.latitude!, loc.longitude!);
+        // saveProgress();
       }
     });
   }
 
   Future<bool> _checkPermission() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return false;
+    if (!serviceEnabled)
+      if (!await Geolocator.openLocationSettings()) return false;
 
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied ||
@@ -111,27 +101,8 @@ class MyMapController {
         return false;
       }
     }
+
     return true;
-  }
-
-  Future<void> saveProgress() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = jsonEncode(_value.toJson());
-    await prefs.setString('map_progress', jsonString);
-    // debugPrint("Progress saved: $jsonString");
-  }
-
-  Future<void> _loadProgress() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString('map_progress');
-    if (jsonString == null) return;
-
-    try {
-      final data = jsonDecode(jsonString);
-      _value = MapState.fromJson(data);
-    } catch (e) {
-      throw Exception("Failed to load progress: $e");
-    }
   }
 
   MapOptions mapOptions({
@@ -143,7 +114,7 @@ class MyMapController {
           _value.currentLocation ?? const LatLng(10.762622, 106.660172),
       initialZoom: 15,
       minZoom: 8,
-      maxZoom: 15,
+      maxZoom: 20,
       onTap: (tapPosition, point) => {},
       onMapReady: onMapReady,
     );
@@ -152,8 +123,9 @@ class MyMapController {
   List<Widget> mapLayers(
     BuildContext context,
     List<LocationModel> locationList,
-    void Function(LocationModel location) onLocationTap,
-  ) {
+    void Function(LocationModel location) onLocationTap, {
+    required bool isGameMode,
+  }) {
     final layers = <Widget>[
       TileLayer(
         urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -165,7 +137,13 @@ class MyMapController {
       layers.add(
         PolylineLayer(
           polylines: [
-            Polyline(points: _value.routes!, strokeWidth: 5, color: Colors.red),
+            Polyline(
+              points: _value.routes!,
+              strokeWidth: 6,
+              borderColor: Colors.blue.shade900,
+              borderStrokeWidth: 2,
+              color: Colors.blue.shade500,
+            ),
           ],
         ),
       );
@@ -177,6 +155,8 @@ class MyMapController {
           marker: DefaultLocationMarker(
             child: Icon(Icons.location_pin, color: Colors.red),
           ),
+          // accuracyCircleColor: Colors.black,
+          headingSectorColor: Colors.black54,
           markerSize: Size(35, 35),
           // markerDirection: MarkerDirection.heading,
         ),
@@ -184,168 +164,142 @@ class MyMapController {
     );
 
     layers.add(
-      MarkerLayerWidget(
-        locations: locationList,
-        onMarkerTap: (location, context) {
-          onLocationTap(location);
-        },
-        onMovingToLocation: moveToLocation,
+      MarkerLayer(
+        markers: locationList
+            .map(
+              (e) => LocationMarker(
+                context,
+                e,
+
+                gameManager.getMarkerAppearance(
+                  location: e,
+                  isGameMode: isGameMode,
+                ),
+                (loc, context) {
+                  if (isGameMode && gameManager.isLocked(loc)) {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "Locked! Complete the previous mission first",
+                        ),
+                        backgroundColor: Colors.grey[800],
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                    return;
+                  }
+                  onLocationTap(loc);
+                },
+              ),
+            )
+            .toList(),
       ),
     );
     return layers;
   }
 
-  Future<void> _fetchLocationData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    if (token == null) {
-      throw Exception("User error: No token exists");
-    }
-
-    final url = Uri.parse(
-      "https://vnbth-backend.onrender.com/location/locations",
-    );
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        "Content-Type": "application/json",
-      },
-    );
-    final jsonBody = jsonDecode(response.body);
-
-    if (jsonBody['status'] == 'success') {
-      final List<dynamic> data = jsonBody['data'];
-      _value.locationDataList = data
-          .map((e) => LocationModel.fromJson(e))
-          .toList();
-      prefs.setString(
-        "cached_locationData",
-        jsonEncode(_value.locationDataList.map((e) => e.toJson()).toList()),
-      );
-      //print(jsonEncode(value.locationDataList.map((e) => e.toJson()).toList()));
-    } else {
-      throw Exception("Network error: ${jsonBody['error']['message']}");
-    }
-  }
-
-  Future<void> _fetchMissionData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    if (token == null) {
-      throw Exception("User error: No token exists");
-    }
-
-    final url = Uri.parse(
-      "https://vnbth-backend.onrender.com/mission/missions",
-    );
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        "Content-Type": "application/json",
-      },
-    );
-    final jsonBody = jsonDecode(response.body);
-
-    if (jsonBody['status'] == 'success') {
-      final List<dynamic> dataList = jsonBody['data'];
-      _value.missionList = dataList
-          .map((e) => MissionModel.fromJson(e))
-          .toList();
-      prefs.setString(
-        "cached_missions",
-        jsonEncode(_value.missionList.map((e) => e.toJson()).toList()),
-      );
-    } else {
-      throw Exception("Network error: ${jsonBody['error']['message']}");
-    }
-  }
-
   Future<void> fetchCoordinates(String locationName) async {
-    final url = Uri.parse(
-      "https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(locationName)}&format=json&limit=1",
-    );
+    final dio = Dio();
+    final url =
+        "https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(locationName)}&format=json&limit=1";
 
-    final response = await http.get(
-      url,
-      headers: {'User-Agent': 'my_map/1.0 (khangthinh111555@gmail.com)'},
-    );
-    if (response.statusCode == 200) {
-      final List data = json.decode(response.body);
-      if (data.isNotEmpty) {
-        final lat = double.parse(data[0]['lat']);
-        final lon = double.parse(data[0]['lon']);
-        _value.destination = LatLng(lat, lon);
-        await fetchRoute(_value.currentLocation, _value.destination);
-        resetMap();
+    try {
+      final response = await dio.get(
+        url,
+        options: Options(
+          headers: {'User-Agent': 'my_map/1.0 (khangthinh111555@gmail.com)'},
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final List data = response.data;
+        if (data.isNotEmpty) {
+          final lat = double.parse(data[0]['lat']);
+          final lon = double.parse(data[0]['lon']);
+          await fetchRoute(_value.currentLocation, LatLng(lat, lon));
+          resetMap();
+        } else {
+          throw Exception("Location not found.");
+        }
       } else {
-        throw Exception("Location not found.");
+        throw Exception("Failed to fetch location.");
       }
-    } else {
-      throw Exception("Failed to fetch location.");
-    }
+    } catch (e) {
+      throw Exception("Failed to fetch location: $e");
+    } finally {}
   }
 
   Future<void> fetchRoute(LatLng? start, LatLng? end) async {
     if (start == null || end == null) return;
+    final dio = Dio();
+    final url =
+        'https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=polyline&alternatives=false&annotations=distance';
 
-    final url = Uri.parse(
-      'https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=polyline&alternatives=false&annotations=distance',
-    );
+    try {
+      final response = await dio.get(url);
 
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final geometry = data['routes'][0]['geometry'];
-      final List<LatLng> decodedRoute = await compute<String, List<LatLng>>(
-        _decodePolyline,
-        geometry,
-      );
-      _value.routes = decodedRoute;
-      resetMap();
-    } else {
-      throw Exception('Failed to fetch route.');
-    }
-  }
-
-  Future<void> fetchFullRoute({List<LocationModel>? route}) async {
-    route ??= _value.locationList;
-    if (route.length < 2) return;
-
-    List<LatLng> fullRoute = [];
-    LatLng end = _value.currentLocation!;
-    for (int i = 0; i < route.length; i++) {
-      final start = end;
-      end = LatLng(route[i].latitude, route[i].longitude);
-
-      final url = Uri.parse(
-        'https://router.project-osrm.org/route/v1/driving/'
-        '${start.longitude},${start.latitude};'
-        '${end.longitude},${end.latitude}'
-        '?overview=full&geometries=polyline',
-      );
-
-      final response = await http.get(url);
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = response.data;
         final geometry = data['routes'][0]['geometry'];
-
         final List<LatLng> decodedRoute = await compute<String, List<LatLng>>(
           _decodePolyline,
           geometry,
         );
-
-        if (i > 0) decodedRoute.removeAt(0);
-
-        fullRoute.addAll(decodedRoute);
+        _value.routes = decodedRoute;
+        resetMap();
       } else {
-        throw Exception('Failed to fetch route between $i and ${i + 1}');
+        throw Exception('Failed to fetch route.');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch route: $e');
+    } finally {}
+  }
+
+  Future<void> fetchFullRoute({List<LocationModel>? route}) async {
+    route ??= gameManager.userRoute;
+    if (route.length < 2) return;
+
+    _value.routes = [];
+    final dio = Dio();
+    LatLng end = _value.currentLocation!;
+
+    for (int i = 0; i < route.length; i++) {
+      final start = end;
+      end = LatLng(route[i].latitude, route[i].longitude);
+
+      final url =
+          'https://router.project-osrm.org/route/v1/driving/'
+          '${start.longitude},${start.latitude};'
+          '${end.longitude},${end.latitude}'
+          '?overview=full&geometries=polyline';
+
+      try {
+        final response = await dio.get(url);
+
+        if (response.statusCode == 200) {
+          final data = response.data;
+          final geometry = data['routes'][0]['geometry'];
+
+          final List<LatLng> decodedRoute = await compute<String, List<LatLng>>(
+            _decodePolyline,
+            geometry,
+          );
+
+          if (i > 0) decodedRoute.removeAt(0);
+
+          _value.routes?.addAll(decodedRoute);
+        } else {
+          throw Exception('Failed to fetch route between $i and ${i + 1}');
+        }
+      } catch (e) {
+        throw Exception('Failed to fetch route: $e');
       }
     }
-    _value.routes = fullRoute;
+    print("Done fetch ${route.length} locs");
     resetMap();
-    throw Exception("Full route length: ${fullRoute.length} points");
+
+    // throw Exception("Full route length: ${fullRoute.length} points");
   }
 
   // Future<double> fetchDistance(LatLng? start, LatLng? end) async {
@@ -425,24 +379,63 @@ class MyMapController {
           controller: this,
           locationModel: location,
           onNavigate: () {},
+          onClose: () {
+            if (gameManager.currentIndex == userRoute.length)
+              completeRoute(context);
+          },
         ),
       ),
     );
   }
 
-  void nextMission() {
-    if (_value.currentIndex >= userRoute.length) return;
-    _value.currentIndex++;
-    if (_value.currentIndex == userRoute.length)
-      completeRoute();
-    else
+  void nextMission(BuildContext context) {
+    if (gameManager.isFinished) {
+      throw Exception("Out range of userRoute");
+    }
+    gameManager.nextStage();
+
+    if (gameManager.isFinished) {
+      completeRoute(context);
       resetMap();
+      return;
+    }
+
+    if (gameManager.currentTarget != null) {
+      fetchRoute(
+        _value.currentLocation,
+        userRoute[gameManager.currentIndex].coordinates,
+      );
+    }
+    resetMap();
   }
 
-  void completeRoute() {}
+  void startRoute(List<LocationModel> newRoute) {
+    gameManager.startGame(newRoute);
 
-  void updateMissionImage(String missionId, String imagePath) {
-    for (var m in _value.missionList) {
+    if (gameManager.currentTarget != null) {
+      fetchRoute(
+        _value.currentLocation,
+        gameManager.currentTarget!.coordinates,
+      );
+    }
+
+    // for (int i = 0; i < userRoute.length; i++) {
+    //   if (i <= gameManager.currentIndex)
+    //     _markerAppreances[userRoute[i].id]?.color = Colors.red;
+    //   else
+    //     _markerAppreances[userRoute[i].id]?.color = Colors.black;
+    // }
+    resetMap();
+  }
+
+  void completeRoute(BuildContext context) {
+    Navigator.of(
+      context,
+    ).pushReplacement(TransitionLRPageRoute(nextScreen: ResultAutoScreen()));
+  }
+
+  Future<void> updateMissionImage(String missionId, String imagePath) async {
+    for (var m in await NetworkProxy.missions) {
       if (m.id == missionId) {
         m.imagePath = imagePath;
         //notifyListeners();

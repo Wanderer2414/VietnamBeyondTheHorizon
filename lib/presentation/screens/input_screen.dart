@@ -1,12 +1,13 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
-import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
-import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
+import 'package:vietnambeyondthehorizon/main.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/gen_routes_algo_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/map_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/submit_route_screen.dart';
 
 // Class lưu trữ thông tin đầu vào của user
@@ -65,7 +66,7 @@ class InputPage extends StatefulWidget {
   State<InputPage> createState() => _InputPageState();
 }
 
-class _InputPageState extends State<InputPage> {
+class _InputPageState extends State<InputPage> with RouteAware {
   final TextEditingController _budgetController = TextEditingController(
     text: '20\$',
   );
@@ -92,69 +93,70 @@ class _InputPageState extends State<InputPage> {
     super.dispose();
   }
 
-  void toggleLoading() {
-    setState(() {
-      _isLoading = true;
-    });
-  }
-
-  void stopLoading() {
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
   // Hàm xử lý khi nhấn nút NEXT
-  void _handleNext() async {
-    setState(() {
-      _isLoading = true;
-    });
+  Future<void> _handleNext() async {
+    LoadingManager.run(context, (context) async {
+      try {
+        if (userInput.myMapController.currentLocation != null) {
+          userInput.gpsLocation = userInput.myMapController.currentLocation!;
+          print("------START----------");
 
-    try {
-      if (userInput.myMapController.currentLocation != null) {
-        userInput.gpsLocation = userInput.myMapController.currentLocation!;
+          if (userInput.myMapController.currentLocation != null) {
+            print("User GPS is not null");
 
-        // Cập nhật UserInput với dữ liệu từ các controllers
-        userInput.budget = UserInput.parseBudget(_budgetController.text);
-        userInput.durationDays = UserInput.parseDuration(
-          _durationController.text,
-        );
+            userInput.gpsLocation = userInput.myMapController.currentLocation!;
 
-        // Gọi thuật toán để tạo route
-        var route = await _routePlanner.generateRouteFromUserInput(
-          userGPS: userInput.gpsLocation!,
-          selectedInterests: userInput.getSelectedInterests(),
-          budget: userInput.budget,
-          durationDays: userInput.durationDays,
-          allLocations: userInput.myMapController.allLocationn,
-          allMissions: userInput.myMapController.allMission,
-        );
-        if (mounted) {
-          Navigator.of(context).push(
-            TransitionRLPageRoute(
-              nextScreen: SubmitRouteScreen(
-                controller: userInput.myMapController,
-                route: route,
+            // Cập nhật UserInput với dữ liệu từ các controllers
+            userInput.budget = UserInput.parseBudget(_budgetController.text);
+            userInput.durationDays = UserInput.parseDuration(
+              _durationController.text,
+            );
+
+            // Gọi thuật toán để tạo route
+            final route = await _routePlanner.generateRouteFromUserInput(
+              userGPS: userInput.gpsLocation!,
+              selectedInterests: userInput.getSelectedInterests(),
+              budget: userInput.budget,
+              durationDays: userInput.durationDays,
+              allLocations: await NetworkProxy.locations,
+              allMissions: await NetworkProxy.missions,
+            );
+
+            Navigator.of(context).push(
+              TransitionRLPageRoute(
+                nextScreen: SubmitRouteScreen(
+                  controller: userInput.myMapController,
+                  route: route,
+                ),
               ),
-            ),
-          );
+            );
+          }
         }
+      } catch (e) {
+        print(e);
       }
-    } catch (e) {
-      //
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)! as PageRoute);
+  }
+
+  @override
+  void didPopNext() {
+    print("Clear reset map");
+    userInput.myMapController.resetMap = () {};
+    super.didPopNext();
   }
 
   @override
   Widget build(BuildContext context) {
     return LoadingWrapper(
-      isLoading: _isLoading,
+      init: (context) async {
+        await userInput.myMapController.initialize();
+      },
       child: Scaffold(
         body: Container(
           decoration: const BoxDecoration(
@@ -381,6 +383,7 @@ class _InputPageState extends State<InputPage> {
                                 // Next Button
                                 InkWell(
                                   onTap: _isLoading ? null : _handleNext,
+
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 50,
@@ -411,27 +414,15 @@ class _InputPageState extends State<InputPage> {
                                         ),
                                       ],
                                     ),
-                                    child: _isLoading
-                                        ? const SizedBox(
-                                            height: 20,
-                                            width: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                    Colors.white,
-                                                  ),
-                                            ),
-                                          )
-                                        : const Text(
-                                            'NEXT',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.w600,
-                                              letterSpacing: 1.5,
-                                            ),
-                                          ),
+                                    child: const Text(
+                                      'NEXT',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 1.5,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],

@@ -1,73 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vietnambeyondthehorizon/data/models/city_map.dart';
-import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/auth_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 
-class FinishButton extends ConsumerStatefulWidget {
+class FinishButton extends StatefulWidget {
   final Size size;
   final String name;
   final int? age;
   final int? cityCode;
-  final void Function() toggleLoading;
-  final void Function() stopLoading;
   const FinishButton({
     super.key,
     required this.age,
     required this.name,
     required this.cityCode,
     required this.size,
-    required this.toggleLoading,
-    required this.stopLoading,
   });
 
   @override
-  ConsumerState<FinishButton> createState() => _FinishButtonState();
+  State<FinishButton> createState() => _FinishButtonState();
 }
 
-class _FinishButtonState extends ConsumerState<FinishButton> {
+class _FinishButtonState extends State<FinishButton> {
   @override
   Widget build(BuildContext context) {
-    final auth = ref.read(authProvider);
-    final user = ref.watch(userProvider);
     return ElevatedButton(
-      onPressed: () async {
-        widget.toggleLoading();
-
+      onPressed: () {
         final name = widget.name.trim();
         final age = widget.age!;
         final cityCode = widget.cityCode!;
-        try {
-          await auth.updateProfile(
-            name: name,
-            age: age,
-            city: cityMap[cityCode] ?? "Unknown",
-          );
-          DateTime todayDateOnly = DateTime.now();
-          ref
-              .read(userProvider.notifier)
-              .updateUser(
-                user!.copyWith(
-                  username: name,
-                  age: age,
-                  city: cityMap[cityCode],
-                  createdAt: DateTime(
-                    todayDateOnly.year,
-                    todayDateOnly.month,
-                    todayDateOnly.day,
-                  ),
-                ),
-              );
-          widget.stopLoading();
-
-          Navigator.of(context).pushReplacementNamed("home");
-        } catch (e) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("Update profile failed: $e")));
-        } finally {
-          widget.stopLoading();
-        }
+        LoadingManager.run(context, (context) async {
+          try {
+            NetworkProxy.updateProfile(
+              name,
+              age,
+              cityMap[cityCode] ?? "Unknown",
+            );
+            Navigator.of(context).pushReplacementNamed("home");
+          } catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Update profile failed: $e")),
+            );
+          }
+        });
       },
       style: ButtonStyle(
         backgroundColor: WidgetStatePropertyAll(Colors.transparent),

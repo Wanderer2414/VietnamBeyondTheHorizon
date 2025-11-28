@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/profile_page.dart';
 
 class UserButton extends StatelessWidget {
@@ -10,9 +11,11 @@ class UserButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
-        Navigator.of(
-          context,
-        ).pushReplacement(TransitionRLPageRoute(nextScreen: ProfilePage()));
+        NetworkProxy.account.then((value) {
+          Navigator.of(context).pushReplacement(
+            TransitionRLPageRoute(nextScreen: ProfilePage(user: value)),
+          );
+        });
       },
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(

@@ -1,19 +1,15 @@
 import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
 
-class SplashScreen extends ConsumerStatefulWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  ConsumerState<SplashScreen> createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends ConsumerState<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
@@ -21,23 +17,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   void navigateNext() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString('token');
-
-    print("token = $token");
-
-    if (token != null && token.isNotEmpty) {
-      final raw = prefs.getString("user_data");
-      if (raw != null) {
-        final data = jsonDecode(raw);
-        final user = UserAccount.fromJson(data);
-        ref.read(userProvider.notifier).setUser(user);
-      }
+    if (await NetworkProxy.isLogged()) {
+      print("Log");
       Navigator.pushReplacementNamed(context, "home");
-      return;
+    } else {
+      Navigator.pushReplacementNamed(context, "intro");
     }
-
-    Navigator.pushReplacementNamed(context, "intro");
   }
 
   @override
