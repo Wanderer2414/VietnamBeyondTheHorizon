@@ -2,19 +2,19 @@ import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 
 class MapState {
-  int currentIndex = 0;
+  // int currentIndex = 0;
   LatLng? currentLocation;
   List<LocationModel> locationList;
   List<LatLng>? routes;
 
   MapState({
-    this.currentIndex = 0,
+    // this.currentIndex = 0,
     this.currentLocation,
     this.routes = const [],
     this.locationList = const [],
   });
 
-  // ---------------------- JSON ------------------------
+  // ------------------- JSON ------------------------
   Map<String, dynamic> toJson() {
     return {
       'currentLocation': currentLocation != null

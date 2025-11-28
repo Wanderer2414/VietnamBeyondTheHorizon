@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
@@ -64,167 +67,193 @@ class _MissionCardState extends State<MissionCard> {
     return true;
   }
 
-  Future<XFile?> compressImage(XFile file) async {
-    final filePath = file.path;
-    final lastIndex = filePath.lastIndexOf(new RegExp(r'.jp'));
-    final splitted = filePath.substring(0, (lastIndex));
-    final outPath = "${splitted}_out${filePath.substring(lastIndex)}";
+  // Future<XFile?> compressImage(XFile file) async {
+  //   final filePath = file.path;
+  //   final lastIndex = filePath.lastIndexOf(new RegExp(r'.jp'));
+  //   final splitted = filePath.substring(0, (lastIndex));
+  //   final outPath = "${splitted}_out${filePath.substring(lastIndex)}";
 
-    var result = await FlutterImageCompress.compressAndGetFile(
-      file.path,
-      outPath,
-      quality: 70,
-      minWidth: 800,
-      minHeight: 800,
-    );
-    return result;
-  }
+  //   var result = await FlutterImageCompress.compressAndGetFile(
+  //     file.path,
+  //     outPath,
+  //     quality: 70,
+  //     minWidth: 800,
+  //     minHeight: 800,
+  //   );
+  //   return result;
+  // }
 
-  Future<void> _submitImage(XFile? imagePath) async {
+  Future<bool> _submitImage(XFile? imagePath) async {
     if (imagePath == null) throw Exception(("Please upload your image"));
 
     final fileName = imagePath.path.split('/').last;
 
-    final compressedFile = await compressImage(imagePath);
     FormData formData = FormData.fromMap({
       "files": await MultipartFile.fromFile(
-        compressedFile!.path,
+        imagePath.path,
         filename: fileName,
         contentType: DioMediaType("image", "jpeg"),
       ),
       'missionID': int.parse(widget.controller.currentMissionLocation.id),
     });
     NetworkProxy.postImage(formData);
+    return true;
   }
 
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
-    final double cardHeight = screenSize.height * 0.65;
+    final double cardHeight = screenSize.height * 0.7;
     if (_mission == null) {
-      return SizedBox(height: 20);
+      return SizedBox.shrink();
     }
     return Container(
-      padding: EdgeInsets.all(20),
+      // padding: EdgeInsets.all(20),
       height: cardHeight,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        // color: Colors.white.withAlpha(200),
+        borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black26,
-            blurRadius: 10,
-            offset: Offset(0, 6),
+            color: Colors.black38,
+            blurRadius: 20,
+            offset: Offset(0, 10),
           ),
         ],
       ),
-      child: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(25),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+          child: Container(
+            padding: EdgeInsets.fromLTRB(20, 25, 20, 20),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.4),
+                width: 1.5,
+              ),
+            ),
+            child: Stack(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        widget.location.name,
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: BouncingScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _mission.name,
+                                style: TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Gantari',
+                                  height: 1.2,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            IconButton(
+                              onPressed: () {
+                                widget.controller.toggleLocationInfo(
+                                  context,
+                                  widget.location,
+                                  widget.onNavigate,
+                                  () {},
+                                  isReplace: true,
+                                );
+                              },
+                              icon: Icon(
+                                Icons.info_outline_rounded,
+                                size: 32,
+                                color: ColorPalette.accentColor,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: BoxConstraints(),
+                            ),
+                          ],
                         ),
-                      ),
-                    ),
+                        SizedBox(height: 20),
 
-                    IconButton(
-                      onPressed: () {
-                        widget.controller.toggleLocationInfo(
+                        _buildMainTitle("Mission Details"),
+
+                        ChallengeBoxWidget(mission: _mission),
+                        SizedBox(height: 25),
+
+                        _buildMainTitle("Your Submission"),
+                        SizedBox(height: 10),
+                        Card(
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: ImageUploadWidget(
+                              selectedImage: imageFile,
+                              onPicked: (file) {
+                                imageFile = file;
+                                SharedPreferences.getInstance().then(
+                                  (value) =>
+                                      value.setString(_mission.id, file.path),
+                                );
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(height: 20),
+                      ],
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: _ControlPanel(
+                    onClaim: () {
+                      _claimed().then((value) {
+                        if (value) {
+                          widget.controller.nextMission(context);
+                          Navigator.of(context).pop();
+                          widget.onClose();
+                        }
+                      });
+                    },
+                    onSubmit: () async {
+                      try {
+                        return await _submitImage(imageFile);
+                      } catch (e) {
+                        ScaffoldMessenger.of(
                           context,
-                          widget.location,
-                          widget.onNavigate,
-                          () {},
-                          isReplace: true,
-                        );
-                      },
-                      icon: Icon(
-                        Icons.info,
-                        size: 35,
-                        color: ColorPalette.accentColor,
-                      ),
-                    ),
-                  ],
-                ),
-                //SizedBox(height: 8),
-                Divider(
-                  color: ColorPalette.dividerColor,
-                  thickness: 1,
-                  indent: screenSize.width * 0.1,
-                  endIndent: screenSize.width * 0.1,
-                ),
-                Text(
-                  "Mission",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
-                ),
-                ChallengeBoxWidget(mission: _mission),
-                SizedBox(height: 8),
-                Divider(
-                  color: ColorPalette.dividerColor,
-                  thickness: 1,
-                  indent: screenSize.width * 0.1,
-                  endIndent: screenSize.width * 0.1,
-                ),
-                Text(
-                  "Your submission",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
-                ),
-
-                ImageUploadWidget(
-                  selectedImage: imageFile,
-                  onPicked: (file) {
-                    imageFile = file;
-                    SharedPreferences.getInstance().then(
-                      (value) => value.setString(_mission.id, file.path),
-                    );
-                    setState(() {});
-                  },
-                ),
-                SizedBox(
-                  width: screenSize.width,
-                  height: screenSize.height * 0.07,
+                        ).showSnackBar(SnackBar(content: Text(e.toString())));
+                      }
+                      return false;
+                    },
+                    isSubmited: _mission.isCompleted,
+                  ),
                 ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
 
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: _ControlPanel(
-              onClaim: () {
-                _claimed().then((value) {
-                  if (value) {
-                    widget.controller.nextMission(context);
-                    Navigator.of(context).pop();
-                    widget.onClose();
-                  }
-                });
-              },
-              onSubmit: () async {
-                try {
-                  await _submitImage(imageFile);
-                  return true;
-                } catch (e) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(e.toString())));
-                  return false;
-                }
-              },
-              isSubmited: _mission.isCompleted,
-            ),
-          ),
-        ],
+  Widget _buildMainTitle(String text) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: Colors.black54, // Màu xám đậm cho tiêu đề phụ
+        fontFamily: 'Gantari',
       ),
     );
   }

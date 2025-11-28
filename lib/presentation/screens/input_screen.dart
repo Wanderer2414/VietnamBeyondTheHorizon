@@ -99,31 +99,38 @@ class _InputPageState extends State<InputPage> with RouteAware {
       try {
         if (userInput.myMapController.currentLocation != null) {
           userInput.gpsLocation = userInput.myMapController.currentLocation!;
+          print("------START----------");
 
-          // Cập nhật UserInput với dữ liệu từ các controllers
-          userInput.budget = UserInput.parseBudget(_budgetController.text);
-          userInput.durationDays = UserInput.parseDuration(
-            _durationController.text,
-          );
+          if (userInput.myMapController.currentLocation != null) {
+            print("User GPS is not null");
 
-          // Gọi thuật toán để tạo route
-          final route = await _routePlanner.generateRouteFromUserInput(
-            userGPS: userInput.gpsLocation!,
-            selectedInterests: userInput.getSelectedInterests(),
-            budget: userInput.budget,
-            durationDays: userInput.durationDays,
-            allLocations: await NetworkProxy.locations,
-            allMissions: await NetworkProxy.missions,
-          );
+            userInput.gpsLocation = userInput.myMapController.currentLocation!;
 
-          Navigator.of(context).push(
-            TransitionRLPageRoute(
-              nextScreen: SubmitRouteScreen(
-                controller: userInput.myMapController,
-                route: route,
+            // Cập nhật UserInput với dữ liệu từ các controllers
+            userInput.budget = UserInput.parseBudget(_budgetController.text);
+            userInput.durationDays = UserInput.parseDuration(
+              _durationController.text,
+            );
+
+            // Gọi thuật toán để tạo route
+            final route = await _routePlanner.generateRouteFromUserInput(
+              userGPS: userInput.gpsLocation!,
+              selectedInterests: userInput.getSelectedInterests(),
+              budget: userInput.budget,
+              durationDays: userInput.durationDays,
+              allLocations: await NetworkProxy.locations,
+              allMissions: await NetworkProxy.missions,
+            );
+
+            Navigator.of(context).push(
+              TransitionRLPageRoute(
+                nextScreen: SubmitRouteScreen(
+                  controller: userInput.myMapController,
+                  route: route,
+                ),
               ),
-            ),
-          );
+            );
+          }
         }
       } catch (e) {
         print(e);

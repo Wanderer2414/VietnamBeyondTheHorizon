@@ -13,6 +13,26 @@ class LoadingManager {
     Future<void> Function(BuildContext context) func,
   ) async {
     await _run?.call(func);
+    // static int _loadingCount = 0;
+    // static void Function()? _onUpdateUI;
+
+    // static bool get isLoading => _loadingCount > 0;
+    // static void registerCallback(void Function() callback) {
+    //   _onUpdateUI = callback;
+    // }
+
+    // static void show() {
+    //   _loadingCount++;
+    //   print("Loading count: ${_loadingCount}");
+    //   _onUpdateUI?.call();
+    // }
+
+    // static void hide() {
+    //   if (_loadingCount > 0) {
+    //     _loadingCount--;
+    //   }
+    //   print("Loading count: ${_loadingCount}");
+    //   _onUpdateUI?.call();
   }
 }
 //   static final ValueNotifier<int> _loadingCount = ValueNotifier<int>(0);

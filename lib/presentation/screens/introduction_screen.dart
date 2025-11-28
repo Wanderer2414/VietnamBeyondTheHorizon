@@ -115,7 +115,7 @@ class IntroScreen extends StatelessWidget {
       title: _FirstTitle(),
       content:
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris efficitur ex sit amet elementum sagittis.',
-      background: AssetImage("assets/backgrounds/introduce_first.png"),
+      background: AssetImage("assets/backgrounds/introduce_first.jpeg"),
       skipRoute: TransitionRLPageRoute(nextScreen: LogNavigatorScreen()),
       nextRoute: TransitionRLPageRoute(nextScreen: _SecondScreen()),
     );
@@ -132,7 +132,7 @@ class _SecondScreen extends StatelessWidget {
       title: _SecondTitle(),
       content:
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris efficitur ex sit amet elementum sagittis.',
-      background: AssetImage("assets/backgrounds/introduce_second.png"),
+      background: AssetImage("assets/backgrounds/introduce_second.jpeg"),
       skipRoute: TransitionRLPageRoute(nextScreen: LogNavigatorScreen()),
       nextRoute: TransitionRLPageRoute(nextScreen: _ThirdScreen()),
     );
