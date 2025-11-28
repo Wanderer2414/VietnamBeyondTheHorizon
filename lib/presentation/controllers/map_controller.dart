@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +8,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 import 'package:vietnambeyondthehorizon/animations/card/appear.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
+import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/map_state.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
@@ -21,20 +21,21 @@ class MyMapController {
   MapController? mapController;
   final Location _location = Location();
   MapState _value = MapState();
-  Map<String, MarkerAppearance> _markerAppreances = Map();
+  final GameProgressManager gameManager = GameProgressManager();
   void Function() resetMap = () {};
 
   LocationModel get currentMissionLocation {
-    return _value.locationList[_value.currentIndex];
+    return gameManager.userRoute[gameManager.currentIndex];
   }
 
-  set userRoute(List<LocationModel> route) {
-    _value.locationList = route;
-  }
+  // set userRoute(List<LocationModel> route) {
+  //   gameManager.userRoute = route;
+  // }
 
-  List<LocationModel> get userRoute {
-    return _value.locationList;
-  }
+  // List<LocationModel> get userRoute {
+  //   return _value.locationList;
+  // }
+  List<LocationModel> get userRoute => gameManager.userRoute;
 
   LatLng? get currentLocation {
     if (_value.currentLocation == null) {
@@ -44,27 +45,25 @@ class MyMapController {
   }
 
   Future<void> initialize() async {
-    await _loadProgress();
-    await _initLocation();
+    try {
+      await _initLocation();
+      await gameManager.loadProgress();
 
-    _markerAppreances = Map.fromIterable(
-      await NetworkProxy.locations,
-      key: (element) => element.id,
-      value: (element) {
-        switch (element.type) {
-          case "Entertainment":
-            return MarkerAppearance(color: Colors.purple);
-          case "Culture":
-            return MarkerAppearance(color: Colors.orange);
-          case "Attraction":
-            return MarkerAppearance(color: Colors.blue);
-          case "Food":
-            return MarkerAppearance(color: Colors.yellow);
-          default:
-            return MarkerAppearance();
-        }
-      },
-    );
+      // final userGPS = await loadGPS();
+      // _value.currentLocation = LatLng(userGPS['lat']!, userGPS['lng']!);
+
+      if (gameManager.userRoute.isNotEmpty &&
+          gameManager.currentTarget != null) {
+        await fetchRoute(
+          _value.currentLocation,
+          gameManager.currentTarget!.coordinates,
+        );
+      }
+    } catch (e) {
+      print("Eror in initializing map: ${e}");
+    } finally {
+      resetMap();
+    }
   }
 
   Future<void> _initLocation() async {
@@ -102,27 +101,8 @@ class MyMapController {
         return false;
       }
     }
+
     return true;
-  }
-
-  Future<void> saveProgress() async {
-    // final prefs = await SharedPreferences.getInstance();
-    // final jsonString = jsonEncode(_value.toJson());
-    // await prefs.setString('map_progress', jsonString);
-    // debugPrint("Progress saved: $jsonString");
-  }
-
-  Future<void> _loadProgress() async {
-    // final prefs = await SharedPreferences.getInstance();
-    // final jsonString = prefs.getString('map_progress');
-    // if (jsonString == null) return;
-
-    // try {
-    //   final data = jsonDecode(jsonString);
-    //   _value = MapState.fromJson(data);
-    // } catch (e) {
-    //   throw Exception("Failed to load progress: $e");
-    // }
   }
 
   MapOptions mapOptions({
@@ -143,8 +123,9 @@ class MyMapController {
   List<Widget> mapLayers(
     BuildContext context,
     List<LocationModel> locationList,
-    void Function(LocationModel location) onLocationTap,
-  ) {
+    void Function(LocationModel location) onLocationTap, {
+    required bool isGameMode,
+  }) {
     final layers = <Widget>[
       TileLayer(
         urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -156,7 +137,13 @@ class MyMapController {
       layers.add(
         PolylineLayer(
           polylines: [
-            Polyline(points: _value.routes!, strokeWidth: 5, color: Colors.red),
+            Polyline(
+              points: _value.routes!,
+              strokeWidth: 6,
+              borderColor: Colors.blue.shade900,
+              borderStrokeWidth: 2,
+              color: Colors.blue.shade500,
+            ),
           ],
         ),
       );
@@ -168,6 +155,8 @@ class MyMapController {
           marker: DefaultLocationMarker(
             child: Icon(Icons.location_pin, color: Colors.red),
           ),
+          // accuracyCircleColor: Colors.black,
+          headingSectorColor: Colors.black54,
           markerSize: Size(35, 35),
           // markerDirection: MarkerDirection.heading,
         ),
@@ -181,8 +170,27 @@ class MyMapController {
               (e) => LocationMarker(
                 context,
                 e,
-                _markerAppreances[e.id] ?? MarkerAppearance(),
-                (loc, context) => onLocationTap(loc),
+
+                gameManager.getMarkerAppearance(
+                  location: e,
+                  isGameMode: isGameMode,
+                ),
+                (loc, context) {
+                  if (isGameMode && gameManager.isLocked(loc)) {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "Locked! Complete the previous mission first",
+                        ),
+                        backgroundColor: Colors.grey[800],
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                    return;
+                  }
+                  onLocationTap(loc);
+                },
               ),
             )
             .toList(),
@@ -249,8 +257,7 @@ class MyMapController {
   }
 
   Future<void> fetchFullRoute({List<LocationModel>? route}) async {
-    route ??= _value.locationList;
-    print(route.length);
+    route ??= gameManager.userRoute;
     if (route.length < 2) return;
 
     _value.routes = [];
@@ -373,7 +380,8 @@ class MyMapController {
           locationModel: location,
           onNavigate: () {},
           onClose: () {
-            if (_value.currentIndex == userRoute.length) completeRoute(context);
+            if (gameManager.currentIndex == userRoute.length)
+              completeRoute(context);
           },
         ),
       ),
@@ -381,28 +389,42 @@ class MyMapController {
   }
 
   void nextMission(BuildContext context) {
-    if (_value.currentIndex >= userRoute.length)
+    if (gameManager.isFinished) {
       throw Exception("Out range of userRoute");
-    _value.currentIndex++;
-    if (_value.currentIndex == userRoute.length) {
+    }
+    gameManager.nextStage();
+
+    if (gameManager.isFinished) {
+      completeRoute(context);
+      resetMap();
       return;
-    } else {
-      _markerAppreances[userRoute[_value.currentIndex].id]?.color = Colors.red;
+    }
+
+    if (gameManager.currentTarget != null) {
       fetchRoute(
         _value.currentLocation,
-        userRoute[_value.currentIndex].coordinates,
+        userRoute[gameManager.currentIndex].coordinates,
       );
     }
     resetMap();
   }
 
-  void startRoute() {
-    for (int i = 0; i < userRoute.length; i++) {
-      if (i <= _value.currentIndex)
-        _markerAppreances[userRoute[i].id]?.color = Colors.red;
-      else
-        _markerAppreances[userRoute[i].id]?.color = Colors.black;
+  void startRoute(List<LocationModel> newRoute) {
+    gameManager.startGame(newRoute);
+
+    if (gameManager.currentTarget != null) {
+      fetchRoute(
+        _value.currentLocation,
+        gameManager.currentTarget!.coordinates,
+      );
     }
+
+    // for (int i = 0; i < userRoute.length; i++) {
+    //   if (i <= gameManager.currentIndex)
+    //     _markerAppreances[userRoute[i].id]?.color = Colors.red;
+    //   else
+    //     _markerAppreances[userRoute[i].id]?.color = Colors.black;
+    // }
     resetMap();
   }
 

@@ -3,7 +3,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 
 class MapShow extends StatefulWidget {
   final Size size;
@@ -48,7 +47,14 @@ class _MapShowState extends State<MapShow> {
         children: widget.controller.mapLayers(
           context,
           _allLocation ?? [],
-          (location) => widget.controller.toggleMissionCard(context, location),
+          (location) =>
+              widget.controller.toggleLocationInfo(context, location, () {
+                widget.controller.fetchRoute(
+                  widget.controller.currentLocation,
+                  location.coordinates,
+                );
+              }, () {}),
+          isGameMode: false,
         ),
       ),
     );
