@@ -1,22 +1,15 @@
 import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/auth_controller.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/dio_service.dart';
 
-class SplashScreen extends ConsumerStatefulWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  ConsumerState<SplashScreen> createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends ConsumerState<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
@@ -24,11 +17,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   void navigateNext() async {
-    try {
-      final user = await NetworkProxy.account;
-      ref.read(userProvider.notifier).setUser(user);
+    if (await NetworkProxy.isLogged()) {
+      print("Log");
       Navigator.pushReplacementNamed(context, "home");
-    } catch (e) {
+    } else {
       Navigator.pushReplacementNamed(context, "intro");
     }
   }

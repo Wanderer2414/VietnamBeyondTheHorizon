@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 
 class ImageUploadWidget extends StatefulWidget {
   final Function(XFile file) onPicked;

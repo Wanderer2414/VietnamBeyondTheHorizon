@@ -1,13 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/dio_service.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/image_upload.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission/challenge_box.dart';
 
@@ -34,18 +33,24 @@ class _MissionCardState extends State<MissionCard> {
   @override
   void initState() {
     super.initState();
-    _mission = retrieveMission();
-    if (_mission != null) {
-      SharedPreferences.getInstance().then((value) {
-        imageFile = XFile(value.getString(_mission.id)!);
-
+    retrieveMission().then((value) {
+      _mission = value;
+      if (_mission != null) {
+        SharedPreferences.getInstance().then((value) {
+          final src = value.getString(_mission.id);
+          if (src != null) {
+            imageFile = XFile(src);
+            setState(() {});
+          }
+        });
         setState(() {});
-      });
-    }
+      }
+    });
   }
 
-  MissionModel? retrieveMission() {
-    for (var mission in widget.controller.allMission) {
+  Future<MissionModel?> retrieveMission() async {
+    final missions = await NetworkProxy.missions;
+    for (var mission in missions) {
       for (var correspondingMission in widget.location.missionID) {
         if (mission.id == correspondingMission) {
           return mission;
@@ -75,9 +80,8 @@ class _MissionCardState extends State<MissionCard> {
     return result;
   }
 
-  Future<bool> _submitImage(XFile? imagePath) async {
+  Future<void> _submitImage(XFile? imagePath) async {
     if (imagePath == null) throw Exception(("Please upload your image"));
-    var uploadUrl = "/mission/similarity";
 
     final fileName = imagePath.path.split('/').last;
 
@@ -90,18 +94,7 @@ class _MissionCardState extends State<MissionCard> {
       ),
       'missionID': int.parse(widget.controller.currentMissionLocation.id),
     });
-
-    try {
-      final response = await DioService.dio.post(uploadUrl, data: formData);
-
-      print("Upload success: ${response.data}");
-      return true;
-    } catch (e) {
-      if (e is DioException) {
-        print("Lỗi server trả về: ${e.response?.data}");
-      }
-    } finally {}
-    return false;
+    NetworkProxy.postImage(formData);
   }
 
   @override
@@ -218,7 +211,15 @@ class _MissionCardState extends State<MissionCard> {
                 });
               },
               onSubmit: () async {
-                return await _submitImage(imageFile);
+                try {
+                  await _submitImage(imageFile);
+                  return true;
+                } catch (e) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(e.toString())));
+                  return false;
+                }
               },
               isSubmited: _mission.isCompleted,
             ),

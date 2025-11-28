@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
-import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/auth_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/profile_register_screen.dart';
 
-class SignUpButton extends ConsumerStatefulWidget {
+class SignUpButton extends StatefulWidget {
   final Size size;
   final TextEditingController emailCtrl;
   final TextEditingController passwordCtrl;
@@ -20,44 +18,37 @@ class SignUpButton extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<SignUpButton> createState() => _SignUpButtonState();
+  State<SignUpButton> createState() => _SignUpButtonState();
 }
 
-class _SignUpButtonState extends ConsumerState<SignUpButton> {
+class _SignUpButtonState extends State<SignUpButton> {
   @override
   Widget build(BuildContext context) {
-    final auth = ref.read(authProvider);
+    // final auth = ref.read(authProvider);
 
     return ElevatedButton(
-      onPressed: () async {
-        LoadingManager.show();
-
+      onPressed: () {
         final email = widget.emailCtrl.text.trim();
         final password = widget.passwordCtrl.text.trim();
         final confirmPassword = widget.confirmPasswordCtrl.text.trim();
-
-        try {
-          await auth.signup(email, password, confirmPassword);
-          LoadingManager.hide();
-
-          if (!mounted) return;
-
-          if (auth.isLoggedIn) {
-            final user = UserAccount(email: email);
-            ref.read(userProvider.notifier).setUser(user);
-            Navigator.of(
+        if (password != confirmPassword) return; // <- Update there
+        LoadingManager.run(context, (context) async {
+          try {
+            if (await NetworkProxy.signup(email, password)) {
+              Navigator.of(
+                context,
+              ).push(TransitionRLPageRoute(nextScreen: ProfileRegister()));
+            } else {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text("Sign up failed!")));
+            }
+          } catch (e) {
+            ScaffoldMessenger.of(
               context,
-            ).push(TransitionRLPageRoute(nextScreen: ProfileRegister()));
+            ).showSnackBar(SnackBar(content: Text("Error $e!")));
           }
-        } catch (e) {
-          if (!mounted) return;
-
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("Sign up failed: $e")));
-        } finally {
-          if (mounted) LoadingManager.hide();
-        }
+        });
       },
       style: ButtonStyle(
         backgroundColor: WidgetStatePropertyAll(Colors.transparent),

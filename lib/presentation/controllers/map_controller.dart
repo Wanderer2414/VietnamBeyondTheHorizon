@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,9 +11,7 @@ import 'package:vietnambeyondthehorizon/animations/card/appear.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/map_state.dart';
-import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/result_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/information_location.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
@@ -26,14 +23,6 @@ class MyMapController {
   MapState _value = MapState();
   Map<String, MarkerAppearance> _markerAppreances = Map();
   void Function() resetMap = () {};
-
-  List<LocationModel> get allLocationn {
-    return _value.locationDataList;
-  }
-
-  List<MissionModel> get allMission {
-    return _value.missionList;
-  }
 
   LocationModel get currentMissionLocation {
     return _value.locationList[_value.currentIndex];
@@ -54,20 +43,12 @@ class MyMapController {
     return _value.currentLocation;
   }
 
-  MyMapController() {
-    _initialize();
-  }
-
-  Future<void> _initialize() async {
-    LoadingManager.show();
+  Future<void> initialize() async {
     await _loadProgress();
     await _initLocation();
 
-    await _fetchLocationData();
-    await _fetchMissionData();
-
     _markerAppreances = Map.fromIterable(
-      _value.locationDataList,
+      await NetworkProxy.locations,
       key: (element) => element.id,
       value: (element) {
         switch (element.type) {
@@ -84,14 +65,14 @@ class MyMapController {
         }
       },
     );
-    LoadingManager.hide();
   }
 
   Future<void> _initLocation() async {
     if (!await _checkPermission()) return;
 
     final locData = await _location.getLocation();
-    print(locData);
+    print(locData.latitude);
+    print(locData.longitude);
     if (locData.latitude != null && locData.longitude != null) {
       _value.currentLocation = LatLng(locData.latitude!, locData.longitude!);
       // saveGPS(locData.latitude!, locData.longitude!);
@@ -210,14 +191,6 @@ class MyMapController {
     return layers;
   }
 
-  Future<void> _fetchLocationData() async {
-    _value.locationDataList = await NetworkProxy.locations;
-  }
-
-  Future<void> _fetchMissionData() async {
-    _value.missionList = await NetworkProxy.missions;
-  }
-
   Future<void> fetchCoordinates(String locationName) async {
     final dio = Dio();
     final url =
@@ -251,7 +224,6 @@ class MyMapController {
 
   Future<void> fetchRoute(LatLng? start, LatLng? end) async {
     if (start == null || end == null) return;
-
     final dio = Dio();
     final url =
         'https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=polyline&alternatives=false&annotations=distance';
@@ -278,10 +250,11 @@ class MyMapController {
 
   Future<void> fetchFullRoute({List<LocationModel>? route}) async {
     route ??= _value.locationList;
+    print(route.length);
     if (route.length < 2) return;
 
+    _value.routes = [];
     final dio = Dio();
-    List<LatLng> fullRoute = [];
     LatLng end = _value.currentLocation!;
 
     for (int i = 0; i < route.length; i++) {
@@ -308,14 +281,15 @@ class MyMapController {
 
           if (i > 0) decodedRoute.removeAt(0);
 
-          fullRoute.addAll(decodedRoute);
+          _value.routes?.addAll(decodedRoute);
         } else {
           throw Exception('Failed to fetch route between $i and ${i + 1}');
         }
       } catch (e) {
         throw Exception('Failed to fetch route: $e');
-      } finally {}
+      }
     }
+    print("Done fetch ${route.length} locs");
     resetMap();
 
     // throw Exception("Full route length: ${fullRoute.length} points");
@@ -438,8 +412,8 @@ class MyMapController {
     ).pushReplacement(TransitionLRPageRoute(nextScreen: ResultAutoScreen()));
   }
 
-  void updateMissionImage(String missionId, String imagePath) {
-    for (var m in _value.missionList) {
+  Future<void> updateMissionImage(String missionId, String imagePath) async {
+    for (var m in await NetworkProxy.missions) {
       if (m.id == missionId) {
         m.imagePath = imagePath;
         //notifyListeners();

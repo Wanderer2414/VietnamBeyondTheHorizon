@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/input_panel_t1.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/register/extra_login.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/register/sign_button.dart';

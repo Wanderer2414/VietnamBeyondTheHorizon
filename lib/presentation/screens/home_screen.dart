@@ -1,5 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/daily_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
@@ -8,19 +7,30 @@ import 'package:vietnambeyondthehorizon/presentation/widgets/home/visited_places
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/greeting_box.dart';
 import 'package:flutter/material.dart';
 
-class HomeScreen extends ConsumerStatefulWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final sideBox = SideBox();
+  String userName = "";
+
+  @override
+  void initState() {
+    super.initState();
+    NetworkProxy.account.then(
+      (value) => setState(() {
+        userName = value.username;
+      }),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
-    final user = ref.watch(userProvider);
     return Scaffold(
       key: _scaffoldKey,
       appBar: HomeAppbar(
@@ -45,7 +55,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               //Hi box
               GreetingBox(
                 size: Size(screenSize.width * 0.9, screenSize.height * 0.1),
-                userName: user!.username,
+                userName: userName,
               ),
               SizedBox(height: screenSize.height * 0.03),
 

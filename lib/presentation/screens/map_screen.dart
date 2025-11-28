@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/main_content.dart';
@@ -28,11 +29,6 @@ class _MapScreenState extends State<MapScreen> {
       child: const Icon(Icons.my_location, size: 30, color: Colors.white),
     );
     _sidePanel = Drawer(child: SideBox());
-
-    widget.controller.fetchRoute(
-      widget.controller.currentLocation,
-      widget.controller.currentMissionLocation.coordinates,
-    );
   }
 
   @override
@@ -50,13 +46,21 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _key,
-      resizeToAvoidBottomInset: false,
-      appBar: _homeBar,
-      drawer: _sidePanel,
-      body: _content,
-      floatingActionButton: _myLocation,
+    return LoadingWrapper(
+      init: (context) async {
+        await widget.controller.fetchRoute(
+          widget.controller.currentLocation,
+          widget.controller.currentMissionLocation.coordinates,
+        );
+      },
+      child: Scaffold(
+        key: _key,
+        resizeToAvoidBottomInset: false,
+        appBar: _homeBar,
+        drawer: _sidePanel,
+        body: _content,
+        floatingActionButton: _myLocation,
+      ),
     );
   }
 }
