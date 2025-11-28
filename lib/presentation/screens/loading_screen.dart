@@ -3,37 +3,56 @@ import 'dart:math';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class LoadingManager {
-  static final ValueNotifier<int> _loadingCount = ValueNotifier<int>(0);
+  static int _loadingCount = 0;
+  static void Function()? _onUpdateUI;
 
-  static ValueNotifier<bool> get isLoadingNotifier =>
-      ValueNotifier(_loadingCount.value > 0);
+  static bool get isLoading => _loadingCount > 0;
+  static void registerCallback(void Function() callback) {
+    _onUpdateUI = callback;
+  }
 
   static void show() {
-    _loadingCount.value++;
-    print("Loading count: ${_loadingCount.value}");
+    _loadingCount++;
+    print("Loading count: ${_loadingCount}");
+    _onUpdateUI?.call();
   }
 
   static void hide() {
-    if (_loadingCount.value > 0) {
-      _loadingCount.value--;
+    if (_loadingCount > 0) {
+      _loadingCount--;
     }
-    print("Loading count: ${_loadingCount.value}");
+    print("Loading count: ${_loadingCount}");
+    _onUpdateUI?.call();
   }
 }
 
-class LoadingWrapper extends StatelessWidget {
+class LoadingWrapper extends StatefulWidget {
   final Widget child;
 
   const LoadingWrapper({super.key, required this.child});
 
   @override
+  State<LoadingWrapper> createState() => _LoadingWrapperState();
+}
+
+class _LoadingWrapperState extends State<LoadingWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    LoadingManager.registerCallback(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<int>(
-      valueListenable: LoadingManager._loadingCount,
-      builder: (context, count, _) {
-        bool isLoading = count > 0;
-        return Stack(children: [child, if (isLoading) const LoadingScreen()]);
-      },
+    return Stack(
+      children: [
+        widget.child,
+        if (LoadingManager.isLoading) const LoadingScreen(),
+      ],
     );
   }
 }

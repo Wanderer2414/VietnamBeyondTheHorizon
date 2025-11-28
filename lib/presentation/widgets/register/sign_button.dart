@@ -56,7 +56,7 @@ class _SignUpButtonState extends ConsumerState<SignUpButton> {
             context,
           ).showSnackBar(SnackBar(content: Text("Sign up failed: $e")));
         } finally {
-          if (mounted) LoadingManager.hide();
+          LoadingManager.hide();
         }
       },
       style: ButtonStyle(

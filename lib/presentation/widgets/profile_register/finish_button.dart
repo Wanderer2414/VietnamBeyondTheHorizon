@@ -55,8 +55,6 @@ class _FinishButtonState extends ConsumerState<FinishButton> {
                   ),
                 ),
               );
-          LoadingManager.hide();
-
           Navigator.of(context).pushReplacementNamed("home");
         } catch (e) {
           ScaffoldMessenger.of(

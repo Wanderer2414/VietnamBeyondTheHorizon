@@ -94,12 +94,16 @@ class _InputPageState extends State<InputPage> {
 
   // Hàm xử lý khi nhấn nút NEXT
   void _handleNext() async {
+    print("------START----------");
+    LoadingManager.show();
+
     setState(() {
-      LoadingManager.show();
       _isLoading = true;
     });
     try {
       if (userInput.myMapController.currentLocation != null) {
+        print("User GPS is not null");
+
         userInput.gpsLocation = userInput.myMapController.currentLocation!;
 
         // Cập nhật UserInput với dữ liệu từ các controllers
@@ -117,6 +121,8 @@ class _InputPageState extends State<InputPage> {
           allLocations: userInput.myMapController.allLocationn,
           allMissions: userInput.myMapController.allMission,
         );
+        print("AFTER CALLING routePlanner");
+
         if (mounted) {
           Navigator.of(context).push(
             TransitionRLPageRoute(
@@ -127,12 +133,16 @@ class _InputPageState extends State<InputPage> {
             ),
           );
         }
+      } else {
+        print("currentLocation is NULL");
       }
     } catch (e) {
       //
     } finally {
+      print("FINALLY");
+      LoadingManager.hide();
+
       if (mounted) {
-        LoadingManager.hide();
         setState(() {
           _isLoading = false;
         });

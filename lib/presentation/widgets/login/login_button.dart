@@ -36,7 +36,6 @@ class _LoginButtonState extends ConsumerState<LoginButton> {
             final user = await auth.fetchUserData();
             if (user != null) {
               if (!mounted) return;
-              LoadingManager.hide();
 
               ref.read(userProvider.notifier).setUser(user);
               print("Fetch data successfully!");
@@ -55,9 +54,7 @@ class _LoginButtonState extends ConsumerState<LoginButton> {
             context,
           ).showSnackBar(SnackBar(content: Text("Login failed: $e")));
         } finally {
-          if (mounted) {
-            LoadingManager.hide();
-          }
+          LoadingManager.hide();
         }
       },
 

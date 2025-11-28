@@ -88,7 +88,8 @@ class _MissionCardState extends State<MissionCard> {
         filename: fileName,
         contentType: DioMediaType("image", "jpeg"),
       ),
-      'missionID': int.parse(widget.controller.currentMissionLocation.id),
+      // 'missionID': int.parse(widget.controller.currentMissionLocation.id),
+      'missionID': 48,
     });
 
     try {
@@ -137,7 +138,7 @@ class _MissionCardState extends State<MissionCard> {
                   children: [
                     Expanded(
                       child: Text(
-                        widget.location.name,
+                        _mission.name,
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
