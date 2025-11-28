@@ -48,7 +48,6 @@ class MyMapController {
     try {
       await _initLocation();
       await gameManager.loadProgress();
-      await _loadProgress();
 
       // final userGPS = await loadGPS();
       // _value.currentLocation = LatLng(userGPS['lat']!, userGPS['lng']!);
