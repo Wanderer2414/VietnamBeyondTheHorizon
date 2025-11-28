@@ -39,11 +39,37 @@ class GameProgressManager {
     }
   }
 
-  MarkerAppearance getMarkerAppearance(LocationModel location) {
+  int? getSequenceNumber(LocationModel location) {
+    final index = userRoute.indexWhere((e) => e.id == location.id);
+    if (index != -1) {
+      return index + 1;
+    }
+    return null;
+  }
+
+  MarkerAppearance getMarkerAppearance({
+    LocationModel? location,
+    bool isGameMode = false,
+  }) {
+    if (location == null) {
+      return MarkerAppearance(
+        color: Colors.grey.shade700,
+        icon: Icons.not_listed_location,
+      );
+    }
     final indexInRoute = userRoute.indexWhere((e) => e.id == location.id);
 
     if (indexInRoute == -1) {
-      return _getDefaultColor(location.type);
+      return _getDefaultMarker(location.type);
+    }
+
+    if (isGameMode == false) {
+      return MarkerAppearance(
+        color: const Color.fromRGBO(233, 43, 43, 1),
+        size: 50,
+        icon: Icons.location_on_sharp,
+        sequenceNumber: indexInRoute + 1,
+      );
     }
 
     if (indexInRoute < currentIndex) {
@@ -52,7 +78,7 @@ class GameProgressManager {
     if (indexInRoute == currentIndex) {
       return MarkerAppearance(
         color: const Color.fromARGB(255, 50, 153, 212),
-        size: 45,
+        size: 55,
         shouldPulse: true,
       );
     }
@@ -63,7 +89,7 @@ class GameProgressManager {
     );
   }
 
-  MarkerAppearance _getDefaultColor(String type) {
+  MarkerAppearance _getDefaultMarker(String type) {
     switch (type) {
       case "Entertainment":
         return MarkerAppearance(color: ColorPalette.entertainment);

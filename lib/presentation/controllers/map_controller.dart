@@ -70,23 +70,47 @@ class MyMapController {
       final prefs = await SharedPreferences.getInstance();
       final cachedLoc = prefs.getString("cached_locationData");
       final cachedMis = prefs.getString("cached_missions");
+
+      bool hasCache = false;
+
       if (cachedLoc != null) {
-        final data = jsonDecode(cachedLoc) as List;
-        _value.locationDataList = data
-            .map((e) => LocationModel.fromJson(e))
-            .toList();
-      } else {
-        await _fetchLocationData();
+        try {
+          final data = jsonDecode(cachedLoc) as List;
+          _value.locationDataList = data
+              .map((e) => LocationModel.fromJson(e))
+              .toList();
+          hasCache = true;
+        } catch (e) {
+          print("Cache location eror: $e");
+        }
       }
 
       if (cachedMis != null) {
-        final data = jsonDecode(cachedMis) as List;
-
-        _value.missionList = data.map((e) => MissionModel.fromJson(e)).toList();
-      } else {
-        await _fetchMissionData();
+        try {
+          final data = jsonDecode(cachedMis) as List;
+          _value.missionList = data
+              .map((e) => MissionModel.fromJson(e))
+              .toList();
+        } catch (e) {
+          print("Cache mission error: $e");
+        }
       }
 
+      if (hasCache) {
+        resetMap();
+      }
+
+      try {
+        await Future.wait([_fetchLocationData(), _fetchMissionData()]);
+
+        resetMap();
+        print("Data synced with Server successfully");
+      } catch (e) {
+        print("Sync data failed: $e");
+        if (!hasCache) {
+          throw Exception("Unable to fetch data and no cache available.");
+        }
+      }
       if (gameManager.userRoute.isNotEmpty &&
           gameManager.currentTarget != null) {
         await fetchRoute(
@@ -176,8 +200,9 @@ class MyMapController {
   List<Widget> mapLayers(
     BuildContext context,
     List<LocationModel> locationList,
-    void Function(LocationModel location) onLocationTap,
-  ) {
+    void Function(LocationModel location) onLocationTap, {
+    required bool isGameMode,
+  }) {
     final layers = <Widget>[
       TileLayer(
         urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -222,9 +247,13 @@ class MyMapController {
               (e) => LocationMarker(
                 context,
                 e,
-                gameManager.getMarkerAppearance(e),
+
+                gameManager.getMarkerAppearance(
+                  location: e,
+                  isGameMode: isGameMode,
+                ),
                 (loc, context) {
-                  if (gameManager.isLocked(loc)) {
+                  if (isGameMode && gameManager.isLocked(loc)) {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -294,6 +323,7 @@ class MyMapController {
           "cached_missions",
           jsonEncode(_value.missionList.map((e) => e.toJson()).toList()),
         );
+        print(jsonEncode(_value.missionList.map((e) => e.toJson()).toList()));
       } else {
         throw Exception("Network error: ${jsonBody['error']['message']}");
       }

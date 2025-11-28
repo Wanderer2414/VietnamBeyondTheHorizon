@@ -40,7 +40,11 @@ class _AvatarWidgetState extends State<AvatarWidget> {
         backgroundColor: Colors.grey[300],
         backgroundImage: _imageFile != null ? FileImage(_imageFile!) : null,
         child: _imageFile == null
-            ? Icon(Icons.person, size: widget.radius * 0.8, color: Colors.white)
+            ? Icon(
+                Icons.person,
+                size: widget.radius * 0.8,
+                color: const Color.fromARGB(255, 110, 110, 110),
+              )
             : null,
       ),
     );

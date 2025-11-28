@@ -7,11 +7,13 @@ class MarkerAppearance {
   double size;
   bool shouldPulse;
   IconData icon;
+  final int? sequenceNumber;
   MarkerAppearance({
     this.color = Colors.black,
-    this.size = 35,
+    this.size = 45,
     this.shouldPulse = false,
     this.icon = Icons.location_pin,
+    this.sequenceNumber,
   });
 }
 
@@ -35,7 +37,32 @@ class LocationMarker extends Marker {
             isPulsing: appear.shouldPulse,
             color: appear.color,
             size: appear.size,
-            child: Icon(appear.icon, color: appear.color, size: appear.size),
+            child: Stack(
+              children: [
+                Icon(appear.icon, color: appear.color, size: appear.size),
+                if (appear.sequenceNumber != null)
+                  Positioned(
+                    top: appear.size * 0.15,
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        "${appear.sequenceNumber}",
+                        style: TextStyle(
+                          color: appear.color,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       );

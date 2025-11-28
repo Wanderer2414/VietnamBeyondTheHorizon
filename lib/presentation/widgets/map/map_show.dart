@@ -40,6 +40,7 @@ class _MapShowState extends State<MapShow> {
           (location) {
             widget.controller.toggleMissionCard(context, location);
           },
+          isGameMode: true,
         ),
       ),
     );
