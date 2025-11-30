@@ -16,6 +16,7 @@ import 'package:vietnambeyondthehorizon/presentation/screens/result_screen.dart'
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/information_location.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission_screen.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/map/timeline_progress.dart';
 
 class MyMapController {
   MapController? mapController;
@@ -176,19 +177,19 @@ class MyMapController {
                   isGameMode: isGameMode,
                 ),
                 (loc, context) {
-                  // if (isGameMode && gameManager.isLocked(loc)) {
-                  //   ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  //   ScaffoldMessenger.of(context).showSnackBar(
-                  //     SnackBar(
-                  //       content: Text(
-                  //         "Locked! Complete the previous mission first",
-                  //       ),
-                  //       backgroundColor: Colors.grey[800],
-                  //       duration: Duration(seconds: 1),
-                  //     ),
-                  //   );
-                  //   return;
-                  // }
+                  if (isGameMode && gameManager.isLocked(loc)) {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "Locked! Complete the previous mission first",
+                        ),
+                        backgroundColor: Colors.grey[800],
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                    return;
+                  }
                   onLocationTap(loc);
                 },
               ),
@@ -196,6 +197,23 @@ class MyMapController {
             .toList(),
       ),
     );
+    if (gameManager.userRoute.isNotEmpty && isGameMode) {
+      layers.add(
+        SafeArea(
+          // Tránh tai thỏ
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: TimelineProgress(
+                currentIndex: gameManager.currentIndex,
+                totalSteps: gameManager.userRoute.length,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return layers;
   }
 

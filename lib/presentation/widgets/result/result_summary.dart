@@ -90,7 +90,7 @@ class ResultSummary extends StatelessWidget {
                   // SizedBox(height: 20),
                   // resultBubble(long.toString(), "km long", 2),
                   SizedBox(height: 20),
-                  resultBubble(submited.toString(), "photo submitted", 3),
+                  resultBubble(submited.toString(), "Photo Submitted", 3),
                 ],
               ),
             ),
