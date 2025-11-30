@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:latlong2/latlong.dart';
+import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:flutter/material.dart';
@@ -210,7 +211,8 @@ class RoutePlannerService {
           orElse: () => MissionModel(
             id: missionId,
             name: '',
-            description: '',
+            context: '',
+            type: '',
             challenge: '',
             difficulty: 2,
             illustrationURL: '',
@@ -270,10 +272,24 @@ class RoutePlannerService {
       if (bestLocation == null) {
         break;
       }
+      List<String> pool = bestLocation.missionID;
+      List<String> availableMissions = pool.where((id) {
+        return !GameProgressManager().isMissionCompleted(id);
+      }).toList();
 
-      // Thêm vào route
-      String selectedMissionId = bestLocation
-          .missionID[Random().nextInt(bestLocation.missionID.length)];
+      String selectedMissionId;
+
+      if (availableMissions.isNotEmpty) {
+        print("NEW MISSION");
+        selectedMissionId =
+            availableMissions[Random().nextInt(availableMissions.length)];
+      } else {
+        //replay..
+        selectedMissionId = pool[Random().nextInt(pool.length)];
+      }
+
+      print("Selected MissionID: $selectedMissionId");
+      bestLocation.currentMissionID = selectedMissionId;
 
       route.add(
         RouteResult(locationId: bestLocation.id, missionId: selectedMissionId),
@@ -291,7 +307,8 @@ class RoutePlannerService {
         orElse: () => MissionModel(
           id: selectedMissionId,
           name: '',
-          description: '',
+          context: '',
+          type: '',
           challenge: '',
           difficulty: 2,
           illustrationURL: '',
@@ -328,6 +345,11 @@ class RoutePlannerService {
       }
     }
 
+    //route.add(RouteResult(locationId: 12.toString(), missionId: 30.toString()));
+    // for (var routeRes in route) {
+    //   print("Route result (mission ID): ${routeRes.missionId}");
+    // }
+    //route = [route.first];
     return route;
   }
 
@@ -406,6 +428,7 @@ class RoutePlannerService {
       );
 
       if (location.id.isNotEmpty) {
+        location.currentMissionID = result.missionId;
         selectedLocations.add(location);
       }
     }

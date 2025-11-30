@@ -107,6 +107,7 @@ class _LoadingWrapperState extends State<LoadingWrapper> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    print("LOADING COUNTTT: $_loadingCount");
     if (_loadingCount > 0)
       return Stack(children: [widget.child, const LoadingScreen()]);
     return widget.child;

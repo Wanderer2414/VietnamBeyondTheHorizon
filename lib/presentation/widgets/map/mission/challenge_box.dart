@@ -34,7 +34,7 @@ class ChallengeBoxWidget extends StatelessWidget {
             _buildSectionTitle(Icons.description, "Description", Colors.blue),
             SizedBox(height: 5),
             Text(
-              mission.description,
+              mission.context,
               style: TextStyle(
                 fontSize: 15,
                 color: Colors.black87,

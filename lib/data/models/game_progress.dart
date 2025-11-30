@@ -6,12 +6,32 @@ import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.da
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
 
 class GameProgressManager {
+  static final GameProgressManager _instance = GameProgressManager._internal();
+  factory GameProgressManager() => _instance;
+  GameProgressManager._internal();
   int currentIndex = 0;
   List<LocationModel> userRoute = [];
+  List<String> _completedMissionIds = [];
+  Map<String, String> _missionPhotos = {};
+
+  int _collectedStars = 0;
+
+  int get collectedStars => _collectedStars;
+
+  List<String> get completedMissionID => _completedMissionIds;
+  Future<void> addStars(int amount) async {
+    _collectedStars += amount;
+    await saveProgress();
+    print("Session Stars: $_collectedStars");
+  }
+
+  String? getPhotoUrl(String missionId) => _missionPhotos[missionId];
 
   bool get isFinished =>
       userRoute.isNotEmpty && currentIndex >= userRoute.length;
 
+  int get numberMissionCompleted => _completedMissionIds.length;
+  int get numberImageSubmited => _missionPhotos.length;
   LocationModel? get currentTarget =>
       (userRoute.isNotEmpty && currentIndex < userRoute.length)
       ? userRoute[currentIndex]
@@ -24,6 +44,65 @@ class GameProgressManager {
       return true;
     }
     return false;
+  }
+
+  List<List<String>> getOrderedPhotos() {
+    List<String> urls = [];
+    List<String> locations = [];
+
+    for (var location in userRoute) {
+      if (location.currentMissionID != null) {
+        String? url = _missionPhotos[location.currentMissionID];
+        if (url != null) {
+          urls.add(url);
+          locations.add(location.id);
+        }
+      } else {
+        for (var mid in location.missionID) {
+          if (_missionPhotos.containsKey(mid)) {
+            urls.add(_missionPhotos[mid]!);
+            locations.add(location.id);
+            break;
+          }
+        }
+      }
+    }
+    return [urls, locations];
+  }
+
+  Future<void> saveMissionPhoto(String missionId, String url) async {
+    _missionPhotos[missionId] = url;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('mission_photos', jsonEncode(_missionPhotos));
+
+    print("Saved Photo URL for Mission $missionId: $url");
+  }
+
+  bool isMissionCompleted(String missionId) {
+    return _completedMissionIds.contains(missionId);
+  }
+
+  Future<void> markAsCompleted(String missionId) async {
+    if (!_completedMissionIds.contains(missionId)) {
+      _completedMissionIds.add(missionId);
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('completed_missions', _completedMissionIds);
+      print("Saved Mission: $missionId");
+    }
+  }
+
+  Future<void> resetProgress() async {
+    _completedMissionIds.clear();
+    _missionPhotos.clear();
+    currentIndex = 0;
+    userRoute.clear();
+    _collectedStars = 0;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('completed_missions');
+    await prefs.remove('game_progress');
+    await prefs.remove('mission_photos');
   }
 
   void startGame(List<LocationModel> route) {
@@ -73,19 +152,25 @@ class GameProgressManager {
     }
 
     if (indexInRoute < currentIndex) {
-      return MarkerAppearance(color: const Color.fromARGB(255, 132, 244, 3));
+      return MarkerAppearance(
+        color: ColorPalette.successColor,
+        // icon: Icons.location_pin,
+        size: 40,
+      );
     }
     if (indexInRoute == currentIndex) {
       return MarkerAppearance(
-        color: const Color.fromARGB(255, 50, 153, 212),
-        size: 55,
+        color: const Color.fromARGB(255, 230, 131, 39),
+        size: 50,
         shouldPulse: true,
+        icon: Icons.my_location_rounded,
       );
     }
 
     return MarkerAppearance(
       color: Colors.grey.shade700,
-      icon: Icons.not_listed_location,
+      icon: Icons.lock,
+      size: 35,
     );
   }
 
@@ -108,6 +193,7 @@ class GameProgressManager {
     final prefs = await SharedPreferences.getInstance();
     final data = {
       'currentIndex': currentIndex,
+      'stars': _collectedStars,
       'route': userRoute.map((e) => e.toJson()).toList(),
     };
     await prefs.setString('game_progress', jsonEncode(data));
@@ -116,11 +202,25 @@ class GameProgressManager {
   Future<void> loadProgress() async {
     final prefs = await SharedPreferences.getInstance();
     final String? prog = prefs.getString('game_progress');
+    _completedMissionIds = prefs.getStringList('completed_missions') ?? [];
 
+    print("COMPLETED MISSIONS: $_completedMissionIds");
+    final String? photosRaw = prefs.getString('mission_photos');
+    if (photosRaw != null) {
+      try {
+        Map<String, dynamic> decoded = jsonDecode(photosRaw);
+        _missionPhotos = decoded.map(
+          (key, value) => MapEntry(key, value.toString()),
+        );
+      } catch (e) {
+        print("Lỗi load photos: $e");
+      }
+    }
     if (prog != null) {
       try {
         final data = jsonDecode(prog);
         currentIndex = data['currentIndex'] ?? 0;
+        _collectedStars = data['stars'] ?? 0;
         final List routeData = data['route'] ?? [];
         userRoute = routeData.map((e) => LocationModel.fromJson(e)).toList();
       } catch (e) {

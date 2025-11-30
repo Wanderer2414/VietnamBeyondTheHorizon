@@ -198,9 +198,24 @@ class NetworkProxy {
     }
   }
 
-  static Future<void> postImage(FormData data) async {
+  static Future<Map<String, dynamic>?> postImage({
+    FormData? data,
+    String type = "AI Photo",
+  }) async {
+    if (data == null) throw Exception("Image data is null!");
     final instance = await _getInstance();
-    await instance._server.postImage(data);
+    return await instance._server.postImage(data: data, type: type);
+  }
+
+  static Future<Map<String, dynamic>?> createVideo({
+    Map<String, dynamic>? body,
+  }) async {
+    if (body == null) {
+      print("Body is NULLL");
+      return null;
+    }
+    final instance = await _getInstance();
+    return await instance._server.createVideo(body);
   }
 
   static Future<bool> isLogged() async {
@@ -208,3 +223,12 @@ class NetworkProxy {
     return instance._server.isLogged();
   }
 }
+
+
+// {
+//   url: string[] // Mảng các url của các ảnh generate
+//   frame_index_list: number[], // Mảng các số thứ tự frame 
+//   ứng với từng url ở mảng tên
+//   group_num_list: number[] // Mảng số ảnh ở từng địa điểm, 
+//   ví dụ [1, 1, 1], 3 địa điểm, mỗi địa điểm 1 ảnh
+// }

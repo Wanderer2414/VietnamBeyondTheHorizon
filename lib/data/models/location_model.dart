@@ -14,6 +14,7 @@ class LocationModel {
   final List<String> imageURLs; //URLs to image
 
   final List<String> missionID; // "101"
+  String? currentMissionID;
   final double latitude; // "10.0001010"
   final double longitude; // "20.1234123"
   //trie
@@ -30,6 +31,7 @@ class LocationModel {
     required this.missionID,
     required this.latitude,
     required this.longitude,
+    this.currentMissionID,
   });
 
   factory LocationModel.fromJson(Map<String, dynamic> json) {

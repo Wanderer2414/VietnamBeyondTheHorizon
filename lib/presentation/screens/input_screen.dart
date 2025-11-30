@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
+import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/main.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/gen_routes_algo_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
@@ -111,6 +112,7 @@ class _InputPageState extends State<InputPage> with RouteAware {
             userInput.durationDays = UserInput.parseDuration(
               _durationController.text,
             );
+            GameProgressManager().loadProgress();
 
             // Gọi thuật toán để tạo route
             final route = await _routePlanner.generateRouteFromUserInput(

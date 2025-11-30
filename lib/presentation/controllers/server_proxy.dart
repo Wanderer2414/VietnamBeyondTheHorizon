@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
@@ -34,6 +36,7 @@ class ServerProxy {
     if (jsonBody['status'] == 'success') {
       final List<dynamic> data = jsonBody['data'];
       final missionModel = data.map((e) => MissionModel.fromJson(e)).toList();
+      print(data);
       return missionModel;
     } else
       throw Exception(1);
@@ -146,14 +149,75 @@ class ServerProxy {
     }
   }
 
-  Future<void> postImage(FormData data) async {
+  Future<Map<String, dynamic>?> postImage({
+    FormData? data,
+    String type = "AI Photo",
+  }) async {
     try {
-      await _service.dio.post("/mission/similarity", data: data);
+      Response? response;
+      switch (type) {
+        case "AI Photo":
+          print("Post AI photo");
+          response = await _service.dio.post("/mission/similarity", data: data);
+          break;
+        case "Photo":
+          print("Post photo");
+          response = await _service.dio.post("/mission/image", data: data);
+
+          break;
+
+        default:
+          print(" There is no type '$type'");
+          return null;
+      }
+
+      if (response == null) {
+        // print("Response null");
+        return null;
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print("Response data success: $response");
+        final resData = response.data;
+        if (resData is Map && resData['status'] == 'success') {
+          return response.data as Map<String, dynamic>;
+        }
+      }
     } catch (e) {
       if (e is DioException) {
         print("Lỗi server trả về: ${e.response?.data}");
       }
     }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> createVideo(Map<String, dynamic> body) async {
+    try {
+      print("Calling API creating video...");
+
+      final response = await _service.dio.post(
+        "/video/generation",
+        data: body,
+        options: Options(
+          sendTimeout: const Duration(minutes: 1),
+          receiveTimeout: const Duration(minutes: 2),
+        ),
+      );
+
+      // Check status code
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final resData = response.data;
+        if (resData is Map && resData['status'] == 'success') {
+          return Map<String, dynamic>.from(resData);
+        }
+      }
+    } catch (e) {
+      print("Error API Video: $e");
+      if (e is DioException) {
+        print("Error Server: ${e.response?.data}");
+      }
+    }
+    return null;
   }
 
   Future<bool> isLogged() async {

@@ -176,19 +176,19 @@ class MyMapController {
                   isGameMode: isGameMode,
                 ),
                 (loc, context) {
-                  if (isGameMode && gameManager.isLocked(loc)) {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          "Locked! Complete the previous mission first",
-                        ),
-                        backgroundColor: Colors.grey[800],
-                        duration: Duration(seconds: 1),
-                      ),
-                    );
-                    return;
-                  }
+                  // if (isGameMode && gameManager.isLocked(loc)) {
+                  //   ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  //   ScaffoldMessenger.of(context).showSnackBar(
+                  //     SnackBar(
+                  //       content: Text(
+                  //         "Locked! Complete the previous mission first",
+                  //       ),
+                  //       backgroundColor: Colors.grey[800],
+                  //       duration: Duration(seconds: 1),
+                  //     ),
+                  //   );
+                  //   return;
+                  // }
                   onLocationTap(loc);
                 },
               ),
@@ -275,7 +275,13 @@ class MyMapController {
           '?overview=full&geometries=polyline';
 
       try {
-        final response = await dio.get(url);
+        final response = await dio.get(
+          url,
+          // options: Options(
+          //   receiveTimeout: Duration(seconds: 10),
+          //   sendTimeout: Duration(seconds: 10),
+          // ),
+        );
 
         if (response.statusCode == 200) {
           final data = response.data;
@@ -293,6 +299,9 @@ class MyMapController {
           throw Exception('Failed to fetch route between $i and ${i + 1}');
         }
       } catch (e) {
+        // _value.routes?.add(start);
+        // _value.routes?.add(end);
+        print("OSRM Lỗi đoạn $i (Server 504/Timeout): $e");
         throw Exception('Failed to fetch route: $e');
       }
     }
@@ -432,6 +441,7 @@ class MyMapController {
     Navigator.of(
       context,
     ).pushReplacement(TransitionLRPageRoute(nextScreen: ResultAutoScreen()));
+    // GameProgressManager().resetProgress();
   }
 
   Future<void> updateMissionImage(String missionId, String imagePath) async {

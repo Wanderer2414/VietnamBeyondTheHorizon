@@ -1,10 +1,11 @@
 class MissionModel {
   final String id;
   final String name;
-  final String description;
+  final String type;
+  final String context;
   final String challenge;
   final int difficulty;
-  final bool isCompleted;
+  bool isCompleted;
   final DateTime? finishDay;
   final String? illustrationURL;
   String? imagePath;
@@ -13,7 +14,8 @@ class MissionModel {
   MissionModel({
     required this.id,
     required this.name,
-    required this.description,
+    required this.type,
+    required this.context,
     required this.challenge,
     required this.difficulty,
     this.isCompleted = false,
@@ -27,7 +29,8 @@ class MissionModel {
     return {
       'id': id,
       'name': name,
-      'description': description,
+      'type': type,
+      'context': context,
       'challenge': challenge,
       'difficulty': difficulty,
       'isCompleted': isCompleted,
@@ -42,29 +45,20 @@ class MissionModel {
     return MissionModel(
       id: json['id'].toString(),
       name: json['name'] as String,
-      description: json['description'] as String,
+      type: json['type'] as String,
+      context: json['context'] as String? ?? "",
       challenge: json['challenge'] as String,
       difficulty: json['difficulty'] as int,
       isCompleted: json['isCompleted'] as bool? ?? false,
       finishDay: json['finishDay'] != null
           ? DateTime.tryParse(json['finishDay'].toString())
           : null,
-      illustrationURL: json['illustrationURL'] as String?,
+      illustrationURL: (json['images'] as List<dynamic>?)
+          ?.map((e) => e['url'] as String)
+          .toList()
+          .firstOrNull,
       imagePath: json['imagePath'] as String?,
       cost: json['cost']?.toString() ?? "0",
     );
   }
 }
-
-
-    //  {
-    //         "id": 9,
-    //         "name": "Pigeon Whisperer",
-    //         "type": "Photo",
-    //         "description": "The square in front of Notre-Dame Cathedral is famous for its flocks of gentle pigeons that gather around visitors. They’re friendly, curious, and often comfortable being approached — making them an iconic part of the cathedral’s atmosphere.\nYour challenge: Approach one of the pigeons calmly and gently until it’s close enough for you to lightly touch it (a soft tap or brief touch is enough — be respectful and careful!). Capture a photo of the moment to prove you’ve earned your title as the Pigeon Whisperer of Notre-Dame.",
-    //         "challenge": "Approach one of the pigeons calmly and gently until it’s close enough for you to lightly touch it (a soft tap or brief touch is enough — be respectful and careful!). Capture a photo of the moment to prove you’ve earned your title as the Pigeon Whisperer of Notre-Dame.",
-    //         "cost": 0,
-    //         "difficulty": 4,
-    //         "answer": null,
-    //         "images": []
-    //     },
