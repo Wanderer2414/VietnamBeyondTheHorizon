@@ -223,4 +223,18 @@ class ServerProxy {
   Future<bool> isLogged() async {
     return _service.isLogged;
   }
+
+  Future<List<VisitModel>> fetchVisits() async {
+    try {
+      final response = await _service.dio.get("/mission/visit");
+
+      if (response.statusCode == 200 && response.data['status'] == 'success') {
+        final List data = response.data['data'];
+        return data.map((e) => VisitModel.fromJson(e)).toList();
+      }
+    } catch (e) {
+      print("Error fetch visits: $e");
+    }
+    return [];
+  }
 }

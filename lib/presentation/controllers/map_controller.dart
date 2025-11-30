@@ -12,6 +12,7 @@ import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/map_state.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/user_history.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/result_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/information_location.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
@@ -52,6 +53,7 @@ class MyMapController {
 
       // final userGPS = await loadGPS();
       // _value.currentLocation = LatLng(userGPS['lat']!, userGPS['lng']!);
+      await UserHistoryManager().loadLocalHistory();
 
       if (gameManager.userRoute.isNotEmpty &&
           gameManager.currentTarget != null) {

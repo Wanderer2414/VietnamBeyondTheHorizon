@@ -222,6 +222,11 @@ class NetworkProxy {
     final instance = await _getInstance();
     return instance._server.isLogged();
   }
+
+  static Future<List<VisitModel>> fetchVisits() async {
+    final instance = await _getInstance();
+    return await instance._server.fetchVisits();
+  }
 }
 
 

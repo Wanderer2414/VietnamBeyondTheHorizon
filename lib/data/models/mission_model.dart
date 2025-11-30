@@ -62,3 +62,19 @@ class MissionModel {
     );
   }
 }
+
+class VisitModel {
+  final int missionId;
+  final String? imageUrl;
+
+  VisitModel({required this.missionId, this.imageUrl});
+
+  factory VisitModel.fromJson(Map<String, dynamic> json) {
+    String? url;
+    if (json['images'] != null && (json['images'] as List).isNotEmpty) {
+      url = json['images'][0]['url'];
+    }
+
+    return VisitModel(missionId: json['missionID'], imageUrl: url);
+  }
+}

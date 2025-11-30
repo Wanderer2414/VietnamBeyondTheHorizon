@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/map/photo.dart';
 
 class AlbumView extends StatelessWidget {
   const AlbumView({required this.photos});
@@ -38,28 +39,29 @@ class AlbumView extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   color: Colors.grey[200],
-                  child: Image.asset(
-                    photos[index],
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      final colors = [
-                        Colors.teal.shade300,
-                        Colors.blue.shade300,
-                        Colors.green.shade300,
-                        Colors.purple.shade300,
-                        Colors.orange.shade300,
-                        Colors.pink.shade300,
-                      ];
-                      return Container(
-                        color: colors[index % colors.length],
-                        child: const Icon(
-                          Icons.image,
-                          size: 40,
-                          color: Colors.white,
-                        ),
-                      );
-                    },
-                  ),
+                  child: PhotoWidget(photos[index]),
+                  //  Image.asset(
+                  //   photos[index],
+                  //   fit: BoxFit.cover,
+                  //   errorBuilder: (context, error, stackTrace) {
+                  //     final colors = [
+                  //       Colors.teal.shade300,
+                  //       Colors.blue.shade300,
+                  //       Colors.green.shade300,
+                  //       Colors.purple.shade300,
+                  //       Colors.orange.shade300,
+                  //       Colors.pink.shade300,
+                  //     ];
+                  //     return Container(
+                  //       color: colors[index % colors.length],
+                  //       child: const Icon(
+                  //         Icons.image,
+                  //         size: 40,
+                  //         color: Colors.white,
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
                 ),
               );
             },

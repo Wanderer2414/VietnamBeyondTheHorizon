@@ -4,6 +4,8 @@ import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/user_history.dart';
 
 class RouteResult {
   final String locationId;
@@ -272,9 +274,13 @@ class RoutePlannerService {
       if (bestLocation == null) {
         break;
       }
+
+      final completedMissions = UserHistoryManager().completedMissionIds;
+
+      print(completedMissions);
       List<String> pool = bestLocation.missionID;
       List<String> availableMissions = pool.where((id) {
-        return !GameProgressManager().isMissionCompleted(id);
+        return !UserHistoryManager().hasCompletedBefore(id);
       }).toList();
 
       String selectedMissionId;

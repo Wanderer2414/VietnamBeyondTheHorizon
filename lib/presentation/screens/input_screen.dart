@@ -8,6 +8,7 @@ import 'package:vietnambeyondthehorizon/main.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/gen_routes_algo_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/user_history.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/submit_route_screen.dart';
 
@@ -83,6 +84,7 @@ class _InputPageState extends State<InputPage> with RouteAware {
   void initState() {
     super.initState();
     userInput = UserInput(budget: 20.0, durationDays: 2);
+    UserHistoryManager().syncHistory();
   }
 
   final RoutePlannerService _routePlanner = RoutePlannerService();
