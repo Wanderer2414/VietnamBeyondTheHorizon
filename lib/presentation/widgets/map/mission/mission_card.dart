@@ -36,7 +36,7 @@ class _MissionCardState extends State<MissionCard> {
   late final MissionModel? _mission;
   XFile? imageFile;
   bool _showRewardEffect = false;
-  bool _isReadyToClaim = false;
+  bool _isChecking = false;
   @override
   void initState() {
     super.initState();
@@ -53,22 +53,6 @@ class _MissionCardState extends State<MissionCard> {
         setState(() {});
       }
     });
-
-    _checkPendingClaim();
-  }
-
-  void _checkPendingClaim() async {
-    if (_mission == null) return;
-
-    final prefs = await SharedPreferences.getInstance();
-
-    bool isPending = prefs.getBool('pending_claim_${_mission.id}') ?? false;
-
-    if (isPending && !_mission.isCompleted) {
-      setState(() {
-        _isReadyToClaim = true;
-      });
-    }
   }
 
   Future<MissionModel?> retrieveMission() async {
@@ -104,74 +88,85 @@ class _MissionCardState extends State<MissionCard> {
 
   Future<bool> _submitImage(XFile? imagePath) async {
     if (imagePath == null) throw Exception(("Please upload your image"));
-
-    final fileName = imagePath.path.split('/').last;
-
-    FormData formData = FormData.fromMap({
-      "files": await MultipartFile.fromFile(
-        imagePath.path,
-        filename: fileName,
-        contentType: DioMediaType("image", "jpeg"),
-      ),
-      'missionID': int.parse(widget.controller.currentMissionLocation.id),
+    setState(() {
+      _isChecking = true;
     });
+    try {
+      final fileName = imagePath.path.split('/').last;
 
-    print("${_mission?.type}");
-    print("ILLUSTRATRION URL: ${_mission?.illustrationURL}");
-    print("Mission ID: ${_mission?.id}");
-    final responseData = await NetworkProxy.postImage(
-      data: formData,
-      type: _mission!.type,
-    );
-    if (responseData != null) {
-      print("Call server successfully! Data: $responseData");
-      bool isPass = false;
+      FormData formData = FormData.fromMap({
+        "files": await MultipartFile.fromFile(
+          imagePath.path,
+          filename: fileName,
+          contentType: DioMediaType("image", "jpeg"),
+        ),
+        'missionID': int.parse(widget.controller.currentMissionLocation.id),
+      });
 
-      if (_mission.type == "AI Photo") {
-        final result = responseData['result'];
+      print("${_mission?.type}");
+      print("ILLUSTRATRION URL: ${_mission?.illustrationURL}");
+      print("Mission ID: ${_mission?.id}");
+      final responseData = await NetworkProxy.postImage(
+        data: formData,
+        type: _mission!.type,
+      );
+      if (responseData != null) {
+        print("Call server successfully! Data: $responseData");
+        bool isPass = false;
 
-        if (result == "pass") {
+        if (_mission.type == "AI Photo") {
+          final result = responseData['result'];
+
+          if (result == "pass") {
+            isPass = true;
+          } else {
+            isPass = false;
+          }
+        } else if (_mission.type == "Photo") {
           isPass = true;
-        } else {
-          isPass = false;
-        }
-      } else if (_mission.type == "Photo") {
-        isPass = true;
-      }
-
-      if (isPass) {
-        String? url;
-
-        if (_mission.type == "Photo") {
-          url = responseData['data'];
-        } else if (_mission.type == "AI Photo") {
-          //url = responseData['url']
         }
 
-        if (url != null) {
-          await GameProgressManager().saveMissionPhoto(_mission.id, url);
-          print("SAVED uploaded url: $url");
+        if (isPass) {
+          String? url;
+
+          if (_mission.type == "Photo") {
+            url = responseData['data'];
+          } else if (_mission.type == "AI Photo") {
+            //url = responseData['url']
+          }
+
+          if (url != null) {
+            await GameProgressManager().saveMissionPhoto(_mission.id, url);
+            print("SAVED uploaded url: $url");
+          }
+
+          return true;
         }
 
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('pending_claim_${_mission.id}', true);
-
+        if (mounted) {
+          print("Failed to upload image");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                "Failed to upload image: ${responseData['message']} ",
+              ),
+            ),
+          );
+        }
+        return false;
+      } else {
+        print("Response is NULL");
+        //TEST------
         return true;
       }
-      return false;
-    } else {
-      print("Response is NULL");
-      //TEST------
-      return true;
+    } catch (e) {
+      print("Error image submission $e");
+    } finally {
+      setState(() {
+        _isChecking = false;
+      });
     }
-    if (mounted) {
-      print("Failed to upload image");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Failed to upload image: ${responseData?['message']} "),
-        ),
-      );
-    }
+
     return false;
   }
 
@@ -287,6 +282,7 @@ class _MissionCardState extends State<MissionCard> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(10.0),
                                   child: ImageUploadWidget(
+                                    isChecking: _isChecking,
                                     selectedImage: imageFile,
                                     onPicked: (file) {
                                       imageFile = file;
@@ -321,16 +317,8 @@ class _MissionCardState extends State<MissionCard> {
                                 await GameProgressManager().addStars(reward);
                                 setState(() {
                                   _mission.isCompleted = true;
-                                  _isReadyToClaim = false;
                                   _showRewardEffect = true;
                                 });
-
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                await prefs.remove(
-                                  'pending_claim_${_mission.id}',
-                                );
-
                                 // await widget.controller.(_mission!);
                                 await Future.delayed(
                                   Duration(milliseconds: 1500),
@@ -355,7 +343,6 @@ class _MissionCardState extends State<MissionCard> {
                             return false;
                           },
                           isSubmited: _mission.isCompleted,
-                          isReadyToClaim: _isReadyToClaim,
                         ),
                       ),
                     ],
@@ -388,12 +375,10 @@ class _ControlPanel extends StatefulWidget {
   final Future<bool> Function() onSubmit;
   final void Function() onClaim;
   final bool isSubmited;
-  final bool isReadyToClaim;
   _ControlPanel({
     required this.onSubmit,
     required this.onClaim,
     this.isSubmited = false,
-    this.isReadyToClaim = false,
   });
 
   @override
@@ -407,9 +392,7 @@ class _ControlPanelState extends State<_ControlPanel> {
     super.initState();
     if (widget.isSubmited)
       _controlButton = _SubmitedButton();
-    else if (widget.isReadyToClaim) {
-      _controlButton = _ClaimButton(onPressed: widget.onClaim);
-    } else
+    else
       _controlButton = _SubmitButton(
         onPressed: () {
           widget.onSubmit().then((value) async {
@@ -421,9 +404,7 @@ class _ControlPanelState extends State<_ControlPanel> {
               Navigator.of(context).pop();
 
               if (mounted) {
-                setState(() {
-                  _controlButton = _ClaimButton(onPressed: widget.onClaim);
-                });
+                widget.onClaim();
               }
             } else {
               // ScaffoldMessenger.of(context).showSnackBar(
@@ -464,23 +445,23 @@ class _ControlPanelState extends State<_ControlPanel> {
   }
 }
 
-class _ClaimButton extends StatelessWidget {
-  final void Function() onPressed;
-  const _ClaimButton({required this.onPressed});
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.amberAccent,
-        foregroundColor: Colors.black,
-        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      onPressed: onPressed,
-      child: Text("Claim Reward"),
-    );
-  }
-}
+// class _ClaimButton extends StatelessWidget {
+//   final void Function() onPressed;
+//   const _ClaimButton({required this.onPressed});
+//   @override
+//   Widget build(BuildContext context) {
+//     return ElevatedButton(
+//       style: ElevatedButton.styleFrom(
+//         backgroundColor: Colors.amberAccent,
+//         foregroundColor: Colors.black,
+//         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+//       ),
+//       onPressed: onPressed,
+//       child: Text("Claim Reward"),
+//     );
+//   }
+// }
 
 class _SubmitButton extends StatelessWidget {
   final void Function() onPressed;

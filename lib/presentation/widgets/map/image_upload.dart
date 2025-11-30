@@ -5,10 +5,12 @@ import 'package:image_picker/image_picker.dart';
 class ImageUploadWidget extends StatefulWidget {
   final Function(XFile file) onPicked;
   final XFile? selectedImage;
+  final bool isChecking;
   const ImageUploadWidget({
     super.key,
     required this.onPicked,
     this.selectedImage,
+    this.isChecking = false,
   });
 
   @override
@@ -19,8 +21,9 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
   final picker = ImagePicker();
 
   void _pickImage() async {
+    if (widget.isChecking) return;
     final pickedFile = await picker.pickImage(
-      source: ImageSource.gallery, // hoặc ImageSource.camera
+      source: ImageSource.gallery,
       imageQuality: 80,
     );
     if (pickedFile != null) widget.onPicked(pickedFile);
@@ -33,40 +36,89 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
 
   @override
   Widget build(BuildContext context) {
-    Widget? container;
-    if (widget.selectedImage != null) {
-      container = ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Image.file(
-          File(widget.selectedImage!.path),
-          width: 150,
-          height: 150,
-          fit: BoxFit.cover,
-        ),
-      );
-    } else {
-      container = Container(
-        width: 150,
-        height: 150,
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Icon(Icons.add_a_photo, size: 48, color: Colors.grey[700]),
-      );
-    }
-    Size screenSize = MediaQuery.of(context).size;
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: _pickImage,
-          child: SizedBox(
-            width: screenSize.width * 0.8,
-            height: screenSize.width * 0.8,
-            child: container,
+    final Size screenSize = MediaQuery.of(context).size;
+    final double boxSize = screenSize.width * 0.8;
+
+    return Center(
+      child: GestureDetector(
+        onTap: _pickImage,
+        child: Container(
+          width: boxSize,
+          height: boxSize,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 10,
+                offset: Offset(0, 5),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                _buildImageContent(),
+
+                if (widget.isChecking)
+                  Container(
+                    color: Colors.black.withOpacity(0.5),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            color: Colors.white,
+                            backgroundColor: Colors.white24,
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        Text(
+                          "Analyzing...",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
-      ],
+      ),
     );
+  }
+
+  Widget _buildImageContent() {
+    if (widget.selectedImage != null) {
+      return Image.file(File(widget.selectedImage!.path), fit: BoxFit.cover);
+    } else {
+      return Container(
+        color: Colors.grey[200],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.add_a_photo_rounded, size: 50, color: Colors.grey[400]),
+            SizedBox(height: 10),
+            Text(
+              "Tap to upload",
+              style: TextStyle(
+                color: Colors.grey[500],
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
   }
 }
