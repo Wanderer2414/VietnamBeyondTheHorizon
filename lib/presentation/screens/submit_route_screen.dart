@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
+import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/gen_routes_algo_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/input_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/map_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/submit_route_map/main_content.dart';
@@ -43,45 +47,44 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
     // });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void init(GameRoute route) {
     final Size screenSize = MediaQuery.of(context).size;
     if (_homeBar == null) {
       _homeBar = HomeAppbar(
         superKey: _key,
         size: Size(screenSize.width, screenSize.height * 0.06),
       );
-      // _content = Content(
-      //   controller: widget.controller,
-      //   screenSize: screenSize,
-      //   route: widget.route,
-      //   onSubmit: (route) {},
-      //   onLocationPress: (location) {
-      //     widget.controller.moveToLocation(
-      //       LatLng(location.latitude, location.longitude),
-      //       15,
-      //     );
-      //     widget.controller.toggleLocationInfo(context, location, () {
-      //       widget.controller.fetchRoute(
-      //         widget.controller.currentLocation,
-      //         location.coordinates,
-      //       );
-      //     }, () {});
-      //   },
-      // onStart: () {
-      // widget.controller.userRoute = widget.route;
-      // Navigator.of(context).pushReplacement(
-      //   TransitionLRPageRoute(
-      //     nextScreen: MapScreen(
-      //       controller: widget.controller,
-      //       route: widget.route,
-      //     ),
-      //   ),
-      // );
-      // },
-      // );
+
+      _content = Content(
+        controller: widget.controller,
+        screenSize: screenSize,
+        route: route,
+        onSubmit: (route) {},
+        onLocationPress: (location) {
+          widget.controller.moveToLocation(
+            LatLng(location.latitude, location.longitude),
+            15,
+          );
+          widget.controller.toggleLocationInfo(context, location, () {
+            widget.controller.fetchRoute(
+              widget.controller.currentLocation,
+              location.coordinates,
+            );
+          }, () {});
+        },
+        onStart: () {
+          Navigator.of(context).pushReplacement(
+            TransitionLRPageRoute(
+              nextScreen: MapScreen(
+                controller: widget.controller,
+                route: route,
+              ),
+            ),
+          );
+        },
+      );
     }
+    setState(() {});
   }
 
   @override
@@ -99,22 +102,27 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
             // );
 
             // Gọi thuật toán để tạo route
-            final locations = await NetworkProxy.locations;
+            final locations = widget.userInput.getSelectedInterests(
+              await NetworkProxy.locations,
+            );
+            final missions = await NetworkProxy.missions;
+            print(locations.length);
             final route = await RoutePlannerService.generateRouteFromUserInput(
               userGPS: widget.controller.currentLocation!,
               budget: widget.userInput.budget,
               durationDays: widget.userInput.durationDays,
-              locations: widget.userInput.getSelectedInterests(locations),
-              missions: await NetworkProxy.missions,
+              locations: locations,
+              missions: missions,
+            );
+            init(route);
+            await widget.controller.startRoute(route);
+            await widget.controller.fetchFullRoute(
+              route: route.missions
+                  .map((e) => e.location!.coordinates)
+                  .toList(),
             );
           }
-        }
-        // await widget.controller.fetchFullRoute(
-        //   route: widget.route.missions
-        //       .map((e) => e.location!.coordinates)
-        //       .toList(),
-        // );
-        catch (e) {
+        } catch (e) {
           print(e);
         }
       },

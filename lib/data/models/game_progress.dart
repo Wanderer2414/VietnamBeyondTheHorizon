@@ -7,9 +7,13 @@ import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dar
 
 class GameRoute {
   late final List<MissionModel> _missions;
+  late final List<int> _missionId;
   int _currentIndex = 0;
   GameRoute({List<MissionModel>? missions}) {
-    if (missions != null) _missions = missions;
+    if (missions != null) {
+      _missions = missions;
+      _missionId = _missions.map((e) => e.id).toList();
+    }
   }
 
   List<MissionModel> get missions => _missions;
@@ -26,16 +30,13 @@ class GameRoute {
   }
 
   int index(int id) {
-    return _missions.indexWhere((element) => id == element.id);
+    return _missionId.indexWhere((element) => id == element);
   }
 
   bool _isLocked(int id) {
-    final indexInRoute = _missions.indexWhere((e) => e.id == id);
+    final indexInRoute = _missionId.indexWhere((e) => id == id);
 
-    if (indexInRoute != -1 && indexInRoute > _currentIndex) {
-      return true;
-    }
-    return false;
+    return (indexInRoute != -1 && indexInRoute > _currentIndex);
   }
 
   bool _next() {
@@ -47,10 +48,7 @@ class GameRoute {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'progress': _missions.map((e) => e.id).toList(),
-      'current': _currentIndex,
-    };
+    return {'progress': _missionId, 'current': _currentIndex};
   }
 
   static Future<GameRoute> fromJson(Map<String, dynamic> json) async {
@@ -60,6 +58,7 @@ class GameRoute {
         .toList();
     GameRoute route = GameRoute();
     route._missions = list.map((e) => missions[e]!).toList();
+    route._missionId = route._missions.map((e) => e.id).toList();
     route._currentIndex = json['current'] as int;
     return route;
   }
@@ -90,29 +89,23 @@ class GameProgressManager {
     NetworkProxy.completeRoute(_userRoute);
   }
 
-  int? getSequenceNumber(int id) {
-    // final index = _userRoute.indexWhere((e) => e == id);
-    // if (index != -1) {
-    //   return index + 1;
-    // }
-    // return null;
-    return _userRoute._currentIndex + 1;
-  }
+  MarkerAppearance getLocationAppearance({required LocationModel model}) {
+    int? index = -1;
+    for (int i = 0; (i < model.missionID.length) && (index == -1); i++) {
+      index = _userRoute._missionId.indexOf(model.missionID[i]);
+    }
+    if (index == -1) index = null;
 
-  static MarkerAppearance getLocationAppearance({LocationModel? model}) {
     return MarkerAppearance(
       color: const Color.fromRGBO(233, 43, 43, 1),
       size: 50,
       icon: Icons.location_on_sharp,
+      sequenceNumber: index,
     );
   }
 
   MarkerAppearance getMissionAppearance({required MissionModel mission}) {
     final indexInRoute = _userRoute.index(mission.id);
-
-    if (indexInRoute == -1) {
-      return getDefaultMarker(mission.location!.type);
-    }
 
     if (indexInRoute < _userRoute._currentIndex) {
       return MarkerAppearance(color: const Color.fromARGB(255, 132, 244, 3));
@@ -122,6 +115,7 @@ class GameProgressManager {
         color: const Color.fromARGB(255, 50, 153, 212),
         size: 55,
         shouldPulse: true,
+        sequenceNumber: indexInRoute,
       );
     }
 

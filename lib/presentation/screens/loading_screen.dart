@@ -102,6 +102,7 @@ class _LoadingWrapperState extends State<LoadingWrapper> with RouteAware {
     if (widget.init != null) {
       _loadingCount++;
       widget.init!(context).then((value) {
+        print("Loading count: 0");
         setState(() {
           _loadingCount--;
         });

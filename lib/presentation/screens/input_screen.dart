@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/main.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
@@ -63,7 +62,6 @@ class _InputPageState extends State<InputPage> with RouteAware {
 
   @override
   void didPopNext() {
-    print("Clear reset map");
     widget.controller.resetMap = () {};
     super.didPopNext();
   }
@@ -117,7 +115,7 @@ class _Content extends StatefulWidget {
 }
 
 class _ContentState extends State<_Content> {
-  int _budget = 0, _duration = 0, _opt = 0;
+  int _budget = 20, _duration = 2, _opt = 15;
   @override
   Widget build(BuildContext context) {
     return Container(

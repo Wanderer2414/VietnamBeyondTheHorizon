@@ -1,44 +1,32 @@
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 
-class _QuestItem {
-  _QuestItem({this.location, this.mission});
-  LocationModel? location;
-  MissionModel? mission;
-}
-
 class Quests {
   final List<LocationModel?> _locations = [];
-  final List<_QuestItem> _mission = [];
+  final List<MissionModel?> _mission = [];
   Quests({
     required List<LocationModel> locations,
     required List<MissionModel> missions,
   }) {
+    missions.forEach((element) {
+      if (element.id >= _mission.length) _mission.length = element.id + 1;
+      _mission[element.id] = element;
+    });
     locations.forEach((element) {
       if (element.id >= _locations.length) _locations.length = element.id + 1;
       _locations[element.id] = element;
+      element.missionID.removeWhere(
+        (id) => (id >= _mission.length) || (_mission[id] == null),
+      );
       element.missionID.forEach((id) {
-        for (int i = _mission.length - 1; i < id; i++)
-          _mission.add(_QuestItem());
-        _mission[id].location = element;
+        _mission[id]!.location = element;
       });
+      if (element.missionID.isEmpty) _locations[element.id] = null;
     });
-    missions.forEach((element) {
-      for (int i = _mission.length - 1; i < element.id; i++)
-        _mission.add(_QuestItem());
-      _mission[element.id].mission = element;
-      element.location = _mission[element.id].location;
+    _mission.forEach((element) {
+      if (element?.location == null) element = null;
     });
-    _locations.forEach((element) {
-      if (element != null) {
-        element.missionID.removeWhere(
-          (id) => (id >= _mission.length) || (_mission[id].mission == null),
-        );
-        if (element.missionID.isEmpty) element = null;
-      }
-    });
-    while (_mission.isNotEmpty &&
-        (_mission.last.location == null || _mission.last.mission == null))
+    while (_mission.isNotEmpty && (_mission.last == null))
       _mission.removeLast();
   }
 
@@ -47,20 +35,11 @@ class Quests {
     required List<MissionModel?> missions,
     required List<int?> rels,
   }) {
-    print(locations.length);
-    print(missions.length);
-    print(rels.length);
     _locations.addAll(locations);
-    rels.forEach(
-      (element) => _mission.add(
-        _QuestItem(location: (element != null) ? _locations[element] : null),
-      ),
-    );
-    missions.forEach((element) {
-      if (element == null) return;
-      _mission[element.id].mission = element;
-      element.location = _mission[element.id].location;
-    });
+    _mission.addAll(missions);
+    for (int i = 0; i < rels.length; i++) {
+      if (rels[i] != null) _mission[i]!.location = locations[rels[i]!];
+    }
   }
 
   List<LocationModel?> get locations {
@@ -68,19 +47,14 @@ class Quests {
   }
 
   List<MissionModel?> get missions {
-    return _mission.map((e) => e.mission).toList();
-  }
-
-  LocationModel? getLocation(int id) {
-    if (id > _mission.length) return null;
-    return _mission[id].location;
+    return _mission;
   }
 
   Map<String, dynamic> toJson() {
     return {
       "locs": locations.map((e) => e?.toJson() ?? null).toList(),
       "misses": missions.map((e) => e?.toJson() ?? null).toList(),
-      "rel": _mission.map((e) => e.location?.id ?? null).toList(),
+      "rel": _mission.map((e) => e?.location!.id ?? null).toList(),
     };
   }
 

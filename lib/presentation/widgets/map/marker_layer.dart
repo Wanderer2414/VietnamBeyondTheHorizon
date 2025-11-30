@@ -66,7 +66,7 @@ class LocationLayer extends MarkerLayer {
               (e) => LocationMarker(
                 context,
                 e!.coordinates,
-                GameProgressManager.getLocationAppearance(model: e),
+                controller.getLocationAppearance(location: e),
                 (loc, context) {
                   controller.toggleLocationInfo(context, e, () {
                     controller.fetchRoute(controller.currentLocation, loc);

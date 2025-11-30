@@ -367,7 +367,6 @@ class RoutePlannerService {
             .toList(),
       );
     }
-
     // Chuyển đổi RouteResult thành List<LocationModel>
     List<MissionModel> selectedMission = routeResults
         .map((e) => missions[e.missionId]!)
