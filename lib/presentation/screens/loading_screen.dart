@@ -67,11 +67,16 @@ class _LoadingWrapperState extends State<LoadingWrapper> with RouteAware {
   int _loadingCount = 0;
 
   Future<void> _run(Future<void> Function(BuildContext context) func) async {
+    if (!mounted) return;
     setState(() {
       _loadingCount++;
       print("loading count: $_loadingCount");
     });
     await func(context);
+    if (!mounted) {
+      _loadingCount--;
+      return;
+    }
     setState(() {
       _loadingCount--;
       print("loading count: $_loadingCount");

@@ -1,12 +1,13 @@
 import 'dart:math';
 import 'package:latlong2/latlong.dart';
+import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:flutter/material.dart';
 
 class RouteResult {
-  final String locationId;
-  final String missionId;
+  final int locationId;
+  final int missionId;
 
   RouteResult({required this.locationId, required this.missionId});
 
@@ -75,7 +76,7 @@ class RoutePlannerService {
 
   /// Lọc địa điểm theo điều kiện - TRẢ VỀ TẤT CẢ NẾU KHÔNG CÓ ĐỦ ĐIỀU KIỆN
   List<LocationModel> filterLocations({
-    required List<LocationModel> allLocations,
+    required List<LocationModel?> allLocations,
     required LatLng userGPS,
     required List<String> interests,
     required double budget,
@@ -86,43 +87,49 @@ class RoutePlannerService {
     currentTime ??= DateTime.now();
 
     // Lọc nghiêm ngặt theo tất cả tiêu chí
-    List<LocationModel> strictFiltered = allLocations.where((location) {
-      if (interests.isNotEmpty && !interests.contains(location.type))
-        return false;
-      if (!isPriceAffordable(location, budget)) return false;
-      if (!isLocationOpen(location, currentTime!)) return false;
-      return true;
-    }).toList();
+    List<LocationModel> strictFiltered = [];
+    allLocations.forEach((location) {
+      if (location == null) return;
+      if (interests.isNotEmpty && !interests.contains(location.type)) return;
+      if (!isPriceAffordable(location, budget)) return;
+      if (!isLocationOpen(location, currentTime!)) return;
+      strictFiltered.add(location);
+    });
 
     if (strictFiltered.isNotEmpty || strictMode) {
       return strictFiltered;
     }
 
     // Nếu không có kết quả, thử lọc lỏng hơn (bỏ qua giờ mở cửa)
-    List<LocationModel> relaxedFiltered = allLocations.where((location) {
-      if (interests.isNotEmpty && !interests.contains(location.type))
-        return false;
-      if (!isPriceAffordable(location, budget)) return false;
-      return true;
-    }).toList();
+    List<LocationModel> relaxedFiltered = [];
+    allLocations.forEach((location) {
+      if (location == null) return;
+      if (interests.isNotEmpty && !interests.contains(location.type)) return;
+      if (!isPriceAffordable(location, budget)) return;
+      relaxedFiltered.add(location);
+    });
 
     if (relaxedFiltered.isNotEmpty) {
       return relaxedFiltered;
     }
 
     // Nếu vẫn không có, chỉ lọc theo interest
-    List<LocationModel> interestOnly = allLocations.where((location) {
-      if (interests.isNotEmpty && !interests.contains(location.type))
-        return false;
-      return true;
-    }).toList();
+    List<LocationModel> interestOnly = [];
+    allLocations.forEach((location) {
+      if (location == null) return;
+      if (interests.isNotEmpty && !interests.contains(location.type)) return;
+      interestOnly.add(location);
+    });
 
     if (interestOnly.isNotEmpty) {
       return interestOnly;
     }
 
     // Cuối cùng, trả về tất cả locations sẵn có
-    return allLocations;
+    return allLocations
+        .where((element) => element != null)
+        .map((e) => e!)
+        .toList();
   }
 
   /// Thuật toán tìm đường tối ưu - LUÔN TRẢ VỀ KẾT QUẢ
@@ -131,8 +138,8 @@ class RoutePlannerService {
     required List<String> interests,
     required double budget,
     required double maxDuration, // phút
-    required List<LocationModel> allLocations,
-    required List<MissionModel> allMissions,
+    required List<LocationModel?> allLocations,
+    required List<MissionModel?> allMissions,
     DateTime? startTime,
   }) async {
     startTime ??= DateTime.now();
@@ -203,19 +210,9 @@ class RoutePlannerService {
         // Lấy mission
         if (location.missionID.isEmpty) continue;
 
-        String missionId =
+        int missionId =
             location.missionID[Random().nextInt(location.missionID.length)];
-        MissionModel? mission = allMissions.firstWhere(
-          (m) => m.id == missionId,
-          orElse: () => MissionModel(
-            id: missionId,
-            name: '',
-            description: '',
-            challenge: '',
-            difficulty: 2,
-            illustrationURL: '',
-          ),
-        );
+        MissionModel mission = allMissions[missionId]!;
 
         double visitTime = calculateVisitDuration(mission.difficulty);
         double totalTime = travelTime + visitTime;
@@ -272,7 +269,7 @@ class RoutePlannerService {
       }
 
       // Thêm vào route
-      String selectedMissionId = bestLocation
+      int selectedMissionId = bestLocation
           .missionID[Random().nextInt(bestLocation.missionID.length)];
 
       route.add(
@@ -286,17 +283,7 @@ class RoutePlannerService {
       );
       double travelTime = calculateTravelTime(distance);
 
-      MissionModel? mission = allMissions.firstWhere(
-        (m) => m.id == selectedMissionId,
-        orElse: () => MissionModel(
-          id: selectedMissionId,
-          name: '',
-          description: '',
-          challenge: '',
-          difficulty: 2,
-          illustrationURL: '',
-        ),
-      );
+      MissionModel mission = allMissions[selectedMissionId]!;
 
       double visitTime = calculateVisitDuration(mission.difficulty);
 
@@ -332,18 +319,18 @@ class RoutePlannerService {
   }
 
   /// HÀM CHÍNH: Tạo route từ UserInput - LUÔN TRẢ VỀ KẾT QUẢ
-  Future<List<LocationModel>> generateRouteFromUserInput({
+  Future<GameRoute> generateRouteFromUserInput({
     required LatLng userGPS,
     required List<String> selectedInterests,
     required double budget,
     required int durationDays,
-    required List<LocationModel> allLocations,
-    required List<MissionModel> allMissions,
+    required List<LocationModel?> allLocations,
+    required List<MissionModel?> allMissions,
   }) async {
     print("---Start generating routes from user input.....-----");
     // Kiểm tra dataset
     if (allLocations.isEmpty) {
-      return [];
+      throw Exception("No locations on server!");
     }
     print("---Break 1-----");
 
@@ -381,45 +368,25 @@ class RoutePlannerService {
       List<LocationModel> fallbackLocations = sortedByDistance.take(6).toList();
       print("---Break 3: route res is empty-----");
 
-      return fallbackLocations;
+      return GameRoute(
+        missions: fallbackLocations
+            .map(
+              (e) =>
+                  allMissions[e.missionID[Random().nextInt(
+                    e.missionID.length,
+                  )]]!,
+            )
+            .toList(),
+      );
     }
 
     // Chuyển đổi RouteResult thành List<LocationModel>
-    List<LocationModel> selectedLocations = [];
-    for (var result in routeResults) {
-      LocationModel? location = allLocations.firstWhere(
-        (loc) => loc.id == result.locationId,
-        orElse: () => LocationModel(
-          id: '',
-          name: '',
-          address: '',
-          type: '',
-          description: '',
-          openTime: '',
-          closeTime: '',
-          price: '',
-          imageURLs: [],
-          missionID: [],
-          latitude: 0,
-          longitude: 0,
-        ),
-      );
+    List<MissionModel> selectedMission = routeResults
+        .map((e) => allMissions[e.missionId]!)
+        .toList();
 
-      if (location.id.isNotEmpty) {
-        selectedLocations.add(location);
-      }
-    }
-
-    // In thông tin debug
-    printRouteDetails(
-      route: routeResults,
-      allLocations: allLocations,
-      allMissions: allMissions,
-      startPoint: userGPS,
-    );
     print("---Break 4: Final result-----");
-
-    return selectedLocations;
+    return GameRoute(missions: selectedMission);
   }
 
   /// Helper: In thông tin chi tiết route

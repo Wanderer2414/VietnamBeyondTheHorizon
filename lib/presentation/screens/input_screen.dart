@@ -1,12 +1,10 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/main.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/gen_routes_algo_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/submit_route_screen.dart';
 
@@ -17,7 +15,6 @@ class UserInput {
   int durationDays; // Duration (Ngày)
   Map<String, bool>
   interests; // Interest (Yes/No cho attraction, food, culture, entertainment)
-  final MyMapController myMapController = MyMapController();
 
   UserInput({
     this.gpsLocation,
@@ -60,7 +57,8 @@ class UserInput {
 }
 
 class InputPage extends StatefulWidget {
-  const InputPage({Key? key}) : super(key: key);
+  final MyMapController controller;
+  const InputPage({Key? key, required this.controller}) : super(key: key);
 
   @override
   State<InputPage> createState() => _InputPageState();
@@ -96,45 +94,45 @@ class _InputPageState extends State<InputPage> with RouteAware {
   // Hàm xử lý khi nhấn nút NEXT
   Future<void> _handleNext() async {
     LoadingManager.run(context, (context) async {
-      try {
-        if (userInput.myMapController.currentLocation != null) {
-          userInput.gpsLocation = userInput.myMapController.currentLocation!;
-          print("------START----------");
+      // try {
+      if (widget.controller.currentLocation != null) {
+        userInput.gpsLocation = widget.controller.currentLocation!;
+        print("------START----------");
 
-          if (userInput.myMapController.currentLocation != null) {
-            print("User GPS is not null");
+        if (widget.controller.currentLocation != null) {
+          print("User GPS is not null");
 
-            userInput.gpsLocation = userInput.myMapController.currentLocation!;
+          userInput.gpsLocation = widget.controller.currentLocation!;
 
-            // Cập nhật UserInput với dữ liệu từ các controllers
-            userInput.budget = UserInput.parseBudget(_budgetController.text);
-            userInput.durationDays = UserInput.parseDuration(
-              _durationController.text,
-            );
+          // Cập nhật UserInput với dữ liệu từ các controllers
+          userInput.budget = UserInput.parseBudget(_budgetController.text);
+          userInput.durationDays = UserInput.parseDuration(
+            _durationController.text,
+          );
 
-            // Gọi thuật toán để tạo route
-            final route = await _routePlanner.generateRouteFromUserInput(
-              userGPS: userInput.gpsLocation!,
-              selectedInterests: userInput.getSelectedInterests(),
-              budget: userInput.budget,
-              durationDays: userInput.durationDays,
-              allLocations: await NetworkProxy.locations,
-              allMissions: await NetworkProxy.missions,
-            );
+          // Gọi thuật toán để tạo route
+          final route = await _routePlanner.generateRouteFromUserInput(
+            userGPS: userInput.gpsLocation!,
+            selectedInterests: userInput.getSelectedInterests(),
+            budget: userInput.budget,
+            durationDays: userInput.durationDays,
+            allLocations: await NetworkProxy.locations,
+            allMissions: await NetworkProxy.missions,
+          );
 
-            Navigator.of(context).push(
-              TransitionRLPageRoute(
-                nextScreen: SubmitRouteScreen(
-                  controller: userInput.myMapController,
-                  route: route,
-                ),
+          Navigator.of(context).push(
+            TransitionRLPageRoute(
+              nextScreen: SubmitRouteScreen(
+                controller: widget.controller,
+                route: route,
               ),
-            );
-          }
+            ),
+          );
         }
-      } catch (e) {
-        print(e);
       }
+      // } catch (e) {
+      //   print(e);
+      // }
     });
   }
 
@@ -147,16 +145,13 @@ class _InputPageState extends State<InputPage> with RouteAware {
   @override
   void didPopNext() {
     print("Clear reset map");
-    userInput.myMapController.resetMap = () {};
+    widget.controller.resetMap = () {};
     super.didPopNext();
   }
 
   @override
   Widget build(BuildContext context) {
     return LoadingWrapper(
-      init: (context) async {
-        await userInput.myMapController.initialize();
-      },
       child: Scaffold(
         body: Container(
           decoration: const BoxDecoration(

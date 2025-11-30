@@ -5,22 +5,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/image_upload.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission/challenge_box.dart';
 
 class MissionCard extends StatefulWidget {
   final MyMapController controller;
-  final LocationModel location;
+  final MissionModel mission;
   final Function() onNavigate, onClose;
 
   MissionCard({
     super.key,
-    required this.location,
+    required this.mission,
     required this.controller,
     required this.onNavigate,
     required this.onClose,
@@ -31,36 +30,18 @@ class MissionCard extends StatefulWidget {
 }
 
 class _MissionCardState extends State<MissionCard> {
-  late final MissionModel? _mission;
   XFile? imageFile;
   @override
   void initState() {
     super.initState();
-    retrieveMission().then((value) {
-      _mission = value;
-      if (_mission != null) {
-        SharedPreferences.getInstance().then((value) {
-          final src = value.getString(_mission.id);
-          if (src != null) {
-            imageFile = XFile(src);
-            setState(() {});
-          }
-        });
-        setState(() {});
-      }
-    });
-  }
 
-  Future<MissionModel?> retrieveMission() async {
-    final missions = await NetworkProxy.missions;
-    for (var mission in missions) {
-      for (var correspondingMission in widget.location.missionID) {
-        if (mission.id == correspondingMission) {
-          return mission;
-        }
-      }
-    }
-    return null;
+    // SharedPreferences.getInstance().then((value) {
+    //   final src = value.getString(widget.mission.id.toString());
+    //   if (src != null) {
+    //     imageFile = XFile(src);
+    //     setState(() {});
+    //   }
+    // });
   }
 
   Future<bool> _claimed() async {
@@ -86,17 +67,7 @@ class _MissionCardState extends State<MissionCard> {
   Future<bool> _submitImage(XFile? imagePath) async {
     if (imagePath == null) throw Exception(("Please upload your image"));
 
-    final fileName = imagePath.path.split('/').last;
-
-    FormData formData = FormData.fromMap({
-      "files": await MultipartFile.fromFile(
-        imagePath.path,
-        filename: fileName,
-        contentType: DioMediaType("image", "jpeg"),
-      ),
-      'missionID': int.parse(widget.controller.currentMissionLocation.id),
-    });
-    NetworkProxy.postImage(formData);
+    NetworkProxy.postImage(widget.mission.id, imagePath.path);
     return true;
   }
 
@@ -104,9 +75,6 @@ class _MissionCardState extends State<MissionCard> {
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     final double cardHeight = screenSize.height * 0.7;
-    if (_mission == null) {
-      return SizedBox.shrink();
-    }
     return Container(
       // padding: EdgeInsets.all(20),
       height: cardHeight,
@@ -137,80 +105,80 @@ class _MissionCardState extends State<MissionCard> {
             ),
             child: Stack(
               children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: BouncingScrollPhysics(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _mission.name,
-                                style: TextStyle(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Gantari',
-                                  height: 1.2,
+                SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              widget.mission.name,
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Gantari',
+                                height: 1.2,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          IconButton(
+                            onPressed: () {
+                              widget.controller.toggleLocationInfo(
+                                context,
+                                widget.mission.location!,
+                                widget.onNavigate,
+                                () {},
+                                isReplace: true,
+                              );
+                            },
+                            icon: Icon(
+                              Icons.info_outline_rounded,
+                              size: 32,
+                              color: ColorPalette.accentColor,
+                            ),
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+
+                      _buildMainTitle("Mission Details"),
+
+                      ChallengeBoxWidget(mission: widget.mission),
+                      SizedBox(height: 25),
+
+                      _buildMainTitle("Your Submission"),
+                      SizedBox(height: 10),
+                      Card(
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: ImageUploadWidget(
+                            selectedImage: imageFile,
+                            onPicked: (file) {
+                              imageFile = file;
+                              SharedPreferences.getInstance().then(
+                                (value) => value.setString(
+                                  widget.mission.id.toString(),
+                                  file.path,
                                 ),
-                              ),
-                            ),
-                            SizedBox(width: 10),
-                            IconButton(
-                              onPressed: () {
-                                widget.controller.toggleLocationInfo(
-                                  context,
-                                  widget.location,
-                                  widget.onNavigate,
-                                  () {},
-                                  isReplace: true,
-                                );
-                              },
-                              icon: Icon(
-                                Icons.info_outline_rounded,
-                                size: 32,
-                                color: ColorPalette.accentColor,
-                              ),
-                              padding: EdgeInsets.zero,
-                              constraints: BoxConstraints(),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 20),
-
-                        _buildMainTitle("Mission Details"),
-
-                        ChallengeBoxWidget(mission: _mission),
-                        SizedBox(height: 25),
-
-                        _buildMainTitle("Your Submission"),
-                        SizedBox(height: 10),
-                        Card(
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: ImageUploadWidget(
-                              selectedImage: imageFile,
-                              onPicked: (file) {
-                                imageFile = file;
-                                SharedPreferences.getInstance().then(
-                                  (value) =>
-                                      value.setString(_mission.id, file.path),
-                                );
-                                setState(() {});
-                              },
-                            ),
+                              );
+                              setState(() {});
+                            },
                           ),
                         ),
+                      ),
 
-                        SizedBox(height: 20),
-                      ],
-                    ),
+                      SizedBox(height: screenSize.height * 0.07),
+                    ],
                   ),
                 ),
                 Align(
@@ -219,7 +187,6 @@ class _MissionCardState extends State<MissionCard> {
                     onClaim: () {
                       _claimed().then((value) {
                         if (value) {
-                          widget.controller.nextMission(context);
                           Navigator.of(context).pop();
                           widget.onClose();
                         }
@@ -235,7 +202,7 @@ class _MissionCardState extends State<MissionCard> {
                       }
                       return false;
                     },
-                    isSubmited: _mission.isCompleted,
+                    isSubmited: widget.mission.isCompleted,
                   ),
                 ),
               ],

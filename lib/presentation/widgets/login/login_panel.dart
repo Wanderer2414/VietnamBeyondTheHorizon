@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/input_panel_t1.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/login/extra_login.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/login/forget_text.dart';
@@ -22,6 +23,13 @@ class _LoginPanelState extends State<LoginPanel> {
     emailCtrl.dispose();
     passwordCtrl.dispose();
     super.dispose();
+  }
+
+  void swap() {
+    if (mounted)
+      Navigator.of(this.context).pushReplacementNamed("home");
+    else
+      print(mounted);
   }
 
   @override
@@ -69,6 +77,13 @@ class _LoginPanelState extends State<LoginPanel> {
               size: Size(widget.size.width * 0.5, widget.size.height * 0.05),
               emailCtrl: emailCtrl,
               passwordCtrl: passwordCtrl,
+              onLogin: () {
+                NetworkProxy.login(emailCtrl.text, passwordCtrl.text).then((
+                  value,
+                ) {
+                  if (value) swap();
+                });
+              },
             ),
             SizedBox(height: widget.size.height * 0.02),
             ExtraLogin(

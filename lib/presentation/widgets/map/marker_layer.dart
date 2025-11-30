@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 
 class MarkerAppearance {
   Color color;
@@ -17,14 +21,71 @@ class MarkerAppearance {
   });
 }
 
+class CurrentLayer extends CurrentLocationLayer {
+  CurrentLayer()
+    : super(
+        style: LocationMarkerStyle(
+          marker: DefaultLocationMarker(
+            child: Icon(Icons.location_pin, color: Colors.red),
+          ),
+          // accuracyCircleColor: Colors.black,
+          headingSectorColor: Colors.black54,
+          markerSize: Size(35, 35),
+          // markerDirection: MarkerDirection.heading,
+        ),
+      );
+}
+
+class MissionLayer extends MarkerLayer {
+  MissionLayer(BuildContext context, MyMapController controller)
+    : super(
+        markers: controller.missions
+            .map(
+              (e) => LocationMarker(
+                context,
+                e.location?.coordinates ?? LatLng(0, 0),
+                controller.getMissionAppearance(mission: e),
+                (loc, context) {
+                  controller.toggleMissionCard(context, e);
+                },
+              ),
+            )
+            .toList(),
+      );
+}
+
+class LocationLayer extends MarkerLayer {
+  LocationLayer(
+    BuildContext context,
+    MyMapController controller,
+    List<LocationModel?> locationList,
+  ) : super(
+        markers: locationList
+            .where((element) => element != null)
+            .map(
+              (e) => LocationMarker(
+                context,
+                e!.coordinates,
+                GameProgressManager.getLocationAppearance(model: e),
+                (loc, context) {
+                  controller.toggleLocationInfo(context, e, () {
+                    controller.fetchRoute(controller.currentLocation, loc);
+                  }, () {});
+                },
+              ),
+            )
+            .toList(),
+      );
+}
+
 class LocationMarker extends Marker {
   LocationMarker(
     BuildContext context,
-    LocationModel loc,
+    LatLng loc,
     MarkerAppearance appear,
-    Function(LocationModel loc, BuildContext context) onMarkerTap,
+    Function(LatLng loc, BuildContext context) onMarkerTap,
   ) : super(
-        point: loc.coordinates,
+        point: loc,
         width: 60,
         height: 60,
         rotate: true,

@@ -1,5 +1,8 @@
+import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
+
 class MissionModel {
-  final String id;
+  final int id;
+  LocationModel? location;
   final String name;
   final String description;
   final String challenge;
@@ -40,7 +43,7 @@ class MissionModel {
 
   factory MissionModel.fromJson(Map<String, dynamic> json) {
     return MissionModel(
-      id: json['id'].toString(),
+      id: json['id'] as int,
       name: json['name'] as String,
       description: json['description'] as String,
       challenge: json['challenge'] as String,

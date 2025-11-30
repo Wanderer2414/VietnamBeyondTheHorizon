@@ -3,9 +3,7 @@ import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/account_login.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/account_register.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/home_screen.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/input_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/introduction_screen.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/log_navigator.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/splash_begin_screen.dart';
 import 'package:vietnambeyondthehorizon/test_page.dart';
@@ -24,19 +22,10 @@ class MainRoute {
         return TransitionRLPageRoute(nextScreen: LogNavigatorScreen());
 
       case "login":
-        return TransitionRLPageRoute(
-          nextScreen: LoadingWrapper(child: AccountLoginScreen()),
-        );
+        return TransitionRLPageRoute(nextScreen: AccountLoginScreen());
 
       case "register":
-        return TransitionRLPageRoute(
-          nextScreen: LoadingWrapper(child: AccountRegisterScreen()),
-        );
-
-      case "filter":
-        return TransitionRLPageRoute(
-          nextScreen: LoadingWrapper(child: InputPage()),
-        );
+        return TransitionRLPageRoute(nextScreen: AccountRegisterScreen());
 
       case "home":
         return TransitionRLPageRoute(nextScreen: HomeScreen());

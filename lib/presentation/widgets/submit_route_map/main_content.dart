@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/submit_route_map/map_show.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/search_bar.dart';
 
 class Content extends StatefulWidget {
-  final List<LocationModel> route;
+  final GameRoute route;
   final void Function(List<LocationModel> route) onSubmit;
   final void Function(LocationModel location) onLocationPress;
   final void Function() onStart;
@@ -27,6 +28,11 @@ class Content extends StatefulWidget {
 }
 
 class _ContentState extends State<Content> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
@@ -51,7 +57,7 @@ class _ContentState extends State<Content> {
             padding: EdgeInsets.only(top: 10, bottom: 10),
             child: ListView(
               children:
-                  widget.route.map<Widget>((model) {
+                  widget.route.missions.map<Widget>((model) {
                     return Container(
                       height: screenSize.height * 0.06,
                       margin: EdgeInsets.only(
@@ -66,7 +72,8 @@ class _ContentState extends State<Content> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: TextButton(
-                        onPressed: () => widget.onLocationPress(model),
+                        onPressed: () =>
+                            widget.onLocationPress(model.location!),
                         style: TextButton.styleFrom(
                           fixedSize: Size(
                             screenSize.width,

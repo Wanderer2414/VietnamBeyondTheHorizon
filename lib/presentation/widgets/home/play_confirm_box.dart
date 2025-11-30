@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/input_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/map_screen.dart';
 
 class PlayConfirmBox extends StatelessWidget {
   final Size size;
@@ -67,7 +70,7 @@ class PlayConfirmBox extends StatelessWidget {
                       size: size,
                       text: "Not yet",
                       color: const Color(0xFFFA6C6F),
-                      func: () {
+                      onPressed: () {
                         Navigator.of(context).pop();
                       },
                     ),
@@ -75,10 +78,30 @@ class PlayConfirmBox extends StatelessWidget {
                       size: size,
                       text: "Alright",
                       color: const Color(0xFF7CFF70),
-                      func: () {
-                        Navigator.of(
-                          context,
-                        ).push(TransitionRLPageRoute(nextScreen: InputPage()));
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        LoadingManager.run(context, (context) async {
+                          final route = await NetworkProxy.getAvailableRoute();
+                          final controller = MyMapController();
+                          await controller.initialize();
+                          if (route == null) {
+                            Navigator.of(context).push(
+                              TransitionRLPageRoute(
+                                nextScreen: InputPage(controller: controller),
+                              ),
+                            );
+                          } else {
+                            Navigator.of(context).push(
+                              TransitionRLPageRoute(
+                                nextScreen: MapScreen(
+                                  route: route,
+                                  controller: controller,
+                                ),
+                              ),
+                            );
+                          }
+                          ;
+                        });
                       },
                     ),
                   ],
@@ -97,9 +120,9 @@ class _Button extends ElevatedButton {
     required Size size,
     required String text,
     required Color color,
-    required Function()? func,
+    required Function()? onPressed,
   }) : super(
-         onPressed: func,
+         onPressed: onPressed,
          style: _ButtonStyle(size: size),
          child: Container(
            width: size.width * 0.3,

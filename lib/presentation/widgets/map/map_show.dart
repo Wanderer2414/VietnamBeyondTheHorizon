@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
 
 class MapShow extends StatefulWidget {
   final Size size;
@@ -36,11 +37,7 @@ class _MapShowState extends State<MapShow> {
         ),
         children: widget.controller.mapLayers(
           context,
-          widget.controller.userRoute,
-          (location) {
-            widget.controller.toggleMissionCard(context, location);
-          },
-          isGameMode: true,
+          MissionLayer(context, widget.controller),
         ),
       ),
     );

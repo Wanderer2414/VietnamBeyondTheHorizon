@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
@@ -7,7 +8,8 @@ import '../controllers/map_controller.dart';
 
 class MapScreen extends StatefulWidget {
   final MyMapController controller;
-  MapScreen({super.key, required this.controller}) {}
+  final GameRoute route;
+  MapScreen({super.key, required this.controller, required this.route}) {}
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -48,10 +50,7 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return LoadingWrapper(
       init: (context) async {
-        await widget.controller.fetchRoute(
-          widget.controller.currentLocation,
-          widget.controller.currentMissionLocation.coordinates,
-        );
+        await widget.controller.startRoute(widget.route);
       },
       child: Scaffold(
         key: _key,

@@ -38,8 +38,8 @@ class DioService {
   final Dio dio = Dio(
     BaseOptions(
       baseUrl: "https://vnbth-backend.onrender.com",
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
+      connectTimeout: const Duration(seconds: 100),
+      receiveTimeout: const Duration(seconds: 100),
       headers: {"Content-Type": "application/json"},
     ),
   );

@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/extra/text_measure.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/map_show.dart';
 
 class Content extends StatefulWidget {
@@ -42,16 +44,22 @@ class _ContentState extends State<Content> {
               alignment: Alignment.center,
               child: ScrollTextButton(
                 onPressed: () {
-                  final loc = widget.controller.currentMissionLocation;
-                  widget.controller.fetchRoute(
-                    widget.controller.currentLocation,
-                    loc.coordinates,
-                  );
-                  widget.controller.moveToLocation(loc.coordinates, 15);
+                  LoadingManager.run(context, (context) async {
+                    final mission = (await widget.controller.currentMission)!;
+                    final loc = LatLng(
+                      mission.location?.latitude ?? 0,
+                      mission.location?.longitude ?? 0,
+                    );
+                    await widget.controller.fetchRoute(
+                      widget.controller.currentLocation,
+                      loc,
+                    );
+                    widget.controller.moveToLocation(loc, 15);
+                  });
                 },
                 text:
                     "Go to " +
-                    widget.controller.currentMissionLocation.name +
+                    widget.controller.currentMission!.location!.name +
                     "...\t",
               ),
             ),

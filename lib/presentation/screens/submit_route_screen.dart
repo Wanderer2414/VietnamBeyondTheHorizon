@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
-import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
+import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/map_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
@@ -11,7 +11,7 @@ import '../controllers/map_controller.dart';
 
 class SubmitRouteScreen extends StatefulWidget {
   final MyMapController controller;
-  final List<LocationModel> route;
+  final GameRoute route;
   SubmitRouteScreen({super.key, required this.controller, required this.route});
 
   @override
@@ -68,10 +68,12 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
         },
         onStart: () {
           // widget.controller.userRoute = widget.route;
-          widget.controller.startRoute(widget.route);
           Navigator.of(context).pushReplacement(
             TransitionLRPageRoute(
-              nextScreen: MapScreen(controller: widget.controller),
+              nextScreen: MapScreen(
+                controller: widget.controller,
+                route: widget.route,
+              ),
             ),
           );
         },
@@ -83,7 +85,15 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
   Widget build(BuildContext context) {
     return LoadingWrapper(
       init: (context) async {
-        await widget.controller.fetchFullRoute(route: widget.route);
+        try {
+          await widget.controller.fetchFullRoute(
+            route: widget.route.missions
+                .map((e) => e.location!.coordinates)
+                .toList(),
+          );
+        } catch (e) {
+          print(e);
+        }
       },
       child: Scaffold(
         key: _key,

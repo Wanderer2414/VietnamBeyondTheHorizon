@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/profile_register_screen.dart';
 
@@ -34,7 +34,7 @@ class _SignUpButtonState extends State<SignUpButton> {
         if (password != confirmPassword) return; // <- Update there
         LoadingManager.run(context, (context) async {
           try {
-            if (await NetworkProxy.signup(email, password)) {
+            if (await NetworkProxy.register(email, password)) {
               Navigator.of(
                 context,
               ).push(TransitionRLPageRoute(nextScreen: ProfileRegister()));
