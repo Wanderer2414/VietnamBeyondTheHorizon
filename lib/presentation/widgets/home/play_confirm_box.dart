@@ -81,7 +81,7 @@ class PlayConfirmBox extends StatelessWidget {
                       onPressed: () {
                         Navigator.of(context).pop();
                         LoadingManager.run(context, (context) async {
-                          final route = await NetworkProxy.getAvailableRoute();
+                          final route = await NetworkProxy.getRoute();
                           final controller = MyMapController();
                           await controller.initialize();
                           if (route == null) {

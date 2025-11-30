@@ -21,6 +21,12 @@ class TextboxT2 extends StatefulWidget {
 class _TextboxT2State extends State<TextboxT2> {
   TextEditingController _controller = TextEditingController();
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       width: widget.size.width,

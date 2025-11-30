@@ -12,10 +12,10 @@ import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/map_state.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/result_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/information_location.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission_screen.dart';
+import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
 class MyMapController {
   MapController? mapController;
@@ -337,19 +337,19 @@ class MyMapController {
           onNavigate: () {},
           onClose: () {
             if (_gameManager!.nextStage())
-              nextMission(context);
+              nextMission();
             else
-              completeRoute(context);
+              completeRoute();
           },
         ),
       ),
     );
   }
 
-  Future<void> nextMission(BuildContext context) async {
-    final loc = (await _gameManager?.currentTarget)!.location!.coordinates;
+  Future<void> nextMission() async {
+    final mission = (await _gameManager?.currentTarget)!;
+    final loc = mission.location!.coordinates;
     await fetchRoute(_value.currentLocation, loc);
-    resetMap();
   }
 
   Future<void> startRoute(GameRoute newRoute) async {
@@ -369,10 +369,9 @@ class MyMapController {
     resetMap();
   }
 
-  void completeRoute(BuildContext context) {
-    Navigator.of(
-      context,
-    ).pushReplacement(TransitionLRPageRoute(nextScreen: ResultAutoScreen()));
+  void completeRoute() {
+    _gameManager!.complete();
+    MainRoute.goResultScreen();
   }
 
   Future<void> updateMissionImage(int missionId, String imagePath) async {

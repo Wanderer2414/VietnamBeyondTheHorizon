@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
+import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -23,18 +24,10 @@ class _SplashScreenState extends State<SplashScreen> {
       const Duration(seconds: 90),
       onTimeout: () => throw Exception("Disconnect server!"),
     );
-    try {
-      if (await func) {
-        Navigator.pushReplacementNamed(context, "home");
-      } else {
-        Navigator.pushReplacementNamed(context, "intro");
-      }
-    } catch (e) {
-      print(e);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
-    }
+    if (await func)
+      MainRoute.goHome();
+    else
+      MainRoute.goIntro();
   }
 
   @override

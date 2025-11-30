@@ -75,20 +75,20 @@ class GameProgressManager {
   List<MissionModel> get missions => _userRoute.missions;
 
   Future<void> startRoute(GameRoute route) async {
-    NetworkProxy.saveRoute(route);
+    NetworkProxy.setRoute(route);
     _userRoute = route;
   }
 
-  bool nextStage() {
-    if (_userRoute._next()) {}
-    return false;
-  }
+  bool nextStage() => _userRoute._next();
   // if (currentIndex < _userRoute.length) {
   //   currentIndex++;
   // saveProgress();
   // }
 
   // }
+  void complete() {
+    NetworkProxy.completeRoute(_userRoute);
+  }
 
   int? getSequenceNumber(int id) {
     // final index = _userRoute.indexWhere((e) => e == id);
@@ -144,30 +144,5 @@ class GameProgressManager {
       default:
         return MarkerAppearance();
     }
-  }
-
-  Future<void> saveProgress() async {
-    // final prefs = await SharedPreferences.getInstance();
-    // final data = {
-    //   'currentIndex': currentIndex,
-    //   'route': userRoute.map((e) => e.toJson()).toList(),
-    // };
-    // await prefs.setString('game_progress', jsonEncode(data));
-  }
-
-  Future<void> loadProgress() async {
-    // final prefs = await SharedPreferences.getInstance();
-    // final String? prog = prefs.getString('game_progress');
-
-    // if (prog != null) {
-    //   try {
-    //     final data = jsonDecode(prog);
-    //     currentIndex = data['currentIndex'] ?? 0;
-    //     final List routeData = data['route'] ?? [];
-    //     userRoute = routeData.map((e) => LocationModel.fromJson(e)).toList();
-    //   } catch (e) {
-    //     print("Load progress error: $e");
-    //   }
-    // }
   }
 }

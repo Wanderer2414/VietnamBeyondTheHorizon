@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
+import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
 class LoginButton extends StatefulWidget {
   final Size size;
   final TextEditingController emailCtrl;
   final TextEditingController passwordCtrl;
-  final Function() onLogin;
   const LoginButton({
     super.key,
     required this.size,
     required this.emailCtrl,
     required this.passwordCtrl,
-    required this.onLogin,
   });
 
   @override
@@ -25,23 +25,14 @@ class _LoginButtonState extends State<LoginButton> {
       onPressed: () {
         final email = widget.emailCtrl.text.trim();
         final password = widget.passwordCtrl.text.trim();
-        // LoadingManager.run(context, (context) async {
-        // try {
-        // if (await
-        widget.onLogin();
-        //     print("Move to Home");
-        //     Navigator.of(context).pushReplacementNamed("home");
-        //   } else {
-        //     ScaffoldMessenger.of(
-        //       context,
-        //     ).showSnackBar(SnackBar(content: Text("Login failed")));
-        //   }
-        // } catch (e) {
-        //   ScaffoldMessenger.of(
-        //     context,
-        //   ).showSnackBar(SnackBar(content: Text("Login failed $e")));
-        // }
-        // });
+        LoadingManager.run(context, (context) async {
+          try {
+            final value = await NetworkProxy.login(email, password);
+            if (value) MainRoute.goHome();
+          } catch (e) {
+            MainRoute.showError("Login failed $e");
+          }
+        });
       },
 
       style: ButtonStyle(

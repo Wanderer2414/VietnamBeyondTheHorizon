@@ -1,23 +1,9 @@
 part of proxy;
 
-class NetworkProxy extends Proxy {
-  NetworkProxy._()
-    : super(
-        subProxy: CacheProxy(
-          subProxy: ServerProxy(
-            "https://vnbth-backend.onrender.com/",
-            onTokenExpired: logout,
-          ),
-        ),
-      );
+class NetworkProxy {
+  static _Cookies? _instance;
 
-  static Function()? gotoLoginScreen;
-  static NetworkProxy? _instance;
-  Quests? _gameData;
-  UserAccountCore? _userAccount;
-  bool _isLogged = false;
-
-  static Future<NetworkProxy> _getInstance() async {
+  static Future<_Cookies> _getInstance() async {
     if (_instance == null) await _initialize();
     return _instance!;
   }
@@ -28,45 +14,8 @@ class NetworkProxy extends Proxy {
 
   static Future<void> _initialize() async {
     if (_instance != null) return;
-    _instance = NetworkProxy._();
+    _instance = _Cookies(logout);
     await _instance!.init();
-  }
-
-  @override
-  Future<void> _init() async {
-    final token = await getToken();
-    if (token != null) {
-      if (await setToken(token)) _isLogged = true;
-    }
-  }
-
-  @override
-  Future<UserAccountCore?> _getAccount() async {
-    return _userAccount;
-  }
-
-  @override
-  Future<Quests?> _getQuests() async {
-    return _gameData;
-  }
-
-  @override
-  Future<bool> _setAccount(UserAccountCore user) async {
-    _userAccount = user;
-    return true;
-  }
-
-  @override
-  Future<bool> _setQuests(Quests quest) async {
-    _gameData = quest;
-    return true;
-  }
-
-  @override
-  Future<bool> _setToken(String token) async {
-    print("Logged $token");
-    _isLogged = true;
-    return true;
   }
 
   static Future<void> clean() async {
@@ -97,21 +46,17 @@ class NetworkProxy extends Proxy {
 
   static Future<bool> login(String email, String password) async {
     final instance = await _getInstance();
-    String? token = await instance.signin(email, password);
+    String? token = await instance.login(email, password);
     return (token != null);
   }
 
-  static Future<bool> register(String email, String password) async {
+  static Future<bool> signup(String email, String password) async {
     final instance = await _getInstance();
     String? token = await instance.signup(email, password);
     return (token != null);
   }
 
-  static Future<bool> updateProfile(
-    String username,
-    int age,
-    String city,
-  ) async {
+  static Future<bool> setProfile(String username, int age, String city) async {
     final instance = await _getInstance();
     final user = (await instance.getAccount())!;
     user.age = age;
@@ -121,21 +66,33 @@ class NetworkProxy extends Proxy {
     return await instance.setAccount(user);
   }
 
-  static Future<bool?> saveRoute(GameRoute route) async {
+  static Future<bool?> setRoute(GameRoute route) async {
     return (await _getInstance()).setRoute(route);
   }
 
-  static Future<GameRoute?> getAvailableRoute() async {
+  static Future<GameRoute?> getRoute() async {
     return (await _getInstance()).getRoute();
   }
 
-  static void logout() {
-    clean();
-    gotoLoginScreen?.call();
+  static Future<void> logout() async {
+    if (await isLogged()) {
+      clean();
+      MainRoute.logout();
+    }
   }
 
-  static Future<void> postImage(int misssion, String file) async {
+  static Future<void> postMission(int misssion, String file) async {
     final instance = await _getInstance();
     await instance.postMission(misssion, file);
+  }
+
+  static Future<String?> fetchMission(int mission) async {
+    final instance = await _getInstance();
+    return await instance.fetchMission(mission);
+  }
+
+  static Future<void> completeRoute(GameRoute route) async {
+    final instance = await _getInstance();
+    await instance.completeRoute(route);
   }
 }

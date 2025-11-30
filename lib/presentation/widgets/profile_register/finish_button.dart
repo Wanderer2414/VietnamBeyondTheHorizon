@@ -30,11 +30,7 @@ class _FinishButtonState extends State<FinishButton> {
         final cityCode = widget.cityCode!;
         LoadingManager.run(context, (context) async {
           try {
-            NetworkProxy.updateProfile(
-              name,
-              age,
-              cityMap[cityCode] ?? "Unknown",
-            );
+            NetworkProxy.setProfile(name, age, cityMap[cityCode] ?? "Unknown");
             Navigator.of(context).pushReplacementNamed("home");
           } catch (e) {
             ScaffoldMessenger.of(context).showSnackBar(

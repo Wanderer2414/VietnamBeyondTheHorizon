@@ -1,10 +1,10 @@
 part of proxy;
 
-class ServerProxy extends Proxy {
-  final Function() onTokenExpired;
+class _ServerProxy extends Proxy {
+  final Future<void> Function() onTokenExpired;
   DioService _service;
 
-  ServerProxy(String host, {required this.onTokenExpired, super.subProxy})
+  _ServerProxy(String host, {required this.onTokenExpired, super.subProxy})
     : _service = DioService(onTokenExpired: onTokenExpired) {}
 
   @override
@@ -20,7 +20,7 @@ class ServerProxy extends Proxy {
 
   @override
   Future<String?> _getToken() async {
-    onTokenExpired();
+    await onTokenExpired();
     return null;
   }
 
@@ -175,7 +175,7 @@ class ServerProxy extends Proxy {
   }
 
   @override
-  Future<bool> _postMission(int id, String src) async {
+  Future<String> _postMission(int id, String src) async {
     try {
       final fileName = src.split('/').last;
 
@@ -187,13 +187,16 @@ class ServerProxy extends Proxy {
         ),
         'missionID': id,
       });
-      await _service.dio.post("/mission/similarity", data: formData);
+      final resonse = await _service.dio.post(
+        "/mission/similarity",
+        data: formData,
+      );
     } catch (e) {
       if (e is DioException) {
         print("Lỗi server trả về: ${e.response?.data}");
       }
     }
-    return true;
+    return "";
   }
 
   Future<bool> isLogged() async {

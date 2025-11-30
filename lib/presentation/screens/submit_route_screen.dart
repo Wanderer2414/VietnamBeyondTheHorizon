@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
-import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/gen_routes_algo_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/input_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/map_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/submit_route_map/main_content.dart';
@@ -11,8 +10,12 @@ import '../controllers/map_controller.dart';
 
 class SubmitRouteScreen extends StatefulWidget {
   final MyMapController controller;
-  final GameRoute route;
-  SubmitRouteScreen({super.key, required this.controller, required this.route});
+  final UserInput userInput;
+  SubmitRouteScreen({
+    super.key,
+    required this.controller,
+    required this.userInput,
+  });
 
   @override
   State<SubmitRouteScreen> createState() => _SubmitRouteScreenState();
@@ -49,35 +52,35 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
         superKey: _key,
         size: Size(screenSize.width, screenSize.height * 0.06),
       );
-      _content = Content(
-        controller: widget.controller,
-        screenSize: screenSize,
-        route: widget.route,
-        onSubmit: (route) {},
-        onLocationPress: (location) {
-          widget.controller.moveToLocation(
-            LatLng(location.latitude, location.longitude),
-            15,
-          );
-          widget.controller.toggleLocationInfo(context, location, () {
-            widget.controller.fetchRoute(
-              widget.controller.currentLocation,
-              location.coordinates,
-            );
-          }, () {});
-        },
-        onStart: () {
-          // widget.controller.userRoute = widget.route;
-          Navigator.of(context).pushReplacement(
-            TransitionLRPageRoute(
-              nextScreen: MapScreen(
-                controller: widget.controller,
-                route: widget.route,
-              ),
-            ),
-          );
-        },
-      );
+      // _content = Content(
+      //   controller: widget.controller,
+      //   screenSize: screenSize,
+      //   route: widget.route,
+      //   onSubmit: (route) {},
+      //   onLocationPress: (location) {
+      //     widget.controller.moveToLocation(
+      //       LatLng(location.latitude, location.longitude),
+      //       15,
+      //     );
+      //     widget.controller.toggleLocationInfo(context, location, () {
+      //       widget.controller.fetchRoute(
+      //         widget.controller.currentLocation,
+      //         location.coordinates,
+      //       );
+      //     }, () {});
+      //   },
+      // onStart: () {
+      // widget.controller.userRoute = widget.route;
+      // Navigator.of(context).pushReplacement(
+      //   TransitionLRPageRoute(
+      //     nextScreen: MapScreen(
+      //       controller: widget.controller,
+      //       route: widget.route,
+      //     ),
+      //   ),
+      // );
+      // },
+      // );
     }
   }
 
@@ -86,12 +89,32 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
     return LoadingWrapper(
       init: (context) async {
         try {
-          await widget.controller.fetchFullRoute(
-            route: widget.route.missions
-                .map((e) => e.location!.coordinates)
-                .toList(),
-          );
-        } catch (e) {
+          if (widget.controller.currentLocation != null) {
+            // Cập nhật UserInput với dữ liệu từ các controllers
+            // widget.userInput.budget = UserInput.parseBudget(
+            //   widget.._budgetController.text,
+            // );
+            // userInput.durationDays = UserInput.parseDuration(
+            //   _durationController.text,
+            // );
+
+            // Gọi thuật toán để tạo route
+            final locations = await NetworkProxy.locations;
+            final route = await RoutePlannerService.generateRouteFromUserInput(
+              userGPS: widget.controller.currentLocation!,
+              budget: widget.userInput.budget,
+              durationDays: widget.userInput.durationDays,
+              locations: widget.userInput.getSelectedInterests(locations),
+              missions: await NetworkProxy.missions,
+            );
+          }
+        }
+        // await widget.controller.fetchFullRoute(
+        //   route: widget.route.missions
+        //       .map((e) => e.location!.coordinates)
+        //       .toList(),
+        // );
+        catch (e) {
           print(e);
         }
       },

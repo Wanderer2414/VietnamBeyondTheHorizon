@@ -16,26 +16,24 @@ class RouteResult {
 }
 
 class RoutePlannerService {
-  final Distance _distance = Distance();
-
   /// Tính khoảng cách giữa 2 điểm GPS (meters)
-  double calculateDistance(LatLng point1, LatLng point2) {
+  static double calculateDistance(LatLng point1, LatLng point2) {
+    final Distance _distance = Distance();
     return _distance.as(LengthUnit.Meter, point1, point2);
   }
 
   /// Tính thời gian di chuyển (phút) - giả sử tốc độ 40km/h
-  double calculateTravelTime(double distanceMeters) {
+  static double calculateTravelTime(double distanceMeters) {
     const double speedKmh = 40.0;
     return (distanceMeters / 1000) / speedKmh * 60; // phút
   }
 
   /// Tính thời gian tham quan (phút) dựa trên độ khó mission
-  double calculateVisitDuration(int difficulty) {
+  static double calculateVisitDuration(int difficulty) {
     return difficulty * 15.0; // 15 phút cho mỗi độ khó
   }
 
-  /// Kiểm tra địa điểm có mở cửa không
-  bool isLocationOpen(LocationModel location, DateTime currentTime) {
+  static bool isLocationOpen(LocationModel location, DateTime currentTime) {
     try {
       final open = _parseTime(location.openTime);
       final close = _parseTime(location.closeTime);
@@ -56,13 +54,13 @@ class RoutePlannerService {
     }
   }
 
-  TimeOfDay _parseTime(String time) {
+  static TimeOfDay _parseTime(String time) {
     final parts = time.split(':');
     return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
   }
 
   /// Kiểm tra giá phù hợp với ngân sách
-  bool isPriceAffordable(LocationModel location, double budget) {
+  static bool isPriceAffordable(LocationModel location, int budget) {
     try {
       if (location.price.toLowerCase() == 'free') return true;
       final price = double.parse(
@@ -75,11 +73,10 @@ class RoutePlannerService {
   }
 
   /// Lọc địa điểm theo điều kiện - TRẢ VỀ TẤT CẢ NẾU KHÔNG CÓ ĐỦ ĐIỀU KIỆN
-  List<LocationModel> filterLocations({
+  static List<LocationModel> filterLocations({
     required List<LocationModel?> allLocations,
     required LatLng userGPS,
-    required List<String> interests,
-    required double budget,
+    required int budget,
     required double maxDuration,
     DateTime? currentTime,
     bool strictMode = false, // Chế độ nghiêm ngặt
@@ -90,7 +87,6 @@ class RoutePlannerService {
     List<LocationModel> strictFiltered = [];
     allLocations.forEach((location) {
       if (location == null) return;
-      if (interests.isNotEmpty && !interests.contains(location.type)) return;
       if (!isPriceAffordable(location, budget)) return;
       if (!isLocationOpen(location, currentTime!)) return;
       strictFiltered.add(location);
@@ -104,7 +100,6 @@ class RoutePlannerService {
     List<LocationModel> relaxedFiltered = [];
     allLocations.forEach((location) {
       if (location == null) return;
-      if (interests.isNotEmpty && !interests.contains(location.type)) return;
       if (!isPriceAffordable(location, budget)) return;
       relaxedFiltered.add(location);
     });
@@ -117,7 +112,6 @@ class RoutePlannerService {
     List<LocationModel> interestOnly = [];
     allLocations.forEach((location) {
       if (location == null) return;
-      if (interests.isNotEmpty && !interests.contains(location.type)) return;
       interestOnly.add(location);
     });
 
@@ -133,10 +127,9 @@ class RoutePlannerService {
   }
 
   /// Thuật toán tìm đường tối ưu - LUÔN TRẢ VỀ KẾT QUẢ
-  Future<List<RouteResult>> planOptimalRoute({
+  static Future<List<RouteResult>> planOptimalRoute({
     required LatLng userGPS,
-    required List<String> interests,
-    required double budget,
+    required int budget,
     required double maxDuration, // phút
     required List<LocationModel?> allLocations,
     required List<MissionModel?> allMissions,
@@ -153,7 +146,6 @@ class RoutePlannerService {
     List<LocationModel> filteredLocations = filterLocations(
       allLocations: allLocations,
       userGPS: userGPS,
-      interests: interests,
       budget: budget,
       maxDuration: maxDuration,
       currentTime: startTime,
@@ -176,9 +168,9 @@ class RoutePlannerService {
       double score = 10000 / (distance + 1); // +1 để tránh chia cho 0
 
       // Bonus cho type ưu tiên đầu tiên
-      if (interests.isNotEmpty && location.type == interests[0]) {
-        score *= 1.2;
-      }
+      // if (interests.isNotEmpty && location.type == interests[0]) {
+      //   score *= 1.2;
+      // }
 
       scores[location] = score;
     }
@@ -187,7 +179,7 @@ class RoutePlannerService {
     List<RouteResult> route = [];
     LatLng currentPosition = userGPS;
     double remainingTime = maxDuration;
-    double remainingBudget = budget;
+    int remainingBudget = budget;
     Set<String> visitedTypes = {};
     DateTime currentTime = startTime;
 
@@ -290,7 +282,7 @@ class RoutePlannerService {
       // Cập nhật remaining
       remainingTime -= (travelTime + visitTime);
       try {
-        double locationPrice = double.parse(
+        int locationPrice = int.parse(
           bestLocation.price
               .replaceAll('.', '')
               .replaceAll(',', '')
@@ -319,17 +311,16 @@ class RoutePlannerService {
   }
 
   /// HÀM CHÍNH: Tạo route từ UserInput - LUÔN TRẢ VỀ KẾT QUẢ
-  Future<GameRoute> generateRouteFromUserInput({
+  static Future<GameRoute> generateRouteFromUserInput({
     required LatLng userGPS,
-    required List<String> selectedInterests,
-    required double budget,
+    required int budget,
     required int durationDays,
-    required List<LocationModel?> allLocations,
-    required List<MissionModel?> allMissions,
+    required List<LocationModel> locations,
+    required List<MissionModel?> missions,
   }) async {
     print("---Start generating routes from user input.....-----");
     // Kiểm tra dataset
-    if (allLocations.isEmpty) {
+    if (locations.isEmpty) {
       throw Exception("No locations on server!");
     }
     print("---Break 1-----");
@@ -340,18 +331,17 @@ class RoutePlannerService {
     // Gọi thuật toán tìm đường
     List<RouteResult> routeResults = await planOptimalRoute(
       userGPS: userGPS,
-      interests: selectedInterests,
       budget: budget,
       maxDuration: maxDurationMinutes,
-      allLocations: allLocations,
-      allMissions: allMissions,
+      allLocations: locations,
+      allMissions: missions,
     );
     print("---Break 2-----");
 
     // Nếu không tìm thấy route nào, trả về top 5-6 locations gần nhất
     if (routeResults.isEmpty) {
       // Sắp xếp theo khoảng cách
-      List<LocationModel> sortedByDistance = List.from(allLocations);
+      List<LocationModel> sortedByDistance = List.from(locations);
       sortedByDistance.sort((a, b) {
         double distA = calculateDistance(
           userGPS,
@@ -372,9 +362,7 @@ class RoutePlannerService {
         missions: fallbackLocations
             .map(
               (e) =>
-                  allMissions[e.missionID[Random().nextInt(
-                    e.missionID.length,
-                  )]]!,
+                  missions[e.missionID[Random().nextInt(e.missionID.length)]]!,
             )
             .toList(),
       );
@@ -382,7 +370,7 @@ class RoutePlannerService {
 
     // Chuyển đổi RouteResult thành List<LocationModel>
     List<MissionModel> selectedMission = routeResults
-        .map((e) => allMissions[e.missionId]!)
+        .map((e) => missions[e.missionId]!)
         .toList();
 
     print("---Break 4: Final result-----");
@@ -390,7 +378,7 @@ class RoutePlannerService {
   }
 
   /// Helper: In thông tin chi tiết route
-  void printRouteDetails({
+  static void printRouteDetails({
     required List<RouteResult> route,
     required List<LocationModel> allLocations,
     required List<MissionModel> allMissions,

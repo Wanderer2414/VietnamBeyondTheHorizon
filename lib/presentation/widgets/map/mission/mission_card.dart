@@ -1,16 +1,15 @@
 import 'dart:ui';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/image_upload.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission/challenge_box.dart';
+import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
 class MissionCard extends StatefulWidget {
   final MyMapController controller;
@@ -34,14 +33,9 @@ class _MissionCardState extends State<MissionCard> {
   @override
   void initState() {
     super.initState();
-
-    // SharedPreferences.getInstance().then((value) {
-    //   final src = value.getString(widget.mission.id.toString());
-    //   if (src != null) {
-    //     imageFile = XFile(src);
-    //     setState(() {});
-    //   }
-    // });
+    NetworkProxy.fetchMission(widget.mission.id).then((value) {
+      if (value != null) imageFile = XFile(value);
+    });
   }
 
   Future<bool> _claimed() async {
@@ -66,8 +60,7 @@ class _MissionCardState extends State<MissionCard> {
 
   Future<bool> _submitImage(XFile? imagePath) async {
     if (imagePath == null) throw Exception(("Please upload your image"));
-
-    NetworkProxy.postImage(widget.mission.id, imagePath.path);
+    await NetworkProxy.postMission(widget.mission.id, imagePath.path);
     return true;
   }
 
@@ -165,12 +158,6 @@ class _MissionCardState extends State<MissionCard> {
                             selectedImage: imageFile,
                             onPicked: (file) {
                               imageFile = file;
-                              SharedPreferences.getInstance().then(
-                                (value) => value.setString(
-                                  widget.mission.id.toString(),
-                                  file.path,
-                                ),
-                              );
                               setState(() {});
                             },
                           ),
@@ -187,20 +174,19 @@ class _MissionCardState extends State<MissionCard> {
                     onClaim: () {
                       _claimed().then((value) {
                         if (value) {
-                          Navigator.of(context).pop();
+                          MainRoute.pop();
                           widget.onClose();
                         }
                       });
                     },
                     onSubmit: () async {
-                      try {
-                        return await _submitImage(imageFile);
-                      } catch (e) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text(e.toString())));
-                      }
-                      return false;
+                      return true;
+                      // try {
+                      //   return await _submitImage(imageFile);
+                      // } catch (e) {
+                      //   MainRoute.showError(e.toString());
+                      // }
+                      // return false;
                     },
                     isSubmited: widget.mission.isCompleted,
                   ),

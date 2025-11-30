@@ -23,10 +23,12 @@ class _AccountLoginScreenState extends State<AccountLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: const Color(0xFFFFDF9E),
-      body: SingleChildScrollView(child: _content),
+    return LoadingWrapper(
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        backgroundColor: const Color(0xFFFFDF9E),
+        body: SingleChildScrollView(child: _content),
+      ),
     );
   }
 }

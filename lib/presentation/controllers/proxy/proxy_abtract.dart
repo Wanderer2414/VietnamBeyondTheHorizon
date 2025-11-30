@@ -60,9 +60,9 @@ interface class Proxy {
     if (_subProxy != null) _subProxy.clear();
   }
 
-  Future<String?> signin(String username, String password) async {
+  Future<String?> login(String username, String password) async {
     if (_subProxy != null) {
-      String? token = await _subProxy.signin(username, password);
+      String? token = await _subProxy.login(username, password);
       if (token != null) {
         _setToken(token);
         return token;
@@ -101,10 +101,44 @@ interface class Proxy {
     return await _setRoute(route);
   }
 
-  Future<bool> postMission(int id, String file) async {
-    bool res = await _postMission(id, file);
-    if (_subProxy != null) res = await _subProxy.postMission(id, file) || res;
-    return res;
+  Future<String?> postMission(int id, String file) async {
+    if (_subProxy != null) {
+      String? res = await _subProxy.postMission(id, file);
+      if (res != null) await _postMission(id, file);
+      return res;
+    }
+    return await _postMission(id, file);
+  }
+
+  Future<String?> fetchMission(int id) async {
+    String? src = await _fetchMission(id);
+    if (src == null && _subProxy != null) {
+      src = await _subProxy.fetchMission(id);
+      if (src != null) _postMission(id, src);
+    }
+    return src;
+  }
+
+  Future<bool> submit(int id) async {
+    if (_subProxy != null) {
+      if (await _subProxy.submit(id)) {
+        await _submit(id);
+        return true;
+      }
+      return false;
+    }
+    return await _submit(id);
+  }
+
+  Future<bool> completeRoute(GameRoute route) async {
+    if (_subProxy != null) {
+      if (await _subProxy.completeRoute(route)) {
+        await _completeRoute(route);
+        return true;
+      }
+      return false;
+    }
+    return _completeRoute(route);
   }
 
   Future<void> init() async {
@@ -157,7 +191,19 @@ interface class Proxy {
     return true;
   }
 
-  Future<bool> _postMission(int id, String file) async {
+  Future<String?> _postMission(int id, String file) async {
+    return null;
+  }
+
+  Future<String?> _fetchMission(int id) async {
+    return null;
+  }
+
+  Future<bool> _submit(int id) async {
+    return true;
+  }
+
+  Future<bool> _completeRoute(GameRoute route) async {
     return true;
   }
 }

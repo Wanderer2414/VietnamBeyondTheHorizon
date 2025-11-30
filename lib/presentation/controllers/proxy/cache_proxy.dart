@@ -1,7 +1,7 @@
 part of proxy;
 
-class CacheProxy extends Proxy {
-  CacheProxy({super.subProxy});
+class _CacheProxy extends Proxy {
+  _CacheProxy({super.subProxy});
   Timer? _cancelTimer;
   SharedPreferences? _cache;
 
@@ -97,9 +97,14 @@ class CacheProxy extends Proxy {
   }
 
   @override
-  Future<bool> _postMission(int id, String file) async {
+  Future<String?> _postMission(int id, String file) async {
     (await _get()).setString(id.toString(), file);
-    return true;
+    return null;
+  }
+
+  @override
+  Future<String?> _fetchMission(int id) async {
+    return (await _get()).getString(id.toString());
   }
 
   @override
@@ -112,6 +117,13 @@ class CacheProxy extends Proxy {
   @override
   Future<bool> _setRoute(GameRoute route) async {
     (await _get()).setString("route", jsonEncode(route.toJson()));
+    return true;
+  }
+
+  @override
+  Future<bool> _completeRoute(GameRoute route) async {
+    (await _get()).remove("route");
+    // , jsonEncode(route.toJson()));
     return true;
   }
 }
