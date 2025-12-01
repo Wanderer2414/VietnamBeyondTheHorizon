@@ -307,6 +307,11 @@ class RoutePlannerService {
       }
     }
 
+    //route.add(RouteResult(locationId: 12.toString(), missionId: 30.toString()));
+    // for (var routeRes in route) {
+    //   print("Route result (mission ID): ${routeRes.missionId}");
+    // }
+    //route = [route.first];
     return route;
   }
 
@@ -373,6 +378,7 @@ class RoutePlannerService {
         .toList();
 
     print("---Break 4: Final result-----");
+    selectedMission.length = 2;
     return GameRoute(missions: selectedMission);
   }
 

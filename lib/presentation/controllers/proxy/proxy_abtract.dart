@@ -119,6 +119,24 @@ interface class Proxy {
     return src;
   }
 
+  Future<String?> postAIMission(int id, String file) async {
+    if (_subProxy != null) {
+      String? res = await _subProxy.postAIMission(id, file);
+      if (res != null) await _postAIMission(id, file);
+      return res;
+    }
+    return await _postAIMission(id, file);
+  }
+
+  Future<String?> fetchAIMission(int id) async {
+    String? src = await _fetchAIMission(id);
+    if (src == null && _subProxy != null) {
+      src = await _subProxy.fetchAIMission(id);
+      if (src != null) _postAIMission(id, src);
+    }
+    return src;
+  }
+
   Future<bool> submit(int id) async {
     if (_subProxy != null) {
       if (await _subProxy.submit(id)) {
@@ -139,6 +157,16 @@ interface class Proxy {
       return false;
     }
     return _completeRoute(route);
+  }
+
+  Future<String?> createVideo(List<String> urls, List<int> locationId) async {
+    if (_subProxy != null) {
+      String? res = await _subProxy.createVideo(urls, locationId);
+      if (res == null) return null;
+      if (await _saveVideo(res)) return res;
+      return null;
+    }
+    return _createVideo(urls, locationId);
   }
 
   Future<void> init() async {
@@ -195,7 +223,15 @@ interface class Proxy {
     return null;
   }
 
+  Future<String?> _postAIMission(int id, String file) async {
+    return null;
+  }
+
   Future<String?> _fetchMission(int id) async {
+    return null;
+  }
+
+  Future<String?> _fetchAIMission(int id) async {
     return null;
   }
 
@@ -204,6 +240,14 @@ interface class Proxy {
   }
 
   Future<bool> _completeRoute(GameRoute route) async {
+    return true;
+  }
+
+  Future<String?> _createVideo(List<String> urls, List<int> locationIds) async {
+    return null;
+  }
+
+  Future<bool> _saveVideo(String? video) async {
     return true;
   }
 }

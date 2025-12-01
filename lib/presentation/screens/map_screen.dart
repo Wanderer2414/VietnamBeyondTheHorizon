@@ -33,31 +33,29 @@ class _MapScreenState extends State<MapScreen> {
     _sidePanel = Drawer(child: SideBox());
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void init() {
     final Size screenSize = MediaQuery.of(context).size;
-    if (_homeBar == null) {
-      _homeBar = HomeAppbar(
-        superKey: _key,
-        size: Size(screenSize.width, screenSize.height * 0.06),
-      );
-      _content = Content(controller: widget.controller, screenSize: screenSize);
-    }
+    _homeBar = HomeAppbar(
+      superKey: _key,
+      size: Size(screenSize.width, screenSize.height * 0.06),
+    );
+    _content = Content(controller: widget.controller, screenSize: screenSize);
   }
 
   @override
   Widget build(BuildContext context) {
     return LoadingWrapper(
       init: (context) async {
-        await widget.controller.startRoute(widget.route);
+        await GameProgressManager.startGame(widget.route);
+        init();
+        setState(() {});
       },
       child: Scaffold(
         key: _key,
         resizeToAvoidBottomInset: false,
         appBar: _homeBar,
         drawer: _sidePanel,
-        body: _content,
+        body: _content ?? Container(),
         floatingActionButton: _myLocation,
       ),
     );

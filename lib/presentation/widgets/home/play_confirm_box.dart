@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
+import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/input_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/map_screen.dart';
+import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
 class PlayConfirmBox extends StatelessWidget {
   final Size size;
@@ -82,23 +84,15 @@ class PlayConfirmBox extends StatelessWidget {
                         Navigator.of(context).pop();
                         LoadingManager.run(context, (context) async {
                           final route = await NetworkProxy.getRoute();
+                          print(
+                            "Route ${route?.numberOfMission} ${route?.currentIndex}",
+                          );
                           final controller = MyMapController();
                           await controller.initialize();
                           if (route == null) {
-                            Navigator.of(context).push(
-                              TransitionRLPageRoute(
-                                nextScreen: InputPage(controller: controller),
-                              ),
-                            );
+                            MainRoute.goInputScreen(controller);
                           } else {
-                            Navigator.of(context).push(
-                              TransitionRLPageRoute(
-                                nextScreen: MapScreen(
-                                  route: route,
-                                  controller: controller,
-                                ),
-                              ),
-                            );
+                            MainRoute.goGameScreen(controller, route);
                           }
                           ;
                         });

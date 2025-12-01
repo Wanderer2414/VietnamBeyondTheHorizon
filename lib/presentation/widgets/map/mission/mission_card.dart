@@ -14,14 +14,14 @@ import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 class MissionCard extends StatefulWidget {
   final MyMapController controller;
   final MissionModel mission;
-  final Function() onNavigate, onClose;
+  final Function() onNavigate, onSubmitedAndClose;
 
   MissionCard({
     super.key,
     required this.mission,
     required this.controller,
     required this.onNavigate,
-    required this.onClose,
+    required this.onSubmitedAndClose,
   });
 
   @override
@@ -30,38 +30,69 @@ class MissionCard extends StatefulWidget {
 
 class _MissionCardState extends State<MissionCard> {
   XFile? imageFile;
+  bool _showRewardEffect = false;
+  bool _isReadyToClaim = false;
   @override
   void initState() {
     super.initState();
     NetworkProxy.fetchMission(widget.mission.id).then((value) {
-      if (value != null) imageFile = XFile(value);
+      if (value != null) {
+        imageFile = XFile(value);
+      }
     });
+
+    _checkPendingClaim();
+  }
+
+  void _checkPendingClaim() async {
+    // final prefs = await SharedPreferences.getInstance();
+
+    // bool isPending = prefs.getBool('pending_claim_${_mission.id}') ?? false;
+
+    // if (isPending && !_mission.isCompleted) {
+    //   setState(() {
+    //     _isReadyToClaim = true;
+    //   });
+    // }
   }
 
   Future<bool> _claimed() async {
     return true;
   }
 
-  // Future<XFile?> compressImage(XFile file) async {
-  //   final filePath = file.path;
-  //   final lastIndex = filePath.lastIndexOf(new RegExp(r'.jp'));
-  //   final splitted = filePath.substring(0, (lastIndex));
-  //   final outPath = "${splitted}_out${filePath.substring(lastIndex)}";
-
-  //   var result = await FlutterImageCompress.compressAndGetFile(
-  //     file.path,
-  //     outPath,
-  //     quality: 70,
-  //     minWidth: 800,
-  //     minHeight: 800,
-  //   );
-  //   return result;
-  // }
-
   Future<bool> _submitImage(XFile? imagePath) async {
     if (imagePath == null) throw Exception(("Please upload your image"));
-    await NetworkProxy.postMission(widget.mission.id, imagePath.path);
-    return true;
+    try {
+      late final String? url;
+      switch (widget.mission.type) {
+        case "Photo":
+          {
+            url = await NetworkProxy.postMission(
+              widget.mission.id,
+              imagePath.path,
+            );
+          }
+          break;
+        case "AI Photo":
+          {
+            url = await NetworkProxy.postAIMission(
+              widget.mission.id,
+              imagePath.path,
+            );
+          }
+          break;
+      }
+      if (url != null) {
+        widget.mission.imagePath = url;
+        widget.mission.isCompleted = true;
+        setState(() {});
+        return true;
+      }
+      return false;
+    } catch (e) {
+      MainRoute.showError(e.toString());
+    }
+    return false;
   }
 
   @override
@@ -69,132 +100,162 @@ class _MissionCardState extends State<MissionCard> {
     final Size screenSize = MediaQuery.of(context).size;
     final double cardHeight = screenSize.height * 0.7;
     return Container(
-      // padding: EdgeInsets.all(20),
       height: cardHeight,
-      decoration: BoxDecoration(
-        // color: Colors.white.withAlpha(200),
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black38,
-            blurRadius: 20,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(25),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-          child: Container(
-            padding: EdgeInsets.fromLTRB(20, 25, 20, 20),
+      child: Stack(
+        children: [
+          Container(
+            // padding: EdgeInsets.all(20),
+            height: cardHeight,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.8),
+              // color: Colors.white.withAlpha(200),
               borderRadius: BorderRadius.circular(25),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.4),
-                width: 1.5,
-              ),
-            ),
-            child: Stack(
-              children: [
-                SingleChildScrollView(
-                  physics: BouncingScrollPhysics(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              widget.mission.name,
-                              style: TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Gantari',
-                                height: 1.2,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          IconButton(
-                            onPressed: () {
-                              widget.controller.toggleLocationInfo(
-                                context,
-                                widget.mission.location!,
-                                widget.onNavigate,
-                                () {},
-                                isReplace: true,
-                              );
-                            },
-                            icon: Icon(
-                              Icons.info_outline_rounded,
-                              size: 32,
-                              color: ColorPalette.accentColor,
-                            ),
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-
-                      _buildMainTitle("Mission Details"),
-
-                      ChallengeBoxWidget(mission: widget.mission),
-                      SizedBox(height: 25),
-
-                      _buildMainTitle("Your Submission"),
-                      SizedBox(height: 10),
-                      Card(
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: ImageUploadWidget(
-                            selectedImage: imageFile,
-                            onPicked: (file) {
-                              imageFile = file;
-                              setState(() {});
-                            },
-                          ),
-                        ),
-                      ),
-
-                      SizedBox(height: screenSize.height * 0.07),
-                    ],
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: _ControlPanel(
-                    onClaim: () {
-                      _claimed().then((value) {
-                        if (value) {
-                          MainRoute.pop();
-                          widget.onClose();
-                        }
-                      });
-                    },
-                    onSubmit: () async {
-                      return true;
-                      // try {
-                      //   return await _submitImage(imageFile);
-                      // } catch (e) {
-                      //   MainRoute.showError(e.toString());
-                      // }
-                      // return false;
-                    },
-                    isSubmited: widget.mission.isCompleted,
-                  ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black38,
+                  blurRadius: 20,
+                  offset: Offset(0, 10),
                 ),
               ],
             ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(25),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(20, 25, 20, 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.4),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Stack(
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          physics: BouncingScrollPhysics(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      widget.mission.name,
+                                      style: TextStyle(
+                                        fontSize: 26,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Gantari',
+                                        height: 1.2,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  IconButton(
+                                    onPressed: () {
+                                      widget.controller.toggleLocationInfo(
+                                        context,
+                                        widget.mission.location!,
+                                        widget.onNavigate,
+                                        () {},
+                                        isReplace: true,
+                                      );
+                                    },
+                                    icon: Icon(
+                                      Icons.info_outline_rounded,
+                                      size: 32,
+                                      color: ColorPalette.accentColor,
+                                    ),
+                                    padding: EdgeInsets.zero,
+                                    constraints: BoxConstraints(),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20),
+
+                              _buildMainTitle("Mission Details"),
+
+                              ChallengeBoxWidget(mission: widget.mission),
+                              SizedBox(height: 25),
+
+                              Row(
+                                children: [
+                                  _buildMainTitle("Your Submission"),
+                                  SizedBox(width: 8),
+                                  widget.mission.isCompleted
+                                      ? Icon(
+                                          Icons.check_circle_outline,
+                                          size: 25,
+                                          color: Colors.green,
+                                        )
+                                      : SizedBox(),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+                              Card(
+                                elevation: 2,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: ImageUploadWidget(
+                                    selectedImage: imageFile,
+                                    onPicked: (file) =>
+                                        setState(() => imageFile = file),
+                                  ),
+                                ),
+                              ),
+
+                              SizedBox(height: 20),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: _ControlPanel(
+                          onClaim: () {
+                            _claimed().then((value) async {
+                              if (value) {
+                                setState(() {
+                                  _isReadyToClaim = false;
+                                  _showRewardEffect = true;
+                                });
+                                await Future.delayed(
+                                  const Duration(milliseconds: 1500),
+                                );
+                                widget.onSubmitedAndClose();
+                              }
+                            });
+                          },
+                          onSubmit: () async {
+                            try {
+                              return await _submitImage(imageFile);
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(e.toString())),
+                              );
+                            }
+                            return false;
+                          },
+                          isSubmited: widget.mission.isCompleted,
+                          isReadyToClaim: _isReadyToClaim,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
-        ),
+
+          if (_showRewardEffect) RewardPopup(score: widget.mission.difficulty),
+        ],
       ),
     );
   }
@@ -205,7 +266,7 @@ class _MissionCardState extends State<MissionCard> {
       style: TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.bold,
-        color: Colors.black54, // Màu xám đậm cho tiêu đề phụ
+        color: Colors.black54,
         fontFamily: 'Gantari',
       ),
     );
@@ -216,10 +277,12 @@ class _ControlPanel extends StatefulWidget {
   final Future<bool> Function() onSubmit;
   final void Function() onClaim;
   final bool isSubmited;
+  final bool isReadyToClaim;
   _ControlPanel({
     required this.onSubmit,
     required this.onClaim,
     this.isSubmited = false,
+    this.isReadyToClaim = false,
   });
 
   @override
@@ -233,14 +296,32 @@ class _ControlPanelState extends State<_ControlPanel> {
     super.initState();
     if (widget.isSubmited)
       _controlButton = _SubmitedButton();
-    else
+    else if (widget.isReadyToClaim) {
+      _controlButton = _ClaimButton(onPressed: widget.onClaim);
+    } else
       _controlButton = _SubmitButton(
         onPressed: () {
-          widget.onSubmit().then((value) {
+          widget.onSubmit().then((value) async {
             if (value) {
-              setState(() {
-                _controlButton = _ClaimButton(onPressed: widget.onClaim);
-              });
+              showSuccessDialog(context);
+
+              await Future.delayed(Duration(milliseconds: 1500));
+
+              Navigator.of(context).pop();
+
+              if (mounted) {
+                setState(() {
+                  _controlButton = _ClaimButton(onPressed: widget.onClaim);
+                });
+              }
+            } else {
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   SnackBar(content: Text("Failed! Try another photo...")),
+              // );
+              showFailDialog(context);
+              await Future.delayed(Duration(milliseconds: 1500));
+
+              Navigator.of(context).pop();
             }
           });
         },
@@ -279,7 +360,7 @@ class _ClaimButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.amber,
+        backgroundColor: Colors.amberAccent,
         foregroundColor: Colors.black,
         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -321,6 +402,178 @@ class _SubmitedButton extends StatelessWidget {
       ),
       onPressed: () {},
       child: Text("Submited"),
+    );
+  }
+}
+
+//---------------UI HELPER---------------
+Future<dynamic> showSuccessDialog(BuildContext context) async {
+  return showGeneralDialog(
+    context: context,
+    barrierDismissible: false,
+    barrierLabel: "Success",
+    transitionDuration: Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Center(
+        child: Material(
+          color: Colors.transparent,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: Duration(milliseconds: 600),
+            curve: Curves.elasticOut,
+            builder: (context, value, child) {
+              return Transform.scale(
+                scale: value,
+                child: Container(
+                  width: 150,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 20,
+                        offset: Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.green, size: 80),
+                      SizedBox(height: 10),
+                      Text(
+                        "Correct!",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    },
+  );
+}
+
+Future<dynamic> showFailDialog(BuildContext context) async {
+  return showGeneralDialog(
+    context: context,
+    barrierDismissible: false,
+    barrierLabel: "Fail",
+    transitionDuration: Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Center(
+        child: Material(
+          color: Colors.transparent,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: Duration(milliseconds: 600),
+            curve: Curves.elasticOut,
+            builder: (context, value, child) {
+              return Transform.scale(
+                scale: value,
+                child: Container(
+                  width: 150,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 20,
+                        offset: Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.close_rounded,
+                        color: Colors.red.shade600,
+                        size: 80,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        "Incorrect!",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    },
+  );
+}
+
+class RewardPopup extends StatelessWidget {
+  final int score;
+  const RewardPopup({super.key, required this.score});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 800),
+        curve: Curves.elasticOut, // Hiệu ứng nảy bưng bưng
+        builder: (context, value, child) {
+          return Transform.scale(
+            scale: value,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 20,
+                    offset: Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.star_rounded,
+                    size: 80,
+                    color: Colors.amber,
+                  ), // Ngôi sao vàng
+                  SizedBox(height: 10),
+                  Text(
+                    "+$score Stars",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.amber[800],
+                      fontFamily: 'Gantari',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

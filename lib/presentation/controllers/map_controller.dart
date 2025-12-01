@@ -11,6 +11,7 @@ import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/information_location.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/mission_screen.dart';
@@ -21,24 +22,8 @@ class MyMapController {
   final Location _location = Location();
   LatLng? _currentLocation;
   List<LatLng> _routes = [];
-  GameProgressManager? _gameManager;
   void Function() resetMap = () {};
 
-  List<MissionModel> get missions {
-    if (_gameManager == null) return [];
-    return _gameManager!.missions;
-  }
-
-  MissionModel? get currentMission {
-    return _gameManager?.currentTarget;
-  }
-
-  MarkerAppearance getMissionAppearance({required MissionModel mission}) =>
-      _gameManager?.getMissionAppearance(mission: mission) ??
-      GameProgressManager.getDefaultMarker(mission.location!.type);
-  MarkerAppearance getLocationAppearance({required LocationModel location}) =>
-      _gameManager?.getLocationAppearance(model: location) ??
-      GameProgressManager.getDefaultMarker(location.type);
   // set userRoute(List<LocationModel> route) {
   //   gameManager.userRoute = route;
   // }
@@ -255,7 +240,9 @@ class MyMapController {
           throw Exception('Failed to fetch route between $start and $end');
         }
       } catch (e) {
-        print(e);
+        // _value.routes?.add(start);
+        // _value.routes?.add(end);
+        print("$e");
         throw Exception('Failed to fetch route: $e');
       }
     }
@@ -336,43 +323,27 @@ class MyMapController {
           controller: this,
           mission: mission,
           onNavigate: () {},
-          onClose: () {
-            if (_gameManager!.nextStage())
-              nextMission();
-            else
-              completeRoute();
+          onSubmitedAndClose: () {
+            LoadingManager.run(context, (context) async {
+              int reward = mission.difficulty;
+              //ADD STARS!!!!!!!!!!!!!!!
+              await GameProgressManager.markAsCompleted(mission.id);
+              await GameProgressManager.addStars(reward);
+              mission.isCompleted = true;
+              if (GameProgressManager.nextStage()) {
+                final mission = GameProgressManager.currentTarget;
+                await fetchRoute(
+                  _currentLocation,
+                  mission.location!.coordinates,
+                );
+                moveToLocation(mission.location!.coordinates, 15);
+                MainRoute.pop();
+              } else {}
+            });
           },
         ),
       ),
     );
-  }
-
-  Future<void> nextMission() async {
-    final mission = (await _gameManager?.currentTarget)!;
-    final loc = mission.location!.coordinates;
-    await fetchRoute(_currentLocation, loc);
-  }
-
-  Future<void> startRoute(GameRoute newRoute) async {
-    _gameManager = GameProgressManager();
-    await _gameManager!.startRoute(newRoute);
-    final loc = (await _gameManager!.currentTarget)!.location!.coordinates;
-    // if (gameManager.currentTarget != null) {
-    await fetchRoute(_currentLocation, loc);
-    // }
-
-    // for (int i = 0; i < userRoute.length; i++) {
-    //   if (i <= gameManager.currentIndex)
-    //     _markerAppreances[userRoute[i].id]?.color = Colors.red;
-    //   else
-    //     _markerAppreances[userRoute[i].id]?.color = Colors.black;
-    // }
-    resetMap();
-  }
-
-  void completeRoute() {
-    _gameManager!.complete();
-    MainRoute.goResultScreen();
   }
 
   Future<void> updateMissionImage(int missionId, String imagePath) async {

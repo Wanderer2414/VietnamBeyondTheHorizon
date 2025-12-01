@@ -60,9 +60,9 @@ class MainRoute {
     );
   }
 
-  static void goResultScreen() {
+  static void goResultScreen(GameRoute route) {
     NavigatorKey.currentState?.push(
-      TransitionRLPageRoute(nextScreen: ResultAutoScreen()),
+      TransitionRLPageRoute(nextScreen: ResultAutoScreen(route: route)),
     );
   }
 

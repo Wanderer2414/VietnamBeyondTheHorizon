@@ -66,7 +66,7 @@ class NetworkProxy {
     return await instance.setAccount(user);
   }
 
-  static Future<bool?> setRoute(GameRoute route) async {
+  static Future<bool> setRoute(GameRoute route) async {
     return (await _getInstance()).setRoute(route);
   }
 
@@ -81,9 +81,14 @@ class NetworkProxy {
     }
   }
 
-  static Future<void> postMission(int misssion, String file) async {
+  static Future<String?> postMission(int misssion, String file) async {
     final instance = await _getInstance();
-    await instance.postMission(misssion, file);
+    return (await instance.postMission(misssion, file));
+  }
+
+  static Future<String?> postAIMission(int misssion, String file) async {
+    final instance = await _getInstance();
+    return await instance.postAIMission(misssion, file);
   }
 
   static Future<String?> fetchMission(int mission) async {
@@ -94,5 +99,10 @@ class NetworkProxy {
   static Future<void> completeRoute(GameRoute route) async {
     final instance = await _getInstance();
     await instance.completeRoute(route);
+  }
+
+  static Future<String?> createVideo(List<String> url, List<int> ids) async {
+    final instance = await _getInstance();
+    return instance.createVideo(url, ids);
   }
 }

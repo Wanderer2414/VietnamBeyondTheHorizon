@@ -39,12 +39,12 @@ class CurrentLayer extends CurrentLocationLayer {
 class MissionLayer extends MarkerLayer {
   MissionLayer(BuildContext context, MyMapController controller)
     : super(
-        markers: controller.missions
+        markers: GameProgressManager.missions
             .map(
               (e) => LocationMarker(
                 context,
                 e.location?.coordinates ?? LatLng(0, 0),
-                controller.getMissionAppearance(mission: e),
+                GameProgressManager.getMissionAppearance(mission: e),
                 (loc, context) {
                   controller.toggleMissionCard(context, e);
                 },
@@ -66,7 +66,7 @@ class LocationLayer extends MarkerLayer {
               (e) => LocationMarker(
                 context,
                 e!.coordinates,
-                controller.getLocationAppearance(location: e),
+                GameProgressManager.getLocationAppearance(location: e),
                 (loc, context) {
                   controller.toggleLocationInfo(context, e, () {
                     controller.fetchRoute(controller.currentLocation, loc);

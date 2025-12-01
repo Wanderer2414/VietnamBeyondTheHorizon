@@ -109,7 +109,9 @@ class _CacheProxy extends Proxy {
 
   @override
   Future<GameRoute?> _getRoute() async {
+    print("Get route from cache!");
     final response = (await _get()).getString("route");
+    print(response);
     if (response != null) return GameRoute.fromJson(jsonDecode(response));
     return null;
   }
@@ -123,7 +125,6 @@ class _CacheProxy extends Proxy {
   @override
   Future<bool> _completeRoute(GameRoute route) async {
     (await _get()).remove("route");
-    // , jsonEncode(route.toJson()));
     return true;
   }
 }

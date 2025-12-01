@@ -91,39 +91,31 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
   Widget build(BuildContext context) {
     return LoadingWrapper(
       init: (context) async {
-        try {
-          if (widget.controller.currentLocation != null) {
-            // Cập nhật UserInput với dữ liệu từ các controllers
-            // widget.userInput.budget = UserInput.parseBudget(
-            //   widget.._budgetController.text,
-            // );
-            // userInput.durationDays = UserInput.parseDuration(
-            //   _durationController.text,
-            // );
+        if (widget.controller.currentLocation != null) {
+          // Cập nhật UserInput với dữ liệu từ các controllers
+          // widget.userInput.budget = UserInput.parseBudget(
+          //   widget.._budgetController.text,
+          // );
+          // userInput.durationDays = UserInput.parseDuration(
+          //   _durationController.text,
+          // );
 
-            // Gọi thuật toán để tạo route
-            final locations = widget.userInput.getSelectedInterests(
-              await NetworkProxy.locations,
-            );
-            final missions = await NetworkProxy.missions;
-            print(locations.length);
-            final route = await RoutePlannerService.generateRouteFromUserInput(
-              userGPS: widget.controller.currentLocation!,
-              budget: widget.userInput.budget,
-              durationDays: widget.userInput.durationDays,
-              locations: locations,
-              missions: missions,
-            );
-            init(route);
-            await widget.controller.startRoute(route);
-            await widget.controller.fetchFullRoute(
-              route: route.missions
-                  .map((e) => e.location!.coordinates)
-                  .toList(),
-            );
-          }
-        } catch (e) {
-          print(e);
+          // Gọi thuật toán để tạo route
+          final locations = widget.userInput.getSelectedInterests(
+            await NetworkProxy.locations,
+          );
+          final missions = await NetworkProxy.missions;
+          final route = await RoutePlannerService.generateRouteFromUserInput(
+            userGPS: widget.controller.currentLocation!,
+            budget: widget.userInput.budget,
+            durationDays: widget.userInput.durationDays,
+            locations: locations,
+            missions: missions,
+          );
+          init(route);
+          await widget.controller.fetchFullRoute(
+            route: route.missions.map((e) => e.location!.coordinates).toList(),
+          );
         }
       },
       child: Scaffold(

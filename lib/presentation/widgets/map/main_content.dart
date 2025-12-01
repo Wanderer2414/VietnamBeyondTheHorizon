@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/extra/text_measure.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
@@ -45,7 +46,7 @@ class _ContentState extends State<Content> {
               child: ScrollTextButton(
                 onPressed: () {
                   LoadingManager.run(context, (context) async {
-                    final mission = (await widget.controller.currentMission)!;
+                    final mission = GameProgressManager.currentTarget;
                     final loc = LatLng(
                       mission.location?.latitude ?? 0,
                       mission.location?.longitude ?? 0,
@@ -59,7 +60,7 @@ class _ContentState extends State<Content> {
                 },
                 text:
                     "Go to " +
-                    widget.controller.currentMission!.location!.name +
+                    GameProgressManager.currentTarget.location!.name +
                     "...\t",
               ),
             ),

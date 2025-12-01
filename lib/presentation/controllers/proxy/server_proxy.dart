@@ -4,7 +4,7 @@ class _ServerProxy extends Proxy {
   final Future<void> Function() onTokenExpired;
   DioService _service;
 
-  _ServerProxy(String host, {required this.onTokenExpired, super.subProxy})
+  _ServerProxy(String host, {required this.onTokenExpired})
     : _service = DioService(onTokenExpired: onTokenExpired) {}
 
   @override
@@ -89,9 +89,26 @@ class _ServerProxy extends Proxy {
       } else
         throw Exception(1);
     }
+
+    try {
+      final response = await _service.dio.get("/mission/visit");
+
+      if (response.statusCode == 200 && response.data['status'] == 'success') {
+        final List data = response.data['data'];
+        data.forEach((element) {
+          final id = element["misssionId"];
+          final url = element['images']['0']['url'];
+          dataMissions[id].isCompleted = true;
+          dataMissions[id].imagePath = url;
+        });
+      }
+    } catch (e) {
+      print("Error fetch visits: $e");
+    }
     print(
       "Load ${dataLocation.length} locations, ${dataMissions.length} missions!",
     );
+
     return Quests(locations: dataLocation, missions: dataMissions);
   }
 
@@ -187,16 +204,95 @@ class _ServerProxy extends Proxy {
         ),
         'missionID': id,
       });
-      final resonse = await _service.dio.post(
-        "/mission/similarity",
+      final response = await _service.dio.post(
+        "/mission/image",
         data: formData,
       );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print("Response data success: $response");
+        final responseData = response.data;
+        if (responseData is Map && responseData['status'] == 'success') {
+          return responseData['url'] as String;
+        }
+      }
     } catch (e) {
       if (e is DioException) {
         print("Lỗi server trả về: ${e.response?.data}");
       }
     }
     return "";
+  }
+
+  @override
+  Future<String?> _postAIMission(int id, String src) async {
+    try {
+      final fileName = src.split('/').last;
+
+      FormData formData = FormData.fromMap({
+        "files": await MultipartFile.fromFile(
+          src,
+          filename: fileName,
+          contentType: DioMediaType("image", "jpeg"),
+        ),
+        'missionID': id,
+      });
+      final response = await _service.dio.post(
+        "/mission/image",
+        data: formData,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print("Response data success: $response");
+        final responseData = response.data;
+        if (responseData is Map && responseData['status'] == 'success') {
+          return responseData['url'] as String;
+        }
+      }
+    } catch (e) {
+      if (e is DioException) {
+        print("Lỗi server trả về: ${e.response?.data}");
+      }
+    }
+    return "";
+  }
+
+  @override
+  Future<String?> _createVideo(List<String> urls, List<int> id) async {
+    try {
+      print("Calling API creating video...");
+
+      final Map<String, dynamic> body = {
+        "urls": urls,
+        "frame_index_list": id,
+        "group_num_list": List.filled(urls.length, "1"),
+      };
+
+      final response = await _service.dio.post(
+        "/video/generation",
+        data: body,
+        options: Options(
+          sendTimeout: const Duration(minutes: 1),
+          receiveTimeout: const Duration(minutes: 2),
+        ),
+      );
+
+      // Check status code
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = response.data;
+        if (responseData is Map && responseData['status'] == 'success') {
+          final videoUrl = responseData['data'];
+          print("Video URL: ${videoUrl}");
+          if (videoUrl != null && videoUrl.toString().isNotEmpty) {
+            return videoUrl.toString();
+          }
+        }
+      }
+    } catch (e) {
+      print("Error API Video: $e");
+      if (e is DioException) {
+        print("Error Server: ${e.response?.data}");
+      }
+    }
+    return null;
   }
 
   Future<bool> isLogged() async {
