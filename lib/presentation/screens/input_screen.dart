@@ -98,6 +98,7 @@ class _InputPageState extends State<InputPage> with RouteAware {
 
   // Hàm xử lý khi nhấn nút NEXT
   Future<void> _handleNext() async {
+    GameProgressManager().resetProgress();
     LoadingManager.run(context, (context) async {
       try {
         if (userInput.myMapController.currentLocation != null) {

@@ -26,7 +26,6 @@ class _MapShowState extends State<MapShow> {
   @override
   void dispose() {
     super.dispose();
-    GameProgressManager().resetProgress();
   }
 
   @override

@@ -53,7 +53,7 @@ class MyMapController {
 
       // final userGPS = await loadGPS();
       // _value.currentLocation = LatLng(userGPS['lat']!, userGPS['lng']!);
-      await UserHistoryManager().loadLocalHistory();
+      //await UserHistoryManager().loadLocalHistory();
 
       if (gameManager.userRoute.isNotEmpty &&
           gameManager.currentTarget != null) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/user_history.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile/stat_card.dart';
 
 class StatPanel extends StatelessWidget {
@@ -6,6 +7,9 @@ class StatPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final missions_completed = UserHistoryManager().completedMissionIds.length
+        .toString();
+    final numberOfPhotos = UserHistoryManager().historyPhotos.length.toString();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
@@ -18,13 +22,13 @@ class StatPanel extends StatelessWidget {
             iconColor: Colors.amber,
           ),
           Statcard(
-            value: '34',
-            label: 'km long',
+            value: numberOfPhotos,
+            label: 'photos',
             icon: null,
             iconColor: Colors.blueGrey,
           ),
           Statcard(
-            value: '3',
+            value: missions_completed,
             label: 'missions\ncompleted',
             icon: null,
             iconColor: Colors.green,

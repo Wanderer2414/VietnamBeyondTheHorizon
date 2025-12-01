@@ -65,16 +65,16 @@ class MissionModel {
 
 class VisitModel {
   final int missionId;
-  final String? imageUrl;
+  final List<String> imageUrls;
 
-  VisitModel({required this.missionId, this.imageUrl});
+  VisitModel({required this.missionId, required this.imageUrls});
 
   factory VisitModel.fromJson(Map<String, dynamic> json) {
-    String? url;
-    if (json['images'] != null && (json['images'] as List).isNotEmpty) {
-      url = json['images'][0]['url'];
+    List<String> urls = [];
+    if (json['images'] != null) {
+      urls = (json['images'] as List).map((e) => e['url'] as String).toList();
     }
 
-    return VisitModel(missionId: json['missionID'], imageUrl: url);
+    return VisitModel(missionId: json['missionID'], imageUrls: urls);
   }
 }

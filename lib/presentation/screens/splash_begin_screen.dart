@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/user_history.dart';
@@ -18,8 +19,8 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void navigateNext() async {
-    await UserHistoryManager().syncHistory();
     if (await NetworkProxy.isLogged()) {
+      await UserHistoryManager().syncHistory();
       print("Log");
       Navigator.pushReplacementNamed(context, "home");
     } else {

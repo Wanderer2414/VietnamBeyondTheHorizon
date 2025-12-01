@@ -7,6 +7,7 @@ import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/network_cookies.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/server_proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/user_history.dart';
 
 class NetworkProxy {
   late ServerProxy _server;
@@ -92,6 +93,7 @@ class NetworkProxy {
   static Future<void> _setToken(String token) async {
     final cache = await _getCache();
     cache.setString("token", token);
+    await UserHistoryManager().syncHistory();
   }
 
   static Future<NetworkProxy> _getInstance() async {
@@ -226,6 +228,10 @@ class NetworkProxy {
   static Future<List<VisitModel>> fetchVisits() async {
     final instance = await _getInstance();
     return await instance._server.fetchVisits();
+  }
+
+  static Future<List<String>> fetchVideoUrls() async {
+    return await (await _getInstance())._server.fetchVideoUrls();
   }
 }
 

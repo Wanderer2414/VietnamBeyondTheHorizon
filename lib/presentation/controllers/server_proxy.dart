@@ -79,6 +79,7 @@ class ServerProxy {
 
       if (userJson != null) {
         final user = UserAccountCore.fromJson(userJson);
+
         return user;
       }
     }
@@ -234,6 +235,30 @@ class ServerProxy {
       }
     } catch (e) {
       print("Error fetch visits: $e");
+    }
+    return [];
+  }
+
+  Future<List<String>> fetchVideoUrls() async {
+    try {
+      final response = await _service.dio.get("/video/videos");
+
+      if (response.statusCode == 200 && response.data['status'] == 'success') {
+        final listData = response.data['data'];
+        if (listData is List) {
+          return listData
+              .map((e) {
+                if (e is Map) {
+                  return e['url']?.toString() ?? "";
+                }
+                return "";
+              })
+              .where((url) => url.isNotEmpty)
+              .toList();
+        }
+      }
+    } catch (e) {
+      print("Error fetch video: $e");
     }
     return [];
   }

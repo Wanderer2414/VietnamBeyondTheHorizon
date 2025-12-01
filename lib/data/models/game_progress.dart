@@ -67,6 +67,9 @@ class GameProgressManager {
         }
       }
     }
+
+    print("urls: ${jsonEncode(urls)}");
+    print("urls: ${jsonEncode(locations)}");
     return [urls, locations];
   }
 
