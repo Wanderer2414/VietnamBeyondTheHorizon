@@ -112,6 +112,7 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
             locations: locations,
             missions: missions,
           );
+          print("Mission: ${route.missions.length}");
           init(route);
           await widget.controller.fetchFullRoute(
             route: route.missions.map((e) => e.location!.coordinates).toList(),

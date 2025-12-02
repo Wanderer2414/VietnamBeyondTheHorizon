@@ -60,7 +60,7 @@ class _ContentState extends State<Content> {
                 },
                 text:
                     "Go to " +
-                    GameProgressManager.currentTarget.location!.name +
+                    (GameProgressManager.currentTarget.location?.name ?? "") +
                     "...\t",
               ),
             ),

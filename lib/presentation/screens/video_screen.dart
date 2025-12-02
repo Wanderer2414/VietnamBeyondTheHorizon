@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:video_player/video_player.dart';
 import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
@@ -17,6 +18,7 @@ class VideoApp extends StatefulWidget {
 class _VideoAppState extends State<VideoApp> {
   late VideoPlayerController _controller;
   bool _isSaving = false;
+  String _progressPercent = "";
   bool _showControls = true;
 
   @override
@@ -79,7 +81,10 @@ class _VideoAppState extends State<VideoApp> {
         videoUrl,
         savePath,
         onReceiveProgress: (count, total) {
-          print("Downloading: ${(count / total * 100).toStringAsFixed(0)}%");
+          // print("Downloading: ${(count / total * 100).toStringAsFixed(0)}%");
+          setState(() {
+            _progressPercent = (count / total * 100).toStringAsFixed(0);
+          });
         },
       );
 
@@ -114,7 +119,10 @@ class _VideoAppState extends State<VideoApp> {
       }
     } finally {
       if (mounted) {
-        setState(() => _isSaving = false);
+        setState(() {
+          _isSaving = false;
+          _progressPercent = "0";
+        });
       }
     }
   }
@@ -243,7 +251,22 @@ class _VideoAppState extends State<VideoApp> {
                   ),
 
                   _isSaving
-                      ? CircularProgressIndicator(color: Colors.white)
+                      ? Column(
+                          children: [
+                            SpinKitCircle(color: Colors.white),
+                            SizedBox(height: 8),
+                            Text(
+                              // ignore: prefer_interpolation_to_compose_strings
+                              _progressPercent + " %",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontFamily: 'Gantari',
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                          ],
+                        )
                       : CircleAvatar(
                           backgroundColor: Colors.black54,
                           child: IconButton(

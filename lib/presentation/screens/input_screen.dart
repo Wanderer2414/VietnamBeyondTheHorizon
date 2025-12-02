@@ -6,6 +6,7 @@ import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/main.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/user_history.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/back_button.dart'
     as common;
@@ -399,7 +400,7 @@ class _InterestField extends StatefulWidget {
 }
 
 class _InterestFieldState extends State<_InterestField> {
-  int _current = 0;
+  int _current = 15;
   @override
   Widget build(BuildContext context) {
     return Row(

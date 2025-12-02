@@ -2,8 +2,10 @@ library proxy;
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/data/models/game_quest.dart';
@@ -12,7 +14,7 @@ import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/dio_service.dart';
 import 'package:vietnambeyondthehorizon/routes/main_route.dart';
-
+import 'package:http/http.dart' as http;
 part "server_proxy.dart";
 part "proxy_abtract.dart";
 part "cookies.dart";

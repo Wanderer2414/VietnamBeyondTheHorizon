@@ -23,7 +23,9 @@ class _SplashScreenState extends State<SplashScreen> {
       const Duration(seconds: 90),
       onTimeout: () => throw Exception("Disconnect server!"),
     );
-    if (await func)
+    // await UserHistoryManager().syncHistory();
+    bool isLogged = await func;
+    if (isLogged)
       MainRoute.goHome();
     else
       MainRoute.goIntro();

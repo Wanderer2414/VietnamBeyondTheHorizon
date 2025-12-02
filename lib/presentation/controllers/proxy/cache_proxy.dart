@@ -11,7 +11,6 @@ class _CacheProxy extends Proxy {
     _cancelTimer = Timer(const Duration(minutes: 1), () {
       _cache = null;
       _cancelTimer = null;
-      print("Unlink cache!");
     });
     //Get cache
     if (_cache == null) _cache = await SharedPreferences.getInstance();
@@ -36,95 +35,126 @@ class _CacheProxy extends Proxy {
   }
 
   @override
-  Future<void> _init() async {}
-
-  @override
-  Future<String?> _getToken() async {
-    return (await _get()).getString("token");
+  Future<String?> getToken() async {
+    String? token = (await _get()).getString("token");
+    print("Cache token: $token");
+    if (token == null) token = await _subProxy?.getToken();
+    return token;
   }
 
   @override
-  Future<bool> _setToken(String token) async {
-    (await _get()).setString("token", token);
-    print("save token!");
-    return true;
+  Future<bool> setToken(String token) async {
+    bool res = await _subProxy!.setToken(token);
+    print("Res: $res, Saved token to cache!");
+    if (res) return await (await _get()).setString("token", token);
+    return false;
   }
 
   @override
-  Future<Quests?> _getQuests() async {
+  Future<Quests?> getQuests() async {
     String? response = (await _get()).getString("quest");
     if (response != null) {
       final data = jsonDecode(response);
       return Quests.fromJson(data);
+    } else {
+      return await _subProxy?.getQuests();
     }
-    return null;
   }
 
   @override
-  Future<bool> _setQuests(Quests quest) async {
-    await (await _get()).setString("quest", jsonEncode(quest.toJson()));
-    return true;
+  Future<bool> setQuests(Quests quest) async {
+    bool res = await _subProxy!.setQuests(quest);
+    if (res)
+      return await (await _get()).setString(
+        "quest",
+        jsonEncode(quest.toJson()),
+      );
+    return false;
   }
 
   @override
-  Future<UserAccountCore?> _getAccount() async {
+  Future<UserAccountCore?> getAccount() async {
     final raw = (await _get()).getString("user");
-    if (raw == null) return null;
+    if (raw == null) return await _subProxy!.getAccount();
     final data = jsonDecode(raw);
     return UserAccountCore.fromJson(data);
   }
 
   @override
-  Future<bool> _setAccount(UserAccountCore account) async {
-    await (await _get()).setString("user", jsonEncode(account.toJson()));
-    return true;
+  Future<bool> setAccount(UserAccountCore account) async {
+    bool res = await _subProxy!.setAccount(account);
+    if (res)
+      return await (await _get()).setString(
+        "user",
+        jsonEncode(account.toJson()),
+      );
+    return false;
   }
 
   @override
-  Future<bool> _clear() async {
+  Future<bool> clear() async {
+    print("Clear cache!");
+    _subProxy?.clear();
     (await _get()).clear();
     return true;
   }
 
   @override
-  Future<String?> _signin(String username, String password) async {
-    return null;
+  Future<String?> login(String username, String password) async {
+    String? token = await _subProxy!.login(username, password);
+    if (token != null) setToken(token);
+    return token;
   }
 
   @override
-  Future<String?> _signup(String username, String password) async {
-    return null;
+  Future<String?> signup(String username, String password) async {
+    String? token = await _subProxy!.signup(username, password);
+    if (token != null) setToken(token);
+    return token;
   }
 
   @override
-  Future<String?> _postMission(int id, String file) async {
-    (await _get()).setString(id.toString(), file);
-    return null;
+  Future<String?> postMission(int id, String file) async {
+    String? res = await _subProxy!.postMission(id, file);
+    if (res == null) return null;
+    (await _get()).setString(id.toString(), res);
+    return res;
   }
 
   @override
-  Future<String?> _fetchMission(int id) async {
-    return (await _get()).getString(id.toString());
+  Future<String?> postAIMission(int id, String file) async {
+    String? res = await _subProxy!.postAIMission(id, file);
+    if (res == null) return null;
+    (await _get()).setString(id.toString(), res);
+    return res;
   }
 
   @override
-  Future<GameRoute?> _getRoute() async {
-    print("Get route from cache!");
+  Future<String?> fetchMission(int id) async {
+    String? local = (await _get()).getString(id.toString());
+    if (local != null) return local;
+    return await _subProxy!.fetchMission(id);
+  }
+
+  @override
+  Future<GameRoute?> getRoute() async {
     final response = (await _get()).getString("route");
-    print(response);
     if (response != null) return GameRoute.fromJson(jsonDecode(response));
-    return null;
+    return _subProxy!.getRoute();
   }
 
   @override
-  Future<bool> _setRoute(GameRoute route) async {
-    (await _get()).setString("route", jsonEncode(route.toJson()));
-    return true;
+  Future<bool> setRoute(GameRoute route) async {
+    // bool res = await _subProxy!.setRoute(route);
+    // if (res)
+    return (await _get()).setString("route", jsonEncode(route.toJson()));
+    // return false;
   }
 
   @override
-  Future<bool> _completeRoute(GameRoute route) async {
-    (await _get()).remove("route");
-    return true;
+  Future<bool> completeRoute(GameRoute route) async {
+    bool res = await _subProxy!.completeRoute(route);
+    if (res) return (await _get()).remove("route");
+    return false;
   }
 }

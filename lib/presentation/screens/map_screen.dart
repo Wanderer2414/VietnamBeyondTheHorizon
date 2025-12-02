@@ -48,6 +48,10 @@ class _MapScreenState extends State<MapScreen> {
       init: (context) async {
         await GameProgressManager.startGame(widget.route);
         init();
+        widget.controller.fetchRoute(
+          widget.controller.currentLocation,
+          widget.route.missions[0].location!.coordinates,
+        );
         setState(() {});
       },
       child: Scaffold(

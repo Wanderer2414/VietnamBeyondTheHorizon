@@ -47,6 +47,7 @@ class MyMapController {
 
       // final userGPS = await loadGPS();
       // _value.currentLocation = LatLng(userGPS['lat']!, userGPS['lng']!);
+      // await UserHistoryManager().loadLocalHistory();
 
       // if (gameManager.userRoute.isNotEmpty &&
       //     gameManager.currentTarget != null) {
@@ -115,7 +116,7 @@ class MyMapController {
     );
   }
 
-  List<Widget> mapLayers(BuildContext context, MarkerLayer locaionLayer) {
+  List<Widget> mapLayers(BuildContext context, List<Widget> locaionLayer) {
     final layers = <Widget>[
       TileLayer(
         urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -140,7 +141,7 @@ class MyMapController {
     }
 
     layers.add(CurrentLayer());
-    layers.add(locaionLayer);
+    locaionLayer.forEach((e) => layers.add(e));
     return layers;
   }
 
@@ -344,10 +345,6 @@ class MyMapController {
         ),
       ),
     );
-  }
-
-  Future<void> updateMissionImage(int missionId, String imagePath) async {
-    (await NetworkProxy.missions)[missionId]?.imagePath = imagePath;
   }
 }
 

@@ -67,7 +67,7 @@ class _ResultAutoScreenState extends State<ResultAutoScreen> {
   }
 
   Future<String?> generateRecapVideo() async {
-    final uploadData = widget.route.getOrderedPhotos();
+    final uploadData = await widget.route.getOrderedPhotos();
     return await NetworkProxy.createVideo(
       uploadData.urls,
       uploadData.locationIds,

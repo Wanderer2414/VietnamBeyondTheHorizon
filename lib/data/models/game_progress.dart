@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
@@ -71,8 +72,15 @@ class GameRoute {
   bool get _isFinished => _currentIndex >= _missionId.length;
   int get currentIndex => _currentIndex;
 
-  ({List<String> urls, List<int> locationIds}) getOrderedPhotos() {
-    final urls = _missions.map((e) => e.imagePath!).toList();
+  Future<({List<String> urls, List<int> locationIds})>
+  getOrderedPhotos() async {
+    final List<String> url = [];
+    for (int i = 0; i < _missionId.length; i++) {
+      String? path = await NetworkProxy.fetchMission(_missionId[i]);
+      if (path == null)
+        throw Exception("There are uncomplete image ${_missionId[i]}");
+      url.add(path);
+    }
     final locationIds = _missions.map((e) => e.location!.id).toList();
 
     //   for (var location in userRoute) {
@@ -92,7 +100,7 @@ class GameRoute {
     //       }
     //     }
     //   }
-    return (urls: urls, locationIds: locationIds);
+    return (urls: url, locationIds: locationIds);
   }
 }
 
@@ -108,7 +116,8 @@ class GameProgressManager {
   GameRoute? _userRoute;
 
   bool get isFinished => _userRoute?._isFinished ?? true;
-  bool isLocked(int id) => _userRoute?._isLocked(id) ?? true;
+  static bool isLocked(int id) =>
+      _getInstance()._userRoute?._isLocked(id) ?? true;
   static int get collectedStars => _getInstance()._userRoute!._collectedStars;
   static MissionModel get currentTarget =>
       _getInstance()._userRoute!._currentTarget!;
@@ -196,7 +205,6 @@ class GameProgressManager {
       instance.nextMission();
       return true;
     } else {
-      print("complete");
       instance.completeRoute();
       return false;
     }

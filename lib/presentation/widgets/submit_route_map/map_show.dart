@@ -45,10 +45,9 @@ class _MapShowState extends State<MapShow> {
           onMapReady: () => setState(() {}),
           context: context,
         ),
-        children: widget.controller.mapLayers(
-          context,
+        children: widget.controller.mapLayers(context, [
           LocationLayer(context, widget.controller, _allLocation ?? []),
-        ),
+        ]),
       ),
     );
   }

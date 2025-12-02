@@ -15,6 +15,9 @@ class NetworkProxy {
   static Future<void> _initialize() async {
     if (_instance != null) return;
     _instance = _Cookies(logout);
+    String? token = await _instance!.getToken();
+    print("Initialize: $token");
+    if (token != null) await _instance!.setToken(token);
     await _instance!.init();
   }
 
@@ -34,7 +37,6 @@ class NetworkProxy {
 
   static Future<List<MissionModel?>> get missions async {
     final quest = await (await _getInstance()).getQuests();
-    print(quest);
     return quest!.missions;
   }
 

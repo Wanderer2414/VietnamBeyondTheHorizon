@@ -46,6 +46,19 @@ class MissionLayer extends MarkerLayer {
                 e.location?.coordinates ?? LatLng(0, 0),
                 GameProgressManager.getMissionAppearance(mission: e),
                 (loc, context) {
+                  if (GameProgressManager.isLocked(e.id)) {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "Locked! Complete the previous mission first",
+                        ),
+                        backgroundColor: Colors.grey[800],
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                    return;
+                  }
                   controller.toggleMissionCard(context, e);
                 },
               ),

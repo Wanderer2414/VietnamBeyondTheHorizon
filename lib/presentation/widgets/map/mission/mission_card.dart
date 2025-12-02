@@ -31,29 +31,16 @@ class MissionCard extends StatefulWidget {
 class _MissionCardState extends State<MissionCard> {
   XFile? imageFile;
   bool _showRewardEffect = false;
-  bool _isReadyToClaim = false;
+  bool _isChecking = false;
   @override
   void initState() {
     super.initState();
     NetworkProxy.fetchMission(widget.mission.id).then((value) {
       if (value != null) {
         imageFile = XFile(value);
+        setState(() {});
       }
     });
-
-    _checkPendingClaim();
-  }
-
-  void _checkPendingClaim() async {
-    // final prefs = await SharedPreferences.getInstance();
-
-    // bool isPending = prefs.getBool('pending_claim_${_mission.id}') ?? false;
-
-    // if (isPending && !_mission.isCompleted) {
-    //   setState(() {
-    //     _isReadyToClaim = true;
-    //   });
-    // }
   }
 
   Future<bool> _claimed() async {
@@ -83,7 +70,6 @@ class _MissionCardState extends State<MissionCard> {
           break;
       }
       if (url != null) {
-        widget.mission.imagePath = url;
         widget.mission.isCompleted = true;
         setState(() {});
         return true;
@@ -92,6 +78,7 @@ class _MissionCardState extends State<MissionCard> {
     } catch (e) {
       MainRoute.showError(e.toString());
     }
+
     return false;
   }
 
@@ -100,6 +87,7 @@ class _MissionCardState extends State<MissionCard> {
     final Size screenSize = MediaQuery.of(context).size;
     final double cardHeight = screenSize.height * 0.7;
     return Container(
+      width: screenSize.width * 0.9,
       height: cardHeight,
       child: Stack(
         children: [
@@ -133,87 +121,85 @@ class _MissionCardState extends State<MissionCard> {
                   ),
                   child: Stack(
                     children: [
-                      Expanded(
-                        child: SingleChildScrollView(
-                          physics: BouncingScrollPhysics(),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      widget.mission.name,
-                                      style: TextStyle(
-                                        fontSize: 26,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'Gantari',
-                                        height: 1.2,
-                                      ),
+                      SingleChildScrollView(
+                        physics: BouncingScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    widget.mission.name,
+                                    style: TextStyle(
+                                      fontSize: 26,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Gantari',
+                                      height: 1.2,
                                     ),
                                   ),
-                                  SizedBox(width: 10),
-                                  IconButton(
-                                    onPressed: () {
-                                      widget.controller.toggleLocationInfo(
-                                        context,
-                                        widget.mission.location!,
-                                        widget.onNavigate,
-                                        () {},
-                                        isReplace: true,
-                                      );
-                                    },
-                                    icon: Icon(
-                                      Icons.info_outline_rounded,
-                                      size: 32,
-                                      color: ColorPalette.accentColor,
-                                    ),
-                                    padding: EdgeInsets.zero,
-                                    constraints: BoxConstraints(),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 20),
-
-                              _buildMainTitle("Mission Details"),
-
-                              ChallengeBoxWidget(mission: widget.mission),
-                              SizedBox(height: 25),
-
-                              Row(
-                                children: [
-                                  _buildMainTitle("Your Submission"),
-                                  SizedBox(width: 8),
-                                  widget.mission.isCompleted
-                                      ? Icon(
-                                          Icons.check_circle_outline,
-                                          size: 25,
-                                          color: Colors.green,
-                                        )
-                                      : SizedBox(),
-                                ],
-                              ),
-                              SizedBox(height: 10),
-                              Card(
-                                elevation: 2,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
                                 ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(10.0),
-                                  child: ImageUploadWidget(
-                                    selectedImage: imageFile,
-                                    onPicked: (file) =>
-                                        setState(() => imageFile = file),
+                                SizedBox(width: 10),
+                                IconButton(
+                                  onPressed: () {
+                                    widget.controller.toggleLocationInfo(
+                                      context,
+                                      widget.mission.location!,
+                                      widget.onNavigate,
+                                      () {},
+                                      isReplace: true,
+                                    );
+                                  },
+                                  icon: Icon(
+                                    Icons.info_outline_rounded,
+                                    size: 32,
+                                    color: ColorPalette.accentColor,
                                   ),
+                                  padding: EdgeInsets.zero,
+                                  constraints: BoxConstraints(),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 20),
+
+                            _buildMainTitle("Mission Details"),
+
+                            ChallengeBoxWidget(mission: widget.mission),
+                            SizedBox(height: 25),
+
+                            Row(
+                              children: [
+                                _buildMainTitle("Your Submission"),
+                                SizedBox(width: 8),
+                                widget.mission.isCompleted
+                                    ? Icon(
+                                        Icons.check_circle_outline,
+                                        size: 25,
+                                        color: Colors.green,
+                                      )
+                                    : SizedBox(),
+                              ],
+                            ),
+                            SizedBox(height: 10),
+                            Card(
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: ImageUploadWidget(
+                                  isChecking: _isChecking,
+                                  selectedImage: imageFile,
+                                  onPicked: (file) =>
+                                      setState(() => imageFile = file),
                                 ),
                               ),
+                            ),
 
-                              SizedBox(height: 20),
-                            ],
-                          ),
+                            SizedBox(height: 20),
+                          ],
                         ),
                       ),
                       Align(
@@ -223,9 +209,9 @@ class _MissionCardState extends State<MissionCard> {
                             _claimed().then((value) async {
                               if (value) {
                                 setState(() {
-                                  _isReadyToClaim = false;
                                   _showRewardEffect = true;
                                 });
+                                // await widget.controller.(_mission!);
                                 await Future.delayed(
                                   const Duration(milliseconds: 1500),
                                 );
@@ -244,7 +230,6 @@ class _MissionCardState extends State<MissionCard> {
                             return false;
                           },
                           isSubmited: widget.mission.isCompleted,
-                          isReadyToClaim: _isReadyToClaim,
                         ),
                       ),
                     ],
@@ -277,12 +262,10 @@ class _ControlPanel extends StatefulWidget {
   final Future<bool> Function() onSubmit;
   final void Function() onClaim;
   final bool isSubmited;
-  final bool isReadyToClaim;
   _ControlPanel({
     required this.onSubmit,
     required this.onClaim,
     this.isSubmited = false,
-    this.isReadyToClaim = false,
   });
 
   @override
@@ -296,9 +279,7 @@ class _ControlPanelState extends State<_ControlPanel> {
     super.initState();
     if (widget.isSubmited)
       _controlButton = _SubmitedButton();
-    else if (widget.isReadyToClaim) {
-      _controlButton = _ClaimButton(onPressed: widget.onClaim);
-    } else
+    else
       _controlButton = _SubmitButton(
         onPressed: () {
           widget.onSubmit().then((value) async {
@@ -310,9 +291,7 @@ class _ControlPanelState extends State<_ControlPanel> {
               Navigator.of(context).pop();
 
               if (mounted) {
-                setState(() {
-                  _controlButton = _ClaimButton(onPressed: widget.onClaim);
-                });
+                widget.onClaim();
               }
             } else {
               // ScaffoldMessenger.of(context).showSnackBar(
@@ -353,23 +332,23 @@ class _ControlPanelState extends State<_ControlPanel> {
   }
 }
 
-class _ClaimButton extends StatelessWidget {
-  final void Function() onPressed;
-  const _ClaimButton({required this.onPressed});
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.amberAccent,
-        foregroundColor: Colors.black,
-        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      onPressed: onPressed,
-      child: Text("Claim Reward"),
-    );
-  }
-}
+// class _ClaimButton extends StatelessWidget {
+//   final void Function() onPressed;
+//   const _ClaimButton({required this.onPressed});
+//   @override
+//   Widget build(BuildContext context) {
+//     return ElevatedButton(
+//       style: ElevatedButton.styleFrom(
+//         backgroundColor: Colors.amberAccent,
+//         foregroundColor: Colors.black,
+//         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+//       ),
+//       onPressed: onPressed,
+//       child: Text("Claim Reward"),
+//     );
+//   }
+// }
 
 class _SubmitButton extends StatelessWidget {
   final void Function() onPressed;

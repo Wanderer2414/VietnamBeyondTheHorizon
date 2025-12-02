@@ -15,39 +15,36 @@ class _Cookies extends Proxy {
   bool _isLogged = false;
 
   @override
-  Future<void> _init() async {
-    final token = await getToken();
-    if (token != null) {
-      if (await setToken(token)) _isLogged = true;
-    }
+  Future<UserAccountCore?> getAccount() async {
+    if (_userAccount != null) return _userAccount;
+    return _subProxy!.getAccount();
   }
 
   @override
-  Future<UserAccountCore?> _getAccount() async {
-    return _userAccount;
+  Future<Quests?> getQuests() async {
+    if (_gameData != null) return _gameData;
+    return _subProxy!.getQuests();
   }
 
   @override
-  Future<Quests?> _getQuests() async {
-    return _gameData;
+  Future<bool> setAccount(UserAccountCore user) async {
+    bool res = await _subProxy!.setAccount(user);
+    if (res) _userAccount = user;
+    return res;
   }
 
   @override
-  Future<bool> _setAccount(UserAccountCore user) async {
-    _userAccount = user;
-    return true;
+  Future<bool> setQuests(Quests quest) async {
+    bool res = await _subProxy!.setQuests(quest);
+    if (res) _gameData = quest;
+    return res;
   }
 
   @override
-  Future<bool> _setQuests(Quests quest) async {
-    _gameData = quest;
-    return true;
-  }
-
-  @override
-  Future<bool> _setToken(String token) async {
-    _isLogged = true;
-    return true;
+  Future<bool> setToken(String token) async {
+    bool res = await _subProxy!.setToken(token);
+    if (res) _isLogged = true;
+    return res;
   }
 
   bool isLogged() => _isLogged;

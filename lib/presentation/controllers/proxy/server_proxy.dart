@@ -3,12 +3,13 @@ part of proxy;
 class _ServerProxy extends Proxy {
   final Future<void> Function() onTokenExpired;
   DioService _service;
+  List<String?> _missionPhotos = [];
 
   _ServerProxy(String host, {required this.onTokenExpired})
     : _service = DioService(onTokenExpired: onTokenExpired) {}
 
   @override
-  Future<void> _init() async {
+  Future<void> init() async {
     print("Connecting server...");
     String response = "";
     while (response != "success") {
@@ -19,13 +20,13 @@ class _ServerProxy extends Proxy {
   }
 
   @override
-  Future<String?> _getToken() async {
+  Future<String?> getToken() async {
     await onTokenExpired();
     return null;
   }
 
   @override
-  Future<bool> _setToken(String token) async {
+  Future<bool> setToken(String token) async {
     _service.token = token;
     final response = (await _service.dio.get("/user/security")).data;
     if (response['status'] == "success") return true;
@@ -33,12 +34,12 @@ class _ServerProxy extends Proxy {
   }
 
   @override
-  Future<bool> _clear() async {
+  Future<bool> clear() async {
     return true;
   }
 
   @override
-  Future<bool> _setAccount(UserAccountCore user) async {
+  Future<bool> setAccount(UserAccountCore user) async {
     try {
       final response = await _service.dio.patch(
         "/user/profile",
@@ -64,12 +65,12 @@ class _ServerProxy extends Proxy {
   }
 
   @override
-  Future<bool> _setQuests(Quests quest) async {
+  Future<bool> setQuests(Quests quest) async {
     return true;
   }
 
   @override
-  Future<Quests> _getQuests() async {
+  Future<Quests> getQuests() async {
     final response = await _service.dio.get("/location/locations");
     final jsonBody = response.data;
     late final List<LocationModel> dataLocation;
@@ -89,31 +90,42 @@ class _ServerProxy extends Proxy {
       } else
         throw Exception(1);
     }
-
-    try {
+    {
       final response = await _service.dio.get("/mission/visit");
-
       if (response.statusCode == 200 && response.data['status'] == 'success') {
         final List data = response.data['data'];
         data.forEach((element) {
-          final id = element["misssionId"];
-          final url = element['images']['0']['url'];
+          final id = element["missionID"] as int;
+          final tmp = element['images'][0];
+          final url = tmp['url'];
           dataMissions[id].isCompleted = true;
-          dataMissions[id].imagePath = url;
+          if (id >= _missionPhotos.length) _missionPhotos.length = id + 1;
+          _missionPhotos[id] = url;
         });
       }
-    } catch (e) {
-      print("Error fetch visits: $e");
     }
-    print(
-      "Load ${dataLocation.length} locations, ${dataMissions.length} missions!",
-    );
 
     return Quests(locations: dataLocation, missions: dataMissions);
   }
 
   @override
-  Future<UserAccountCore> _getAccount() async {
+  Future<String?> fetchMission(int id) async {
+    if (id >= _missionPhotos.length || _missionPhotos[id] == null) return null;
+    final dir = await getApplicationDocumentsDirectory();
+    final source = "${dir.path}/$id";
+    if (!(await File(source).exists())) {
+      final response = await http.get(Uri.parse(_missionPhotos[id]!));
+      if (response.statusCode != 200) {
+        throw Exception("Error fetch image id ${_missionPhotos[id]}");
+      }
+      final file = File(source);
+      file.writeAsBytes(response.bodyBytes);
+    }
+    return source;
+  }
+
+  @override
+  Future<UserAccountCore> getAccount() async {
     final response = await _service.dio.get("/user/info");
 
     if (response.data['status'] == "success") {
@@ -128,7 +140,7 @@ class _ServerProxy extends Proxy {
   }
 
   @override
-  Future<String?> _signin(String email, String password) async {
+  Future<String?> login(String email, String password) async {
     try {
       print("Email $email");
       print("Password: $password");
@@ -161,7 +173,7 @@ class _ServerProxy extends Proxy {
   }
 
   @override
-  Future<String?> _signup(String email, String password) async {
+  Future<String?> signup(String email, String password) async {
     try {
       final response = await _service.dio.post(
         "/auth/signup",
@@ -192,7 +204,7 @@ class _ServerProxy extends Proxy {
   }
 
   @override
-  Future<String> _postMission(int id, String src) async {
+  Future<String?> postMission(int id, String src) async {
     try {
       final fileName = src.split('/').last;
 
@@ -212,7 +224,13 @@ class _ServerProxy extends Proxy {
         print("Response data success: $response");
         final responseData = response.data;
         if (responseData is Map && responseData['status'] == 'success') {
-          return responseData['url'] as String;
+          final dir = await getApplicationDocumentsDirectory();
+          final source = "${dir.path}/$id";
+          if (src != source) {
+            File file = File(src);
+            await file.copySync(source);
+          }
+          return source;
         }
       }
     } catch (e) {
@@ -220,11 +238,11 @@ class _ServerProxy extends Proxy {
         print("Lỗi server trả về: ${e.response?.data}");
       }
     }
-    return "";
+    return null;
   }
 
   @override
-  Future<String?> _postAIMission(int id, String src) async {
+  Future<String?> postAIMission(int id, String src) async {
     try {
       final fileName = src.split('/').last;
 
@@ -244,7 +262,13 @@ class _ServerProxy extends Proxy {
         print("Response data success: $response");
         final responseData = response.data;
         if (responseData is Map && responseData['status'] == 'success') {
-          return responseData['url'] as String;
+          final dir = await getApplicationDocumentsDirectory();
+          final source = "${dir.path}/$id";
+          if (src != source) {
+            File file = File(src);
+            await file.rename(source);
+          }
+          return source;
         }
       }
     } catch (e) {
@@ -252,11 +276,11 @@ class _ServerProxy extends Proxy {
         print("Lỗi server trả về: ${e.response?.data}");
       }
     }
-    return "";
+    return null;
   }
 
   @override
-  Future<String?> _createVideo(List<String> urls, List<int> id) async {
+  Future<String?> createVideo(List<String> urls, List<int> id) async {
     try {
       print("Calling API creating video...");
 
@@ -297,5 +321,10 @@ class _ServerProxy extends Proxy {
 
   Future<bool> isLogged() async {
     return _service.isLogged;
+  }
+
+  @override
+  Future<bool> completeRoute(GameRoute route) async {
+    return true;
   }
 }

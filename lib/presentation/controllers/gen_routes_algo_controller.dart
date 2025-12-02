@@ -43,6 +43,9 @@ class RoutePlannerService {
       final openMinutes = open.hour * 60 + open.minute;
       final closeMinutes = close.hour * 60 + close.minute;
 
+      print(
+        "Close time: ${closeMinutes}, open time: ${openMinutes}, current ${currentMinutes}",
+      );
       if (closeMinutes < openMinutes) {
         // Qua đêm (vd: 18:00 - 02:00)
         return currentMinutes >= openMinutes || currentMinutes <= closeMinutes;
@@ -88,7 +91,7 @@ class RoutePlannerService {
     allLocations.forEach((location) {
       if (location == null) return;
       if (!isPriceAffordable(location, budget)) return;
-      if (!isLocationOpen(location, currentTime!)) return;
+      // if (!isLocationOpen(location, currentTime!)) return;
       strictFiltered.add(location);
     });
 
@@ -260,6 +263,13 @@ class RoutePlannerService {
         break;
       }
 
+      // final completedMissions = UserHistoryManager().completedMissionIds;
+      // print(completedMissions);
+      // List<int> pool = bestLocation.missionID;
+      // List<int> availableMissions = pool.where((id) {
+      //   return !UserHistoryManager().hasCompletedBefore(id);
+      // }).toList();
+
       // Thêm vào route
       int selectedMissionId = bestLocation
           .missionID[Random().nextInt(bestLocation.missionID.length)];
@@ -378,7 +388,7 @@ class RoutePlannerService {
         .toList();
 
     print("---Break 4: Final result-----");
-    selectedMission.length = 2;
+    // selectedMission.length = 2;
     return GameRoute(missions: selectedMission);
   }
 
