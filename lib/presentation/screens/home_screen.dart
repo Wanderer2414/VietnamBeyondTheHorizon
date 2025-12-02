@@ -33,19 +33,20 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
-    return LoadingWrapper(
-      init: (context) async {
-        _videoUrls.addAll(await NetworkProxy.fetchVideoUrls());
-        setState(() {});
-      },
-      child: Scaffold(
-        key: _scaffoldKey,
-        appBar: HomeAppbar(
-          superKey: _scaffoldKey,
-          size: Size(screenSize.width, screenSize.height * 0.06),
-        ),
-        drawer: Drawer(child: sideBox),
-        body: Stack(
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: HomeAppbar(
+        superKey: _scaffoldKey,
+        size: Size(screenSize.width, screenSize.height * 0.06),
+      ),
+      drawer: Drawer(child: sideBox),
+      body: LoadingWrapper(
+        init: (context) async {
+          _videoUrls.addAll(await NetworkProxy.fetchVideoUrls());
+          _videoUrls.forEach((element) => print(element));
+          setState(() {});
+        },
+        child: Stack(
           children: [
             Container(
               decoration: BoxDecoration(
@@ -98,11 +99,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        floatingActionButton: HomeDownBar(
-          size: Size(screenSize.width * 0.9, screenSize.height * 0.13),
-        ),
-        resizeToAvoidBottomInset: false,
       ),
+      floatingActionButton: HomeDownBar(
+        size: Size(screenSize.width * 0.9, screenSize.height * 0.13),
+      ),
+      resizeToAvoidBottomInset: false,
     );
   }
 }

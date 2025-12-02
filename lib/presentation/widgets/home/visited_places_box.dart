@@ -24,6 +24,7 @@ class _VisitedPlaceBoxState extends State<VisitedPlaceBox> {
     super.initState();
 
     // videoUrls = UserHistoryManager().videoUrls;
+    print("List of video: ${widget.listOfVideo.length}");
     for (int i = 0; i < widget.listOfVideo.length; i++) {
       keys.add(GlobalKey<home_widgets.ScenicPanelState>());
       list.add(
