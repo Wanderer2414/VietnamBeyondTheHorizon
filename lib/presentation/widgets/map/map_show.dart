@@ -26,6 +26,11 @@ class _MapShowState extends State<MapShow> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     widget.controller.mapController = _mapController;
     return SizedBox(

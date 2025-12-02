@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/data/packages/reccommend_scenic.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/user_history.dart';
 
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/scenic_panel.dart'
     as home_widgets;
@@ -18,11 +20,14 @@ class _VisitedPlaceBoxState extends State<VisitedPlaceBox> {
   List<GlobalKey<home_widgets.ScenicPanelState>> keys = [];
   List<home_widgets.ScenicPanel> list = [];
   double targetIndex = 0;
-
+  List<String> videoUrls = [];
   @override
   void initState() {
     super.initState();
-    for (int i = 0; i < 10; i++) {
+
+    videoUrls = UserHistoryManager().videoUrls;
+    print("Video URL in Visited Box $videoUrls");
+    for (int i = 0; i < videoUrls.length; i++) {
       keys.add(GlobalKey<home_widgets.ScenicPanelState>());
       list.add(
         home_widgets.ScenicPanel(
@@ -32,8 +37,9 @@ class _VisitedPlaceBoxState extends State<VisitedPlaceBox> {
             image: const AssetImage(
               "assets/temporary/lorem_ipsum_background.png",
             ),
-            name: "Lorem ipsum",
+            name: "",
             establishedTime: DateTime(2022, 20, 19),
+            videoUrl: videoUrls[i],
           ),
         ),
       );
