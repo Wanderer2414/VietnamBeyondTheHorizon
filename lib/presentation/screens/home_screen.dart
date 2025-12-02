@@ -17,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final sideBox = SideBox();
+  final List<String> _videoUrls = [];
   String userName = "";
 
   @override
@@ -33,6 +34,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     return LoadingWrapper(
+      init: (context) async {
+        _videoUrls.addAll(await NetworkProxy.fetchVideoUrls());
+        setState(() {});
+      },
       child: Scaffold(
         key: _scaffoldKey,
         appBar: HomeAppbar(
@@ -87,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 //Scroll view of visited place
                 VisitedPlaceBox(
                   size: Size(screenSize.width * 0.9, screenSize.height * 0.36),
+                  listOfVideo: _videoUrls,
                 ),
               ],
             ),

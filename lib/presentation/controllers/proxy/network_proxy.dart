@@ -4,6 +4,7 @@ class NetworkProxy {
   static _Cookies? _instance;
 
   static Future<_Cookies> _getInstance() async {
+    print("Get instance $_instance");
     if (_instance == null) await _initialize();
     return _instance!;
   }
@@ -15,10 +16,9 @@ class NetworkProxy {
   static Future<void> _initialize() async {
     if (_instance != null) return;
     _instance = _Cookies(logout);
-    String? token = await _instance!.getToken();
-    print("Initialize: $token");
-    if (token != null) await _instance!.setToken(token);
     await _instance!.init();
+    String? token = await _instance!.getToken();
+    if (token != null) await _instance!.setToken(token);
   }
 
   static Future<void> clean() async {
@@ -106,5 +106,9 @@ class NetworkProxy {
   static Future<String?> createVideo(List<String> url, List<int> ids) async {
     final instance = await _getInstance();
     return instance.createVideo(url, ids);
+  }
+
+  static Future<List<String>> fetchVideoUrls() async {
+    return await (await _getInstance()).fetchVideoUrls();
   }
 }

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/data/packages/reccommend_scenic.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/user_history.dart';
 
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/scenic_panel.dart'
     as home_widgets;
@@ -9,8 +7,9 @@ import 'package:vietnambeyondthehorizon/presentation/widgets/home/scenic_panel.d
 class VisitedPlaceBox extends StatefulWidget {
   final Size size;
   final double miniWidth;
+  final List<String> listOfVideo;
 
-  VisitedPlaceBox({super.key, required this.size})
+  VisitedPlaceBox({super.key, required this.size, required this.listOfVideo})
     : miniWidth = size.width * 0.55;
   @override
   State<VisitedPlaceBox> createState() => _VisitedPlaceBoxState();
@@ -20,14 +19,12 @@ class _VisitedPlaceBoxState extends State<VisitedPlaceBox> {
   List<GlobalKey<home_widgets.ScenicPanelState>> keys = [];
   List<home_widgets.ScenicPanel> list = [];
   double targetIndex = 0;
-  List<String> videoUrls = [];
   @override
   void initState() {
     super.initState();
 
-    videoUrls = UserHistoryManager().videoUrls;
-    print("Video URL in Visited Box $videoUrls");
-    for (int i = 0; i < videoUrls.length; i++) {
+    // videoUrls = UserHistoryManager().videoUrls;
+    for (int i = 0; i < widget.listOfVideo.length; i++) {
       keys.add(GlobalKey<home_widgets.ScenicPanelState>());
       list.add(
         home_widgets.ScenicPanel(
@@ -39,7 +36,7 @@ class _VisitedPlaceBoxState extends State<VisitedPlaceBox> {
             ),
             name: "",
             establishedTime: DateTime(2022, 20, 19),
-            videoUrl: videoUrls[i],
+            videoUrl: widget.listOfVideo[i],
           ),
         ),
       );

@@ -12,6 +12,7 @@ class _Cookies extends Proxy {
       );
   Quests? _gameData;
   UserAccountCore? _userAccount;
+  List<String>? _videoUrls;
   bool _isLogged = false;
 
   @override
@@ -45,6 +46,12 @@ class _Cookies extends Proxy {
     bool res = await _subProxy!.setToken(token);
     if (res) _isLogged = true;
     return res;
+  }
+
+  @override
+  Future<List<String>> fetchVideoUrls() async {
+    if (_videoUrls != null) return _videoUrls!;
+    return await _subProxy!.fetchVideoUrls();
   }
 
   bool isLogged() => _isLogged;

@@ -1,4 +1,5 @@
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_down_bar.dart';
@@ -23,6 +24,7 @@ class _ProfilePageState extends State<ProfilePage> {
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
   final SideBox _box = SideBox();
   final List<String> photos = [];
+  late final int missionComplete;
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +33,14 @@ class _ProfilePageState extends State<ProfilePage> {
     return LoadingWrapper(
       init: (context) async {
         photos.clear();
-        // photos.addAll(
-        //   (await NetworkProxy.missions)
-        //       .where((element) => element?.imagePath != null)
-        //       .map((e) => e!.imagePath!)
-        //       .toList(),
-        // );
-        // setState(() {});
+        final missions = (await NetworkProxy.missions)
+            .where((element) => element?.isCompleted ?? false)
+            .toList();
+        missionComplete = missions.length;
+        for (int i = 0; i < missions.length; i++) {
+          photos.add((await NetworkProxy.fetchMission(missions[i]!.id))!);
+        }
+        setState(() {});
       },
       child: Scaffold(
         key: _key,
@@ -56,7 +59,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 painter: profile.Decoration(),
                 size: Size(size.width, size.height),
               ),
-              _Content(user: widget.user, photos: photos),
+              _Content(
+                user: widget.user,
+                photos: photos,
+                missionComplete: missionComplete,
+              ),
             ],
           ),
         ),
@@ -71,7 +78,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
 class _Content extends StatefulWidget {
   final UserAccount user;
-  const _Content({required this.user, required this.photos});
+  final int missionComplete;
+  const _Content({
+    required this.user,
+    required this.photos,
+    required this.missionComplete,
+  });
 
   final List<String> photos;
 
@@ -113,7 +125,10 @@ class _ContentState extends State<_Content> {
         const SizedBox(height: 18),
 
         // Stats Section
-        StatPanel(),
+        StatPanel(
+          missions_completed: widget.missionComplete,
+          numberOfPhotos: widget.photos.length,
+        ),
 
         // Tab Bar
         TabPanel(

@@ -34,6 +34,11 @@ interface class Proxy {
     return false;
   }
 
+  Future<List<String>> fetchVideoUrls() async {
+    if (_subProxy != null) return await _subProxy.fetchVideoUrls();
+    return [];
+  }
+
   Future<void> clear() async {
     if (_subProxy != null) return await _subProxy.clear();
   }
