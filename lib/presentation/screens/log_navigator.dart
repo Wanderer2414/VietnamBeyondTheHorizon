@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
 class LogNavigatorScreen extends StatelessWidget {
   const LogNavigatorScreen({super.key});
@@ -108,9 +109,7 @@ class LogNavigatorScreen extends StatelessWidget {
                         child: TextButton(
                           onPressed: () {
                             // Navigate to sign up page
-                            Navigator.of(
-                              context,
-                            ).pushReplacementNamed("register");
+                            MainRoute.goSignup();
                           },
                           child: Text(
                             'SIGN UP',
@@ -130,7 +129,7 @@ class LogNavigatorScreen extends StatelessWidget {
                         height: size.height * 0.06,
                         child: TextButton(
                           onPressed: () {
-                            Navigator.of(context).pushReplacementNamed("login");
+                            MainRoute.goLogin();
                           },
                           style: TextButton.styleFrom(
                             backgroundColor: const Color(0xFFFDB913),

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
+import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -17,12 +18,17 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void navigateNext() async {
-    if (await NetworkProxy.isLogged()) {
-      print("Log");
-      Navigator.pushReplacementNamed(context, "home");
-    } else {
-      Navigator.pushReplacementNamed(context, "intro");
-    }
+    Future<bool> func = NetworkProxy.isLogged();
+    func.timeout(
+      const Duration(seconds: 90),
+      onTimeout: () => throw Exception("Disconnect server!"),
+    );
+    // await UserHistoryManager().syncHistory();
+    bool isLogged = await func;
+    if (isLogged)
+      MainRoute.goHome();
+    else
+      MainRoute.goIntro();
   }
 
   @override

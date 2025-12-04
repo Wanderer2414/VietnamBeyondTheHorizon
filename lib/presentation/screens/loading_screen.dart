@@ -67,11 +67,16 @@ class _LoadingWrapperState extends State<LoadingWrapper> with RouteAware {
   int _loadingCount = 0;
 
   Future<void> _run(Future<void> Function(BuildContext context) func) async {
+    if (!mounted) return;
     setState(() {
       _loadingCount++;
       print("loading count: $_loadingCount");
     });
     await func(context);
+    if (!mounted) {
+      _loadingCount--;
+      return;
+    }
     setState(() {
       _loadingCount--;
       print("loading count: $_loadingCount");
@@ -97,6 +102,7 @@ class _LoadingWrapperState extends State<LoadingWrapper> with RouteAware {
     if (widget.init != null) {
       _loadingCount++;
       widget.init!(context).then((value) {
+        print("Loading count: 0");
         setState(() {
           _loadingCount--;
         });
@@ -107,6 +113,7 @@ class _LoadingWrapperState extends State<LoadingWrapper> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    print("LOADING COUNTTT: $_loadingCount");
     if (_loadingCount > 0)
       return Stack(children: [widget.child, const LoadingScreen()]);
     return widget.child;

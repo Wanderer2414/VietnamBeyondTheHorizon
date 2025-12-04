@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile/stat_card.dart';
 
 class StatPanel extends StatelessWidget {
-  const StatPanel();
+  final int numberOfPhotos, missions_completed;
+  const StatPanel({
+    required this.missions_completed,
+    required this.numberOfPhotos,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +22,13 @@ class StatPanel extends StatelessWidget {
             iconColor: Colors.amber,
           ),
           Statcard(
-            value: '34',
-            label: 'km long',
+            value: numberOfPhotos.toString(),
+            label: 'photos',
             icon: null,
             iconColor: Colors.blueGrey,
           ),
           Statcard(
-            value: '3',
+            value: missions_completed.toString(),
             label: 'missions\ncompleted',
             icon: null,
             iconColor: Colors.green,

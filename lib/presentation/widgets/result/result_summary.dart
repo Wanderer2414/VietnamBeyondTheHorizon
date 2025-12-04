@@ -6,7 +6,7 @@ class ResultSummary extends StatelessWidget {
   final int missions;
   final int points;
   final double long;
-  final double submited;
+  final int submited;
   const ResultSummary({
     super.key,
     required this.missions,
@@ -87,10 +87,10 @@ class ResultSummary extends StatelessWidget {
                   resultBubble(missions.toString(), "Missions", 0),
                   SizedBox(height: 20),
                   resultBubble(points.toString(), "Points", 1),
+                  // SizedBox(height: 20),
+                  // resultBubble(long.toString(), "km long", 2),
                   SizedBox(height: 20),
-                  resultBubble(long.toString(), "km long", 2),
-                  SizedBox(height: 20),
-                  resultBubble(submited.toString(), "photo submitted", 3),
+                  resultBubble(submited.toString(), "Photo Submitted", 3),
                 ],
               ),
             ),
@@ -188,7 +188,7 @@ Widget gradientGlassBorder({
         ),
 
         BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           child: Container(
             decoration: BoxDecoration(
               color: const Color.fromARGB(255, 105, 105, 105).withOpacity(0.1),

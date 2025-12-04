@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
@@ -7,7 +8,8 @@ import '../controllers/map_controller.dart';
 
 class MapScreen extends StatefulWidget {
   final MyMapController controller;
-  MapScreen({super.key, required this.controller}) {}
+  final GameRoute route;
+  MapScreen({super.key, required this.controller, required this.route}) {}
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -31,34 +33,33 @@ class _MapScreenState extends State<MapScreen> {
     _sidePanel = Drawer(child: SideBox());
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void init() {
     final Size screenSize = MediaQuery.of(context).size;
-    if (_homeBar == null) {
-      _homeBar = HomeAppbar(
-        superKey: _key,
-        size: Size(screenSize.width, screenSize.height * 0.06),
-      );
-      _content = Content(controller: widget.controller, screenSize: screenSize);
-    }
+    _homeBar = HomeAppbar(
+      superKey: _key,
+      size: Size(screenSize.width, screenSize.height * 0.06),
+    );
+    _content = Content(controller: widget.controller, screenSize: screenSize);
   }
 
   @override
   Widget build(BuildContext context) {
     return LoadingWrapper(
       init: (context) async {
-        await widget.controller.fetchRoute(
+        await GameProgressManager.startGame(widget.route);
+        init();
+        widget.controller.fetchRoute(
           widget.controller.currentLocation,
-          widget.controller.currentMissionLocation.coordinates,
+          widget.route.missions[0].location!.coordinates,
         );
+        setState(() {});
       },
       child: Scaffold(
         key: _key,
         resizeToAvoidBottomInset: false,
         appBar: _homeBar,
         drawer: _sidePanel,
-        body: _content,
+        body: _content ?? Container(),
         floatingActionButton: _myLocation,
       ),
     );

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/map/timeline_progress.dart';
 
 class MapShow extends StatefulWidget {
   final Size size;
@@ -23,6 +26,11 @@ class _MapShowState extends State<MapShow> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     widget.controller.mapController = _mapController;
     return SizedBox(
@@ -34,14 +42,22 @@ class _MapShowState extends State<MapShow> {
           onMapReady: () => setState(() {}),
           context: context,
         ),
-        children: widget.controller.mapLayers(
-          context,
-          widget.controller.userRoute,
-          (location) {
-            widget.controller.toggleMissionCard(context, location);
-          },
-          isGameMode: true,
-        ),
+        children: widget.controller.mapLayers(context, [
+          MissionLayer(context, widget.controller),
+          SafeArea(
+            // Tránh tai thỏ
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: TimelineProgress(
+                  currentIndex: GameProgressManager.numberImageSubmited - 1,
+                  totalSteps: GameProgressManager.missions.length,
+                ),
+              ),
+            ),
+          ),
+        ]),
       ),
     );
   }

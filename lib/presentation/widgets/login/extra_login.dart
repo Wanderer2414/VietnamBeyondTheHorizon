@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
 class ExtraLogin extends StatelessWidget {
   final Size size;
@@ -71,7 +72,7 @@ class _SignUpNavigate extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pushReplacementNamed("register");
+                MainRoute.goSignup();
               },
               style: TextButton.styleFrom(
                 padding: EdgeInsets.zero,

@@ -3,7 +3,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
 
 class LocationModel {
-  final String id; // "1", "2",...
+  final int id;
   final String name; // "University of Science,...."
   final String address; // "227, NVC,...."
   final String type; // "culture", "entertainment",...        FORMATED
@@ -13,11 +13,11 @@ class LocationModel {
   final String price; // "0", "20.000"                        FORMATED
   final List<String> imageURLs; //URLs to image
 
-  final List<String> missionID; // "101"
+  final List<int> missionID; // "101"
   final double latitude; // "10.0001010"
   final double longitude; // "20.1234123"
   //trie
-  LocationModel({
+  LocationModel._({
     required this.id,
     required this.name,
     required this.address,
@@ -33,8 +33,8 @@ class LocationModel {
   });
 
   factory LocationModel.fromJson(Map<String, dynamic> json) {
-    return LocationModel(
-      id: json['id']?.toString() ?? '',
+    return LocationModel._(
+      id: json['id'] as int,
       name: json['name'] as String? ?? '',
       address: json['address'] as String? ?? '',
       type: json['type'] as String? ?? '',
@@ -53,7 +53,7 @@ class LocationModel {
           [],
       missionID:
           (json['missions'] as List<dynamic>?)
-              ?.map((e) => e['id'].toString())
+              ?.map((e) => e['id'] as int)
               .toList() ??
           [],
     );

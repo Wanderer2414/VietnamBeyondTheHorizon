@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/login/decoration.dart'
     as login;
 import 'package:vietnambeyondthehorizon/presentation/widgets/login/login_panel.dart'
@@ -22,10 +23,12 @@ class _AccountLoginScreenState extends State<AccountLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: const Color(0xFFFFDF9E),
-      body: SingleChildScrollView(child: _content),
+    return LoadingWrapper(
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        backgroundColor: const Color(0xFFFFDF9E),
+        body: SingleChildScrollView(child: _content),
+      ),
     );
   }
 }

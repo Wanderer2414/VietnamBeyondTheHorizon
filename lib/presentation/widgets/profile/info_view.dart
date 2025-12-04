@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile/intro_item.dart';
 
 class InfoView extends StatefulWidget {

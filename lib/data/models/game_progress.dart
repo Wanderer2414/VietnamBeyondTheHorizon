@@ -1,95 +1,278 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
+import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
+import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
-class GameProgressManager {
-  int currentIndex = 0;
-  List<LocationModel> userRoute = [];
+class GameRoute {
+  late final List<MissionModel> _missions;
+  late final List<int> _missionId;
+  int _currentIndex = 0;
+  int _collectedStars = 0;
 
-  bool get isFinished =>
-      userRoute.isNotEmpty && currentIndex >= userRoute.length;
+  int get numberOfMission => _missionId.length;
+  int get collectedStars => _collectedStars;
 
-  LocationModel? get currentTarget =>
-      (userRoute.isNotEmpty && currentIndex < userRoute.length)
-      ? userRoute[currentIndex]
-      : null;
+  GameRoute({List<MissionModel>? missions}) {
+    if (missions != null) {
+      _missions = missions;
+      _missionId = _missions.map((e) => e.id).toList();
+    }
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'progress': _missionId,
+      'current': _currentIndex,
+      'star': _collectedStars,
+    };
+  }
 
-  bool isLocked(LocationModel location) {
-    final indexInRoute = userRoute.indexWhere((e) => e.id == location.id);
+  List<MissionModel> get missions => _missions;
 
-    if (indexInRoute != -1 && indexInRoute > currentIndex) {
+  static Future<GameRoute> fromJson(Map<String, dynamic> json) async {
+    final missions = await NetworkProxy.missions;
+    List<int> list = (json['progress'] as List<dynamic>)
+        .map((e) => e as int)
+        .toList();
+    GameRoute route = GameRoute();
+    route._missions = list.map((e) => missions[e]!).toList();
+    route._missionId = route._missions.map((e) => e.id).toList();
+    route._currentIndex = json['current'] as int;
+    route._collectedStars = json['star'] as int;
+    return route;
+  }
+
+  bool _next() {
+    if (_currentIndex < _missions.length - 1) {
+      _currentIndex++;
       return true;
     }
     return false;
   }
 
-  void startGame(List<LocationModel> route) {
-    userRoute = route;
-    currentIndex = 0;
-    saveProgress();
+  MissionModel? get _currentTarget {
+    if (_missions.isNotEmpty && _currentIndex < _missions.length)
+      return _missions[_currentIndex];
+    else
+      return null;
   }
 
-  void nextStage() {
-    if (currentIndex < userRoute.length) {
-      currentIndex++;
-      saveProgress();
+  int index(int id) {
+    return _missionId.indexWhere((element) => id == element);
+  }
+
+  bool _isLocked(int id) {
+    int index = _missionId.indexOf(id);
+    return (index > _currentIndex);
+  }
+
+  bool get _isFinished => _currentIndex >= _missionId.length;
+  int get currentIndex => _currentIndex;
+
+  Future<({List<String> urls, List<int> locationIds})>
+  getOrderedPhotos() async {
+    final List<String> url = [];
+    for (int i = 0; i < _missionId.length; i++) {
+      String? path = await NetworkProxy.fetchMission(_missionId[i]);
+      if (path == null)
+        throw Exception("There are uncomplete image ${_missionId[i]}");
+      url.add(path);
+    }
+    final locationIds = _missions.map((e) => e.location!.id).toList();
+
+    //   for (var location in userRoute) {
+    //     if (location.currentMissionID != null) {
+    // String? url = _missionPhotos[location.currentMissionID];
+    //       if (url != null) {
+    //         urls.add(url);
+    //         locations.add(location.id);
+    //       }
+    //     } else {
+    //       for (var mid in location.missionID) {
+    //         if (_missionPhotos.containsKey(mid)) {
+    //           urls.add(_missionPhotos[mid]!);
+    //           locations.add(location.id);
+    //           break;
+    //         }
+    //       }
+    //     }
+    //   }
+    return (urls: url, locationIds: locationIds);
+  }
+}
+
+class GameProgressManager {
+  GameProgressManager._();
+  static GameProgressManager? _progress;
+  static GameProgressManager _getInstance() {
+    if (_progress == null) _progress = GameProgressManager._();
+    return _progress!;
+  }
+
+  int currentIndex = 0;
+  GameRoute? _userRoute;
+
+  bool get isFinished => _userRoute?._isFinished ?? true;
+  static bool isLocked(int id) =>
+      _getInstance()._userRoute?._isLocked(id) ?? true;
+  static int get collectedStars => _getInstance()._userRoute!._collectedStars;
+  static MissionModel get currentTarget =>
+      _getInstance()._userRoute!._currentTarget!;
+  static List<MissionModel> get missions =>
+      _getInstance()._userRoute?._missions ?? [];
+  // List<Stringre<void> saveMissionPhoto(String missionId, String url) async {
+  //   _missionPhotos[missionId] = url;
+
+  //   final prefs = await SharedPreferences.getInstance();
+  //   await prefs.setString('mission_photos', jsonEncode(_missionPhotos));
+
+  //   print("Saved Photo URL for Mission $missionId: $url");
+  // }> get completedMissionID => _completedMissionIds;
+  static Future<void> addStars(int amount) async {
+    final instance = _getInstance();
+    instance._userRoute!._collectedStars += amount;
+    await NetworkProxy.setRoute(instance._userRoute!);
+    print("Session Stars: ${instance._userRoute!._collectedStars}");
+  }
+
+  Future<void> nextMission() async {
+    NetworkProxy.setRoute(_userRoute!);
+    // final mission = _userRoute!._currentTarget!;
+    // final loc = mission.location!.coordinates;
+    // await fetchRoute(_currentLocation, loc);
+  }
+
+  void completeRoute() {
+    final route = _userRoute!;
+    NetworkProxy.completeRoute(route);
+    MainRoute.goResultScreen(route);
+  }
+  // String? getPhotoUrl(String missionId) => _missionPhotos[missionId];
+
+  // bool get _isFinished {
+  //   return (_currentIndex != 0) && (_missions.length == _currentIndex);
+  // }
+  static int get numberMissionCompleted =>
+      _getInstance()._userRoute!._currentIndex + 1;
+  static int get numberImageSubmited =>
+      _getInstance()._userRoute!._currentIndex + 1;
+
+  // Future<void> saveMissionPhoto(String missionId, String url) async {
+  //   _missionPhotos[missionId] = url;
+
+  //   final prefs = await SharedPreferences.getInstance();
+  //   await prefs.setString('mission_photos', jsonEncode(_missionPhotos));
+
+  //   print("Saved Photo URL for Mission $missionId: $url");
+  // }
+
+  bool isMissionCompleted(int missionId) {
+    if (_userRoute == null) return false;
+    int index = _userRoute!.index(missionId);
+    return (index < _userRoute!._currentIndex && index != -1);
+  }
+
+  static Future<bool> startGame(GameRoute route) async {
+    if (await NetworkProxy.setRoute(route)) {
+      _getInstance()._userRoute = route;
+      return true;
+    }
+    return false;
+  }
+
+  static Future<void> markAsCompleted(int missionId) async {
+    final instance = _getInstance();
+    if (!instance.isMissionCompleted(missionId)) {
+      NetworkProxy.setRoute(instance._userRoute!);
     }
   }
 
-  int? getSequenceNumber(LocationModel location) {
-    final index = userRoute.indexWhere((e) => e.id == location.id);
-    if (index != -1) {
-      return index + 1;
-    }
-    return null;
+  static void dispose() {
+    _progress = null;
   }
 
-  MarkerAppearance getMarkerAppearance({
-    LocationModel? location,
-    bool isGameMode = false,
+  // Future<void> startRoute(GameRoute route) async {
+  //   NetworkProxy.setRoute(route);
+  //   _userRoute = route;
+  // }
+
+  static bool nextStage() {
+    final instance = _getInstance();
+    if (instance._userRoute!._next()) {
+      instance.nextMission();
+      return true;
+    } else {
+      instance.completeRoute();
+      return false;
+    }
+  }
+
+  // }
+  // void complete() {
+  //   NetworkProxy.completeRoute(_userRoute);
+  // }
+
+  static MarkerAppearance getLocationAppearance({
+    required LocationModel location,
   }) {
-    if (location == null) {
-      return MarkerAppearance(
-        color: Colors.grey.shade700,
-        icon: Icons.not_listed_location,
-      );
+    final instance = _getInstance();
+    int? index = -1;
+    if (instance._userRoute != null) {
+      for (int i = 0; (i < location.missionID.length) && (index == -1); i++) {
+        index = instance._userRoute!._missionId.indexOf(location.missionID[i]);
+      }
     }
-    final indexInRoute = userRoute.indexWhere((e) => e.id == location.id);
+    if (index == -1) index = null;
 
-    if (indexInRoute == -1) {
-      return _getDefaultMarker(location.type);
-    }
+    return MarkerAppearance(
+      color: const Color.fromRGBO(233, 43, 43, 1),
+      size: 50,
+      icon: Icons.location_on_sharp,
+      sequenceNumber: index,
+    );
+  }
 
-    if (isGameMode == false) {
-      return MarkerAppearance(
-        color: const Color.fromRGBO(233, 43, 43, 1),
-        size: 50,
-        icon: Icons.location_on_sharp,
-        sequenceNumber: indexInRoute + 1,
-      );
-    }
-
-    if (indexInRoute < currentIndex) {
-      return MarkerAppearance(color: const Color.fromARGB(255, 132, 244, 3));
-    }
-    if (indexInRoute == currentIndex) {
-      return MarkerAppearance(
-        color: const Color.fromARGB(255, 50, 153, 212),
-        size: 55,
-        shouldPulse: true,
-      );
+  static MarkerAppearance getMissionAppearance({
+    required MissionModel mission,
+  }) {
+    final instance = _getInstance();
+    if (instance._userRoute != null) {
+      final indexInRoute = instance._userRoute!.index(mission.id);
+      if (indexInRoute == -1)
+        return MarkerAppearance(
+          color: Colors.grey.shade700,
+          icon: Icons.lock,
+          size: 35,
+        );
+      if (indexInRoute < instance._userRoute!._currentIndex) {
+        return MarkerAppearance(
+          color: ColorPalette.successColor,
+          size: 40,
+          sequenceNumber: indexInRoute,
+        );
+      }
+      if (indexInRoute == instance._userRoute!._currentIndex) {
+        return MarkerAppearance(
+          color: const Color.fromARGB(255, 230, 131, 39),
+          size: 50,
+          shouldPulse: true,
+          sequenceNumber: indexInRoute,
+          icon: Icons.my_location_rounded,
+        );
+      }
     }
 
     return MarkerAppearance(
       color: Colors.grey.shade700,
-      icon: Icons.not_listed_location,
+      icon: Icons.lock,
+      size: 35,
     );
   }
 
-  MarkerAppearance _getDefaultMarker(String type) {
+  static MarkerAppearance getDefaultMarker(String type) {
     switch (type) {
       case "Entertainment":
         return MarkerAppearance(color: ColorPalette.entertainment);
@@ -104,28 +287,16 @@ class GameProgressManager {
     }
   }
 
-  Future<void> saveProgress() async {
-    final prefs = await SharedPreferences.getInstance();
-    final data = {
-      'currentIndex': currentIndex,
-      'route': userRoute.map((e) => e.toJson()).toList(),
-    };
-    await prefs.setString('game_progress', jsonEncode(data));
-  }
-
-  Future<void> loadProgress() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? prog = prefs.getString('game_progress');
-
-    if (prog != null) {
-      try {
-        final data = jsonDecode(prog);
-        currentIndex = data['currentIndex'] ?? 0;
-        final List routeData = data['route'] ?? [];
-        userRoute = routeData.map((e) => LocationModel.fromJson(e)).toList();
-      } catch (e) {
-        print("Load progress error: $e");
-      }
-    }
-  }
+  // print("COMPLETED MISSIONS: $_completedMissionIds");
+  // final String? photosRaw = prefs.getString('mission_photos');
+  // if (photosRaw != null) {
+  //   try {
+  //     Map<String, dynamic> decoded = jsonDecode(photosRaw);
+  //     _missionPhotos = decoded.map(
+  //       (key, value) => MapEntry(key, value.toString()),
+  //     );
+  //   } catch (e) {
+  //     print("Lỗi load photos: $e");
+  //   }
+  // }
 }

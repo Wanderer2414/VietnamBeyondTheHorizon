@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 
 class SideBox extends StatefulWidget {
   const SideBox({super.key});

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/network_proxy.dart';
+import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
+import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
 class LoginButton extends StatefulWidget {
   final Size size;
@@ -26,18 +27,10 @@ class _LoginButtonState extends State<LoginButton> {
         final password = widget.passwordCtrl.text.trim();
         LoadingManager.run(context, (context) async {
           try {
-            if (await NetworkProxy.signin(email, password)) {
-              print("Move to Home");
-              Navigator.of(context).pushReplacementNamed("home");
-            } else {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text("Login failed")));
-            }
+            final value = await NetworkProxy.login(email, password);
+            if (value) MainRoute.goHome();
           } catch (e) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text("Login failed $e")));
+            MainRoute.showError("Login failed $e");
           }
         });
       },
