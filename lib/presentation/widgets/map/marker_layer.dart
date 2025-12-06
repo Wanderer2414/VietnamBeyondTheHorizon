@@ -4,6 +4,7 @@ import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 
 class MarkerAppearance {
@@ -37,8 +38,11 @@ class CurrentLayer extends CurrentLocationLayer {
 }
 
 class MissionLayer extends MarkerLayer {
-  MissionLayer(BuildContext context, MyMapController controller)
-    : super(
+  MissionLayer(
+    BuildContext context,
+    MyMapController controller,
+    UserAccount account,
+  ) : super(
         markers: GameProgressManager.missions
             .map(
               (e) => LocationMarker(
@@ -59,7 +63,7 @@ class MissionLayer extends MarkerLayer {
                     );
                     return;
                   }
-                  controller.toggleMissionCard(context, e);
+                  controller.toggleMissionCard(context, e, account: account);
                 },
               ),
             )

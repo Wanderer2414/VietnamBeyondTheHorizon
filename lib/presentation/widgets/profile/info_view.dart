@@ -1,27 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile/intro_item.dart';
 
 class InfoView extends StatefulWidget {
-  const InfoView({super.key});
+  final UserAccount account;
+  const InfoView({super.key, required this.account});
 
   @override
   State<InfoView> createState() => _InfoViewState();
 }
 
 class _InfoViewState extends State<InfoView> {
-  UserAccount? user;
-  @override
-  void initState() {
-    super.initState();
-    NetworkProxy.account.then(
-      (value) => setState(() {
-        user = value;
-      }),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -29,15 +18,15 @@ class _InfoViewState extends State<InfoView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InfoItem(label: 'E-mail', value: user?.email ?? ""),
+          InfoItem(label: 'E-mail', value: widget.account.email),
           const SizedBox(height: 24),
           InfoItem(
             label: 'Member since',
             value:
-                "${user?.createdAt!.year}-${user?.createdAt!.month}-${user?.createdAt!.day}",
+                "${widget.account.createdAt!.year}-${widget.account.createdAt!.month}-${widget.account.createdAt!.day}",
           ),
           const SizedBox(height: 24),
-          InfoItem(label: 'Age', value: user?.age.toString() ?? ""),
+          InfoItem(label: 'Age', value: widget.account.age.toString()),
         ],
       ),
     );

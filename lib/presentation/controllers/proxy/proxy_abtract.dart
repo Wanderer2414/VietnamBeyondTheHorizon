@@ -4,13 +4,9 @@ interface class Proxy {
   final Proxy? _subProxy;
   Proxy({Proxy? subProxy}) : _subProxy = subProxy;
 
-  Future<UserAccountCore?> getAccount() async {
-    if (_subProxy != null) return await _subProxy.getAccount();
-    return null;
-  }
-
-  Future<bool> setAccount(UserAccountCore user) async {
-    if (_subProxy != null) return await _subProxy.setAccount(user);
+  Future<bool> updateAccount(String name, int age, String city) async {
+    if (_subProxy != null)
+      return await _subProxy.updateAccount(name, age, city);
     return false;
   }
 
@@ -24,31 +20,21 @@ interface class Proxy {
     return false;
   }
 
-  Future<String?> getToken() async {
-    if (_subProxy != null) return await _subProxy.getToken();
+  Future<UserAccountCore?> isLogged(String? token) async {
+    if (_subProxy != null) return await _subProxy.isLogged(token);
     return null;
-  }
-
-  Future<bool> setToken(String token) async {
-    if (_subProxy != null) return await _subProxy.setToken(token);
-    return false;
-  }
-
-  Future<List<String>> fetchVideoUrls() async {
-    if (_subProxy != null) return await _subProxy.fetchVideoUrls();
-    return [];
   }
 
   Future<void> clear() async {
     if (_subProxy != null) return await _subProxy.clear();
   }
 
-  Future<String?> login(String username, String password) async {
+  Future<UserAccountCore?> login(String username, String password) async {
     if (_subProxy != null) return await _subProxy.login(username, password);
     return null;
   }
 
-  Future<String?> signup(String username, String password) async {
+  Future<UserAccountCore?> signup(String username, String password) async {
     if (_subProxy != null) return await _subProxy.signup(username, password);
     return null;
   }

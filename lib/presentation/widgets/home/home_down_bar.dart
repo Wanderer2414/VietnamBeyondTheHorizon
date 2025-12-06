@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/heart_button.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_button.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/play_button.dart';
@@ -8,8 +9,9 @@ import 'package:vietnambeyondthehorizon/presentation/widgets/home/ranking_button
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/user_button.dart';
 
 class HomeDownBar extends StatelessWidget {
+  final UserAccount account;
   final Size size;
-  const HomeDownBar({super.key, required this.size});
+  const HomeDownBar({super.key, required this.size, required this.account});
 
   @override
   Widget build(BuildContext context) {
@@ -31,15 +33,15 @@ class HomeDownBar extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  HomeButton(radius: size.height / 2),
+                  HomeButton(radius: size.height / 2, account: account),
                   SizedBox(width: spacing),
                   RankingButton(radius: size.height / 2 / 1.2),
                   SizedBox(width: spacing),
-                  PlayButton(radius: size.height / 2 * 1.4),
+                  PlayButton(radius: size.height / 2 * 1.4, account: account),
                   SizedBox(width: spacing),
                   HeartButton(radius: size.height / 2 / 1.2),
                   SizedBox(width: spacing),
-                  UserButton(radius: size.height / 2 / 1.2),
+                  UserButton(radius: size.height / 2 / 1.2, account: account),
                   SizedBox(width: size.height / 24),
                 ],
               ),

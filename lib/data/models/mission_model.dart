@@ -10,7 +10,7 @@ class MissionModel {
   final int difficulty;
   bool isCompleted;
   final DateTime? finishDay;
-  final String? illustrationURL;
+  String? illustrationURL;
   String? cost;
 
   MissionModel({

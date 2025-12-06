@@ -34,20 +34,13 @@ class _CacheProxy extends Proxy {
     return _cache!;
   }
 
-  @override
-  Future<String?> getToken() async {
+  Future<String?> _getToken() async {
     String? token = (await _get()).getString("token");
-    print("Cache token: $token");
-    if (token == null) token = await _subProxy?.getToken();
     return token;
   }
 
-  @override
-  Future<bool> setToken(String token) async {
-    bool res = await _subProxy!.setToken(token);
-    print("Res: $res, Saved token to cache!");
-    if (res) return await (await _get()).setString("token", token);
-    return false;
+  Future<bool> _setToken(String token) async {
+    return await (await _get()).setString("token", token);
   }
 
   @override
@@ -72,24 +65,12 @@ class _CacheProxy extends Proxy {
     return false;
   }
 
-  @override
-  Future<UserAccountCore?> getAccount() async {
-    final raw = (await _get()).getString("user");
-    if (raw == null) return await _subProxy!.getAccount();
-    final data = jsonDecode(raw);
-    return UserAccountCore.fromJson(data);
-  }
-
-  @override
-  Future<bool> setAccount(UserAccountCore account) async {
-    bool res = await _subProxy!.setAccount(account);
-    if (res)
-      return await (await _get()).setString(
-        "user",
-        jsonEncode(account.toJson()),
-      );
-    return false;
-  }
+  // Future<UserAccountCore?> _getAccount() async {
+  //   final raw = (await _get()).getString("user");
+  //   if (raw == null) return null;
+  //   final data = jsonDecode(raw);
+  //   return UserAccountCore.fromJson(data);
+  // }
 
   @override
   Future<bool> clear() async {
@@ -100,17 +81,23 @@ class _CacheProxy extends Proxy {
   }
 
   @override
-  Future<String?> login(String username, String password) async {
-    String? token = await _subProxy!.login(username, password);
-    if (token != null) setToken(token);
-    return token;
+  Future<UserAccountCore?> login(String username, String password) async {
+    final account = await _subProxy!.login(username, password);
+    if (account != null) _setToken(account.token!);
+    return account;
   }
 
   @override
-  Future<String?> signup(String username, String password) async {
-    String? token = await _subProxy!.signup(username, password);
-    if (token != null) setToken(token);
-    return token;
+  Future<UserAccountCore?> signup(String username, String password) async {
+    final account = await _subProxy!.signup(username, password);
+    if (account != null) _setToken(account.token!);
+    return account;
+  }
+
+  @override
+  Future<UserAccountCore?> isLogged(String? token) async {
+    if (token == null) token = await _getToken();
+    return await _subProxy!.isLogged(token);
   }
 
   @override

@@ -1,21 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/profile_page.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
+import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
 class UserButton extends StatelessWidget {
+  final UserAccount account;
   final double radius;
-  const UserButton({super.key, required this.radius});
+  const UserButton({super.key, required this.radius, required this.account});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
-        NetworkProxy.account.then((value) {
-          Navigator.of(context).pushReplacement(
-            TransitionRLPageRoute(nextScreen: ProfilePage(user: value)),
-          );
-        });
+        MainRoute.goProfilePage(account);
       },
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(

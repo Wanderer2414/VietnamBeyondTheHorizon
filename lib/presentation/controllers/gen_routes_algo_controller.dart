@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
+import 'package:vietnambeyondthehorizon/data/models/game_quest.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:flutter/material.dart';
@@ -43,9 +44,6 @@ class RoutePlannerService {
       final openMinutes = open.hour * 60 + open.minute;
       final closeMinutes = close.hour * 60 + close.minute;
 
-      print(
-        "Close time: ${closeMinutes}, open time: ${openMinutes}, current ${currentMinutes}",
-      );
       if (closeMinutes < openMinutes) {
         // Qua đêm (vd: 18:00 - 02:00)
         return currentMinutes >= openMinutes || currentMinutes <= closeMinutes;
@@ -330,12 +328,11 @@ class RoutePlannerService {
     required LatLng userGPS,
     required int budget,
     required int durationDays,
-    required List<LocationModel> locations,
-    required List<MissionModel?> missions,
+    required Quests quest,
   }) async {
     print("---Start generating routes from user input.....-----");
     // Kiểm tra dataset
-    if (locations.isEmpty) {
+    if (quest.locations.isEmpty) {
       throw Exception("No locations on server!");
     }
     print("---Break 1-----");
@@ -348,15 +345,15 @@ class RoutePlannerService {
       userGPS: userGPS,
       budget: budget,
       maxDuration: maxDurationMinutes,
-      allLocations: locations,
-      allMissions: missions,
+      allLocations: quest.locations,
+      allMissions: quest.missions,
     );
     print("---Break 2-----");
 
     // Nếu không tìm thấy route nào, trả về top 5-6 locations gần nhất
     if (routeResults.isEmpty) {
       // Sắp xếp theo khoảng cách
-      List<LocationModel> sortedByDistance = List.from(locations);
+      List<LocationModel> sortedByDistance = List.from(quest.locations);
       sortedByDistance.sort((a, b) {
         double distA = calculateDistance(
           userGPS,
@@ -377,14 +374,16 @@ class RoutePlannerService {
         missions: fallbackLocations
             .map(
               (e) =>
-                  missions[e.missionID[Random().nextInt(e.missionID.length)]]!,
+                  quest.missions[e.missionID[Random().nextInt(
+                    e.missionID.length,
+                  )]]!,
             )
             .toList(),
       );
     }
     // Chuyển đổi RouteResult thành List<LocationModel>
     List<MissionModel> selectedMission = routeResults
-        .map((e) => missions[e.missionId]!)
+        .map((e) => quest.missions[e.missionId]!)
         .toList();
 
     print("---Break 4: Final result-----");

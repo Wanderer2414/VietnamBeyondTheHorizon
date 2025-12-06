@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
@@ -33,7 +33,7 @@ class GameRoute {
   List<MissionModel> get missions => _missions;
 
   static Future<GameRoute> fromJson(Map<String, dynamic> json) async {
-    final missions = await NetworkProxy.missions;
+    final missions = (await NetworkProxy.quest)!.missions;
     List<int> list = (json['progress'] as List<dynamic>)
         .map((e) => e as int)
         .toList();
@@ -71,37 +71,6 @@ class GameRoute {
 
   bool get _isFinished => _currentIndex >= _missionId.length;
   int get currentIndex => _currentIndex;
-
-  Future<({List<String> urls, List<int> locationIds})>
-  getOrderedPhotos() async {
-    final List<String> url = [];
-    for (int i = 0; i < _missionId.length; i++) {
-      String? path = await NetworkProxy.fetchMission(_missionId[i]);
-      if (path == null)
-        throw Exception("There are uncomplete image ${_missionId[i]}");
-      url.add(path);
-    }
-    final locationIds = _missions.map((e) => e.location!.id).toList();
-
-    //   for (var location in userRoute) {
-    //     if (location.currentMissionID != null) {
-    // String? url = _missionPhotos[location.currentMissionID];
-    //       if (url != null) {
-    //         urls.add(url);
-    //         locations.add(location.id);
-    //       }
-    //     } else {
-    //       for (var mid in location.missionID) {
-    //         if (_missionPhotos.containsKey(mid)) {
-    //           urls.add(_missionPhotos[mid]!);
-    //           locations.add(location.id);
-    //           break;
-    //         }
-    //       }
-    //     }
-    //   }
-    return (urls: url, locationIds: locationIds);
-  }
 }
 
 class GameProgressManager {
@@ -145,10 +114,10 @@ class GameProgressManager {
     // await fetchRoute(_currentLocation, loc);
   }
 
-  void completeRoute() {
+  void completeRoute(UserAccount account) {
     final route = _userRoute!;
     NetworkProxy.completeRoute(route);
-    MainRoute.goResultScreen(route);
+    MainRoute.goResultScreen(route, account);
   }
   // String? getPhotoUrl(String missionId) => _missionPhotos[missionId];
 
@@ -199,13 +168,13 @@ class GameProgressManager {
   //   _userRoute = route;
   // }
 
-  static bool nextStage() {
+  static bool nextStage(UserAccount account) {
     final instance = _getInstance();
     if (instance._userRoute!._next()) {
       instance.nextMission();
       return true;
     } else {
-      instance.completeRoute();
+      instance.completeRoute(account);
       return false;
     }
   }
@@ -227,12 +196,7 @@ class GameProgressManager {
     }
     if (index == -1) index = null;
 
-    return MarkerAppearance(
-      color: const Color.fromRGBO(233, 43, 43, 1),
-      size: 50,
-      icon: Icons.location_on_sharp,
-      sequenceNumber: index,
-    );
+    return getDefaultMarker(location.type);
   }
 
   static MarkerAppearance getMissionAppearance({

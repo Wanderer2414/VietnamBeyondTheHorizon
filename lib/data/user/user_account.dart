@@ -1,4 +1,20 @@
+class MissionCompleted {
+  List<List<String>?> _missionCompleted = [];
+  int _numberOfPhotos = 0;
+  int _numberOfMission = 0;
+  void push({required int id, required List<String> url}) {
+    if (id >= _missionCompleted.length) _missionCompleted.length = id + 1;
+    if (_missionCompleted[id] == null) {
+      _missionCompleted[id] = url;
+      _numberOfMission++;
+    } else
+      _missionCompleted[id]!.addAll(url);
+    _numberOfPhotos += url.length;
+  }
+}
+
 class UserAccountCore {
+  String? token;
   String email;
   String username;
   int age;
@@ -7,6 +23,8 @@ class UserAccountCore {
   int star;
   int diamond;
   DateTime? createdAt;
+  MissionCompleted missionCompleted = MissionCompleted();
+  List<String> videos = [];
   UserAccountCore._({
     required this.email,
     this.username = "",
@@ -80,6 +98,31 @@ class UserAccount {
   int get diamond {
     return _core.diamond;
   }
+
+  int get NumberOfPhotos => _core.missionCompleted._numberOfPhotos;
+  int get NumberOfMissions => _core.missionCompleted._numberOfMission;
+  ({List<String> urls, List<int> ids}) get RepresentPhoto {
+    List<String> urls = [];
+    List<int> ids = [];
+    final list = _core.missionCompleted._missionCompleted;
+    for (int i = 0; i < list.length; i++) {
+      if (list[i] != null) {
+        urls.add(list[i]![0]);
+        ids.add(i);
+      }
+    }
+    return (urls: urls, ids: ids);
+  }
+
+  List<String> get Photos {
+    List<String> res = [];
+    _core.missionCompleted._missionCompleted.forEach((e) {
+      if (e != null) res.addAll(e);
+    });
+    return res;
+  }
+
+  List<String> get videos => _core.videos;
 
   DateTime? get createdAt {
     return _core.createdAt;

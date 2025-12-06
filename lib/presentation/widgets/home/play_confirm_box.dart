@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
-import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/input_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/map_screen.dart';
 import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
 class PlayConfirmBox extends StatelessWidget {
   final Size size;
-  const PlayConfirmBox({super.key, required this.size});
+  final UserAccount account;
+  const PlayConfirmBox({super.key, required this.size, required this.account});
 
   @override
   Widget build(BuildContext context) {
@@ -83,16 +81,16 @@ class PlayConfirmBox extends StatelessWidget {
                       onPressed: () {
                         Navigator.of(context).pop();
                         LoadingManager.run(context, (context) async {
-                          final route = await NetworkProxy.getRoute();
+                          final route = await NetworkProxy.route;
                           print(
                             "Route ${route?.numberOfMission} ${route?.currentIndex}",
                           );
                           final controller = MyMapController();
                           await controller.initialize();
                           if (route == null) {
-                            MainRoute.goInputScreen(controller);
+                            MainRoute.goInputScreen(controller, account);
                           } else {
-                            MainRoute.goGameScreen(controller, route);
+                            MainRoute.goGameScreen(controller, route, account);
                           }
                           ;
                         });
