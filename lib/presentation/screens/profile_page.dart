@@ -1,6 +1,4 @@
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
-import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_down_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile/avatar_panel.dart';
@@ -23,54 +21,36 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
   final SideBox _box = SideBox();
-  final List<String> photos = [];
-  late final int missionComplete;
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return LoadingWrapper(
-      init: (context) async {
-        photos.clear();
-        final missions = (await NetworkProxy.missions)
-            .where((element) => element?.isCompleted ?? false)
-            .toList();
-        missionComplete = missions.length;
-        for (int i = 0; i < missions.length; i++) {
-          photos.add((await NetworkProxy.fetchMission(missions[i]!.id))!);
-        }
-        setState(() {});
-      },
-      child: Scaffold(
-        key: _key,
-        appBar: HomeAppbar(
-          superKey: _key,
-          size: Size(size.width, size.height * 0.06),
+    return Scaffold(
+      key: _key,
+      appBar: HomeAppbar(
+        superKey: _key,
+        size: Size(size.width, size.height * 0.06),
+      ),
+      backgroundColor: Colors.white,
+      drawer: Drawer(child: _box),
+      body: SizedBox(
+        width: size.width,
+        height: size.height,
+        child: Stack(
+          children: [
+            CustomPaint(
+              painter: profile.Decoration(),
+              size: Size(size.width, size.height),
+            ),
+            _Content(user: widget.user),
+          ],
         ),
-        backgroundColor: Colors.white,
-        drawer: Drawer(child: _box),
-        body: SizedBox(
-          width: size.width,
-          height: size.height,
-          child: Stack(
-            children: [
-              CustomPaint(
-                painter: profile.Decoration(),
-                size: Size(size.width, size.height),
-              ),
-              _Content(
-                user: widget.user,
-                photos: photos,
-                missionComplete: missionComplete,
-              ),
-            ],
-          ),
-        ),
+      ),
 
-        floatingActionButton: HomeDownBar(
-          size: Size(size.width * 0.9, size.height * 0.13),
-        ),
+      floatingActionButton: HomeDownBar(
+        size: Size(size.width * 0.9, size.height * 0.13),
+        account: widget.user,
       ),
     );
   }
@@ -78,14 +58,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
 class _Content extends StatefulWidget {
   final UserAccount user;
-  final int missionComplete;
-  const _Content({
-    required this.user,
-    required this.photos,
-    required this.missionComplete,
-  });
-
-  final List<String> photos;
+  const _Content({required this.user});
 
   @override
   State<_Content> createState() => _ContentState();
@@ -126,8 +99,8 @@ class _ContentState extends State<_Content> {
 
         // Stats Section
         StatPanel(
-          missions_completed: widget.missionComplete,
-          numberOfPhotos: widget.photos.length,
+          missions_completed: widget.user.NumberOfMissions,
+          numberOfPhotos: widget.user.NumberOfPhotos,
         ),
 
         // Tab Bar
@@ -139,7 +112,7 @@ class _ContentState extends State<_Content> {
         ),
 
         // Content area
-        TabContentPanel(selectedIndex: _selectedIndex, photos: widget.photos),
+        TabContentPanel(selectedIndex: _selectedIndex, account: widget.user),
       ],
     );
   }

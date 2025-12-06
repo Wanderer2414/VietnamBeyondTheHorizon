@@ -34,7 +34,8 @@ class _SignUpButtonState extends State<SignUpButton> {
         if (password != confirmPassword) return; // <- Update there
         LoadingManager.run(context, (context) async {
           try {
-            if (await NetworkProxy.signup(email, password)) {
+            final account = await NetworkProxy.signup(email, password);
+            if (account != null) {
               Navigator.of(
                 context,
               ).push(TransitionRLPageRoute(nextScreen: ProfileRegister()));

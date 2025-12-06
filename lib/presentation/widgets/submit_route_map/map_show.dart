@@ -26,9 +26,9 @@ class _MapShowState extends State<MapShow> {
       print("Reset map");
       setState(() {});
     };
-    NetworkProxy.locations.then(
+    NetworkProxy.quest.then(
       (value) => setState(() {
-        _allLocation = value;
+        _allLocation = value?.locations ?? [];
       }),
     );
   }

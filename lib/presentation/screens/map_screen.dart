@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
@@ -8,8 +9,14 @@ import '../controllers/map_controller.dart';
 
 class MapScreen extends StatefulWidget {
   final MyMapController controller;
+  final UserAccount account;
   final GameRoute route;
-  MapScreen({super.key, required this.controller, required this.route}) {}
+  MapScreen({
+    super.key,
+    required this.controller,
+    required this.route,
+    required this.account,
+  }) {}
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -39,7 +46,11 @@ class _MapScreenState extends State<MapScreen> {
       superKey: _key,
       size: Size(screenSize.width, screenSize.height * 0.06),
     );
-    _content = Content(controller: widget.controller, screenSize: screenSize);
+    _content = Content(
+      controller: widget.controller,
+      screenSize: screenSize,
+      account: widget.account,
+    );
   }
 
   @override

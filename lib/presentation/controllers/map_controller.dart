@@ -10,6 +10,7 @@ import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/information_location.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
@@ -312,6 +313,7 @@ class MyMapController {
   Future<void> toggleMissionCard(
     BuildContext context,
     MissionModel mission, {
+    required UserAccount account,
     bool isReplace = false,
   }) async {
     Function(Route) func = Navigator.of(context).push;
@@ -330,7 +332,7 @@ class MyMapController {
               await GameProgressManager.markAsCompleted(mission.id);
               await GameProgressManager.addStars(reward);
               mission.isCompleted = true;
-              if (GameProgressManager.nextStage()) {
+              if (GameProgressManager.nextStage(account)) {
                 final mission = GameProgressManager.currentTarget;
                 await fetchRoute(
                   _currentLocation,

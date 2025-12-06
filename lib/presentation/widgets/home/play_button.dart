@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/play_confirm_box.dart';
 
 class PlayButton extends StatelessWidget {
   final double radius;
-  const PlayButton({super.key, required this.radius});
+  final UserAccount account;
+  const PlayButton({super.key, required this.radius, required this.account});
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +19,7 @@ class PlayButton extends StatelessWidget {
             final Size size = MediaQuery.of(context).size;
             return PlayConfirmBox(
               size: Size(size.width * 0.8, size.height * 0.2),
+              account: account,
             );
           },
         );

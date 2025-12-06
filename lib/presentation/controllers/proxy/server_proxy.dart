@@ -3,7 +3,6 @@ part of proxy;
 class _ServerProxy extends Proxy {
   final Future<void> Function() onTokenExpired;
   DioService _service;
-  List<String?> _missionPhotos = [];
 
   _ServerProxy(String host, {required this.onTokenExpired})
     : _service = DioService(onTokenExpired: onTokenExpired) {}
@@ -20,30 +19,16 @@ class _ServerProxy extends Proxy {
   }
 
   @override
-  Future<String?> getToken() async {
-    await onTokenExpired();
-    return null;
-  }
-
-  @override
-  Future<bool> setToken(String token) async {
-    _service.token = token;
-    final response = (await _service.dio.get("/user/security")).data;
-    if (response['status'] == "success") return true;
-    return false;
-  }
-
-  @override
   Future<bool> clear() async {
     return true;
   }
 
   @override
-  Future<bool> setAccount(UserAccountCore user) async {
+  Future<bool> updateAccount(String name, int age, String city) async {
     try {
       final response = await _service.dio.patch(
         "/user/profile",
-        data: {"name": user.username, "age": user.age, "city": user.city},
+        data: {"name": name, "age": age, "city": city},
       );
       if (response.data['status'] == "success") {
         return true;
@@ -69,6 +54,24 @@ class _ServerProxy extends Proxy {
     return true;
   }
 
+  Future<List<({int id, List<String> url})>?> _getVisit() async {
+    final response = await _service.dio.get("/mission/visit");
+    if (response.statusCode == 200 && response.data['status'] == 'success') {
+      final List data = response.data['data'];
+      final result = data.map((element) {
+        ({int id, List<String> url}) res = (
+          url: (element['images'] as List<dynamic>)
+              .map((e) => e['url'] as String)
+              .toList(),
+          id: element["missionID"] as int,
+        );
+        return res;
+      }).toList();
+      return result;
+    }
+    return null;
+  }
+
   @override
   Future<Quests> getQuests() async {
     final response = await _service.dio.get("/location/locations");
@@ -90,49 +93,42 @@ class _ServerProxy extends Proxy {
       } else
         throw Exception(1);
     }
-    {
-      final response = await _service.dio.get("/mission/visit");
-      if (response.statusCode == 200 && response.data['status'] == 'success') {
-        final List data = response.data['data'];
-        data.forEach((element) {
-          final id = element["missionID"] as int;
-          final tmp = element['images'][0];
-          final url = tmp['url'];
-          dataMissions[id].isCompleted = true;
-          if (id >= _missionPhotos.length) _missionPhotos.length = id + 1;
-          _missionPhotos[id] = url;
-        });
-      }
-    }
-
-    return Quests(locations: dataLocation, missions: dataMissions);
+    final quest = Quests(locations: dataLocation, missions: dataMissions);
+    (await _getVisit())?.forEach((e) {
+      quest.missions[e.id]!.isCompleted = true;
+      quest.missions[e.id]!.illustrationURL = e.url[0];
+    });
+    return quest;
   }
 
   @override
   Future<String?> fetchMission(int id) async {
-    if (id >= _missionPhotos.length || _missionPhotos[id] == null) return null;
-    final dir = await getApplicationDocumentsDirectory();
-    final source = "${dir.path}/$id";
-    if (!(await File(source).exists())) {
-      final response = await http.get(Uri.parse(_missionPhotos[id]!));
-      if (response.statusCode != 200) {
-        throw Exception("Error fetch image id ${_missionPhotos[id]}");
-      }
-      final file = File(source);
-      file.writeAsBytes(response.bodyBytes);
-    }
-    return source;
+    return null;
+    // if (id >= _missionPhotos.length || _missionPhotos[id] == null) return null;
+    // final dir = await getApplicationDocumentsDirectory();
+    // final source = "${dir.path}/$id";
+    // if (!(await File(source).exists())) {
+    //   final response = await http.get(Uri.parse(_missionPhotos[id]!));
+    //   if (response.statusCode != 200) {
+    //     throw Exception("Error fetch image id ${_missionPhotos[id]}");
+    //   }
+    //   final file = File(source);
+    //   file.writeAsBytes(response.bodyBytes);
+    // }
+    // return source;
   }
 
-  @override
-  Future<UserAccountCore> getAccount() async {
+  Future<UserAccountCore> _getAccount() async {
     final response = await _service.dio.get("/user/info");
 
     if (response.data['status'] == "success") {
       final userJson = response.data['data'];
-
       if (userJson != null) {
         final user = UserAccountCore.fromJson(userJson);
+        (await _getVisit())?.forEach((element) {
+          user.missionCompleted.push(id: element.id, url: element.url);
+        });
+        user.videos = (await _fetchVideoUrls());
         return user;
       }
     }
@@ -140,7 +136,7 @@ class _ServerProxy extends Proxy {
   }
 
   @override
-  Future<String?> login(String email, String password) async {
+  Future<UserAccountCore?> login(String email, String password) async {
     try {
       print("Email $email");
       print("Password: $password");
@@ -152,7 +148,9 @@ class _ServerProxy extends Proxy {
       if (response.data["status"] == "success") {
         final token = response.data['data']['access_token'];
         _service.token = token;
-        return token;
+        final account = await _getAccount();
+        account.token = token;
+        return account;
       }
 
       // throw Exception("Unexpected server format.");
@@ -173,7 +171,7 @@ class _ServerProxy extends Proxy {
   }
 
   @override
-  Future<String?> signup(String email, String password) async {
+  Future<UserAccountCore?> signup(String email, String password) async {
     try {
       final response = await _service.dio.post(
         "/auth/signup",
@@ -183,7 +181,9 @@ class _ServerProxy extends Proxy {
       if (response.data['status'] == "success") {
         final token = response.data['data']['access_token'];
         _service.token = token;
-        return token;
+        final account = await _getAccount();
+        account.token = token;
+        return account;
       } else {
         return null;
         // throw Exception("Sign up error: ${response.data['error']['message']}");
@@ -224,13 +224,7 @@ class _ServerProxy extends Proxy {
         print("Response data success: $response");
         final responseData = response.data;
         if (responseData is Map && responseData['status'] == 'success') {
-          final dir = await getApplicationDocumentsDirectory();
-          final source = "${dir.path}/$id";
-          if (src != source) {
-            File file = File(src);
-            await file.copySync(source);
-          }
-          return source;
+          return responseData["data"];
         }
       }
     } catch (e) {
@@ -259,16 +253,10 @@ class _ServerProxy extends Proxy {
         data: formData,
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print("Response data success: $response");
         final responseData = response.data;
+        print(response.toString());
         if (responseData is Map && responseData['status'] == 'success') {
-          final dir = await getApplicationDocumentsDirectory();
-          final source = "${dir.path}/$id";
-          if (src != source) {
-            File file = File(src);
-            await file.rename(source);
-          }
-          return source;
+          return responseData["url"];
         }
       }
     } catch (e) {
@@ -319,8 +307,18 @@ class _ServerProxy extends Proxy {
     return null;
   }
 
-  Future<bool> isLogged() async {
-    return _service.isLogged;
+  @override
+  Future<UserAccountCore?> isLogged(String? token) async {
+    if (token != null)
+      _service.token = token;
+    else if (_service.token == null)
+      return null;
+    final response = (await _service.dio.get("/user/security"));
+    if (response.statusCode == 200) {
+      final data = response.data;
+      if (data['status'] == "success") return await _getAccount();
+    }
+    return null;
   }
 
   @override
@@ -328,7 +326,7 @@ class _ServerProxy extends Proxy {
     return true;
   }
 
-  Future<List<String>> fetchVideoUrls() async {
+  Future<List<String>> _fetchVideoUrls() async {
     try {
       final response = await _service.dio.get("/video/videos");
 

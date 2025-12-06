@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/main.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
@@ -36,7 +37,9 @@ class UserInput {
 
 class InputPage extends StatefulWidget {
   final MyMapController controller;
-  const InputPage({Key? key, required this.controller}) : super(key: key);
+  final UserAccount account;
+  const InputPage({Key? key, required this.controller, required this.account})
+    : super(key: key);
 
   @override
   State<InputPage> createState() => _InputPageState();
@@ -57,6 +60,7 @@ class _InputPageState extends State<InputPage> with RouteAware {
         screenSize: screenSize,
         subSize: subSize,
         controller: widget.controller,
+        account: widget.account,
       );
   }
 
@@ -105,8 +109,10 @@ class _Content extends StatefulWidget {
     required this.screenSize,
     required this.subSize,
     required this.controller,
+    required this.account,
   });
   final MyMapController controller;
+  final UserAccount account;
   final Size screenSize;
   final Size subSize;
 
@@ -182,6 +188,7 @@ class _ContentState extends State<_Content> {
                   durationDays: _duration,
                   interests: _opt,
                 ),
+                widget.account,
               );
             },
           ),

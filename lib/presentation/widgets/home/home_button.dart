@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/home_screen.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
+import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
 class HomeButton extends StatelessWidget {
+  final UserAccount account;
   final double radius;
-  const HomeButton({super.key, required this.radius});
+  const HomeButton({super.key, required this.radius, required this.account});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {
-        Navigator.of(
-          context,
-        ).pushReplacement(TransitionLRPageRoute(nextScreen: HomeScreen()));
-      },
+      onPressed: () => MainRoute.goHome(account),
       style: ElevatedButton.styleFrom(
         shape: CircleBorder(),
         padding: EdgeInsets.zero,

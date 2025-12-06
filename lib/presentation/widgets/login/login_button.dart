@@ -27,8 +27,8 @@ class _LoginButtonState extends State<LoginButton> {
         final password = widget.passwordCtrl.text.trim();
         LoadingManager.run(context, (context) async {
           try {
-            final value = await NetworkProxy.login(email, password);
-            if (value) MainRoute.goHome();
+            final account = await NetworkProxy.login(email, password);
+            if (account != null) MainRoute.goHome(account);
           } catch (e) {
             MainRoute.showError("Login failed $e");
           }

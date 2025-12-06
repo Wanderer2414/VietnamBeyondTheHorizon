@@ -12,14 +12,12 @@ class _Cookies extends Proxy {
       );
   Quests? _gameData;
   UserAccountCore? _userAccount;
-  List<String>? _videoUrls;
-  bool _isLogged = false;
 
-  @override
-  Future<UserAccountCore?> getAccount() async {
-    if (_userAccount != null) return _userAccount;
-    return _subProxy!.getAccount();
-  }
+  // @override
+  // Future<UserAccountCore?> getAccount() async {
+  //   if (_userAccount != null) return _userAccount;
+  //   return _subProxy!.getAccount();
+  // }
 
   @override
   Future<Quests?> getQuests() async {
@@ -28,10 +26,26 @@ class _Cookies extends Proxy {
   }
 
   @override
-  Future<bool> setAccount(UserAccountCore user) async {
-    bool res = await _subProxy!.setAccount(user);
-    if (res) _userAccount = user;
-    return res;
+  Future<UserAccountCore?> login(String username, String password) async {
+    _userAccount = await _subProxy!.login(username, password);
+    return _userAccount;
+  }
+
+  @override
+  Future<UserAccountCore?> signup(String username, String password) async {
+    _userAccount = await _subProxy!.signup(username, password);
+    return _userAccount;
+  }
+
+  @override
+  Future<bool> updateAccount(String name, int age, String city) async {
+    if (await _subProxy!.updateAccount(name, age, city)) {
+      _userAccount!.username = name;
+      _userAccount!.age = age;
+      _userAccount!.city = city;
+      return true;
+    }
+    return false;
   }
 
   @override
@@ -41,18 +55,16 @@ class _Cookies extends Proxy {
     return res;
   }
 
-  @override
-  Future<bool> setToken(String token) async {
-    bool res = await _subProxy!.setToken(token);
-    if (res) _isLogged = true;
-    return res;
-  }
+  // @override
+  // Future<bool> setToken(String token) async {
+  //   bool res = await _subProxy!.setToken(token);
+  //   if (res) _isLogged = true;
+  //   return res;
+  // }
 
   @override
-  Future<List<String>> fetchVideoUrls() async {
-    if (_videoUrls != null) return _videoUrls!;
-    return await _subProxy!.fetchVideoUrls();
+  Future<UserAccountCore?> isLogged(String? token) async {
+    if (_userAccount != null) return _userAccount;
+    return await _subProxy!.isLogged(null);
   }
-
-  bool isLogged() => _isLogged;
 }

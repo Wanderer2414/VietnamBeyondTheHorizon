@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/video_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/result/result_mission.dart';
@@ -9,7 +10,8 @@ import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
 class ResultAutoScreen extends StatefulWidget {
   final GameRoute route;
-  const ResultAutoScreen({required this.route});
+  final UserAccount account;
+  const ResultAutoScreen({required this.route, required this.account});
   @override
   _ResultAutoScreenState createState() => _ResultAutoScreenState(
     numberOfMission: route.numberOfMission,
@@ -67,15 +69,12 @@ class _ResultAutoScreenState extends State<ResultAutoScreen> {
   }
 
   Future<String?> generateRecapVideo() async {
-    final uploadData = await widget.route.getOrderedPhotos();
-    return await NetworkProxy.createVideo(
-      uploadData.urls,
-      uploadData.locationIds,
-    );
+    final uploadData = await widget.account.RepresentPhoto;
+    return await NetworkProxy.createVideo(uploadData.urls, uploadData.ids);
   }
 
   void _onBackHome() async {
-    MainRoute.goHome();
+    MainRoute.goHome(widget.account);
   }
 
   @override

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/gen_routes_algo_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/input_screen.dart';
@@ -10,15 +11,18 @@ import 'package:vietnambeyondthehorizon/presentation/screens/map_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/submit_route_map/main_content.dart';
+import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 import '../controllers/map_controller.dart';
 
 class SubmitRouteScreen extends StatefulWidget {
   final MyMapController controller;
   final UserInput userInput;
+  final UserAccount account;
   SubmitRouteScreen({
     super.key,
     required this.controller,
     required this.userInput,
+    required this.account,
   });
 
   @override
@@ -77,6 +81,7 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
             TransitionLRPageRoute(
               nextScreen: MapScreen(
                 controller: widget.controller,
+                account: widget.account,
                 route: route,
               ),
             ),
@@ -101,22 +106,24 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
           // );
 
           // Gọi thuật toán để tạo route
-          final locations = widget.userInput.getSelectedInterests(
-            await NetworkProxy.locations,
-          );
-          final missions = await NetworkProxy.missions;
-          final route = await RoutePlannerService.generateRouteFromUserInput(
-            userGPS: widget.controller.currentLocation!,
-            budget: widget.userInput.budget,
-            durationDays: widget.userInput.durationDays,
-            locations: locations,
-            missions: missions,
-          );
-          print("Mission: ${route.missions.length}");
-          init(route);
-          await widget.controller.fetchFullRoute(
-            route: route.missions.map((e) => e.location!.coordinates).toList(),
-          );
+          final quest = (await NetworkProxy.quest);
+          if (quest == null)
+            MainRoute.showError("No quest response!");
+          else {
+            final route = await RoutePlannerService.generateRouteFromUserInput(
+              userGPS: widget.controller.currentLocation!,
+              budget: widget.userInput.budget,
+              durationDays: widget.userInput.durationDays,
+              quest: quest.UncompletedQuest(),
+            );
+            print("Mission: ${route.missions.length}");
+            init(route);
+            await widget.controller.fetchFullRoute(
+              route: route.missions
+                  .map((e) => e.location!.coordinates)
+                  .toList(),
+            );
+          }
         }
       },
       child: Scaffold(

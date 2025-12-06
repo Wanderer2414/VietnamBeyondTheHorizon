@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/animations/screen/transition.dart';
 import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/account_login.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/account_register.dart';
@@ -9,6 +10,7 @@ import 'package:vietnambeyondthehorizon/presentation/screens/input_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/introduction_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/log_navigator.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/map_screen.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/profile_page.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/result_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/splash_begin_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/submit_route_screen.dart';
@@ -20,9 +22,9 @@ class MainRoute {
     return SplashScreen();
   }
 
-  static void goHome() {
+  static void goHome(UserAccount account) {
     NavigatorKey.currentState?.pushAndRemoveUntil(
-      TransitionRLPageRoute(nextScreen: HomeScreen()),
+      TransitionRLPageRoute(nextScreen: HomeScreen(user: account)),
       (_) => false,
     );
   }
@@ -46,23 +48,41 @@ class MainRoute {
     );
   }
 
-  static void goInputScreen(MyMapController controller) {
-    NavigatorKey.currentState?.push(
-      TransitionRLPageRoute(nextScreen: InputPage(controller: controller)),
-    );
-  }
-
-  static void goGameScreen(MyMapController controller, GameRoute route) {
+  static void goInputScreen(MyMapController controller, UserAccount account) {
     NavigatorKey.currentState?.push(
       TransitionRLPageRoute(
-        nextScreen: MapScreen(controller: controller, route: route),
+        nextScreen: InputPage(controller: controller, account: account),
       ),
     );
   }
 
-  static void goResultScreen(GameRoute route) {
+  static void goGameScreen(
+    MyMapController controller,
+    GameRoute route,
+    UserAccount account,
+  ) {
     NavigatorKey.currentState?.push(
-      TransitionRLPageRoute(nextScreen: ResultAutoScreen(route: route)),
+      TransitionRLPageRoute(
+        nextScreen: MapScreen(
+          controller: controller,
+          route: route,
+          account: account,
+        ),
+      ),
+    );
+  }
+
+  static void goProfilePage(UserAccount user) {
+    NavigatorKey.currentState?.push(
+      TransitionLRPageRoute(nextScreen: ProfilePage(user: user)),
+    );
+  }
+
+  static void goResultScreen(GameRoute route, UserAccount account) {
+    NavigatorKey.currentState?.push(
+      TransitionRLPageRoute(
+        nextScreen: ResultAutoScreen(route: route, account: account),
+      ),
     );
   }
 
@@ -72,10 +92,18 @@ class MainRoute {
     );
   }
 
-  static void goSubmitRoute(MyMapController controller, UserInput input) {
+  static void goSubmitRoute(
+    MyMapController controller,
+    UserInput input,
+    UserAccount account,
+  ) {
     NavigatorKey.currentState?.push(
       TransitionRLPageRoute(
-        nextScreen: SubmitRouteScreen(controller: controller, userInput: input),
+        nextScreen: SubmitRouteScreen(
+          controller: controller,
+          userInput: input,
+          account: account,
+        ),
       ),
     );
   }

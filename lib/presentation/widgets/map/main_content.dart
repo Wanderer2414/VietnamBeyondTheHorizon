@@ -3,15 +3,21 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/extra/text_measure.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/map_show.dart';
 
 class Content extends StatefulWidget {
-  Content({required this.controller, required this.screenSize});
+  Content({
+    required this.controller,
+    required this.screenSize,
+    required this.account,
+  });
 
   final MyMapController controller;
+  final UserAccount account;
   final Size screenSize;
 
   @override
@@ -24,7 +30,11 @@ class _ContentState extends State<Content> {
     final Size screenSize = MediaQuery.of(context).size;
     return Stack(
       children: [
-        MapShow(controller: widget.controller, size: screenSize),
+        MapShow(
+          controller: widget.controller,
+          size: screenSize,
+          account: widget.account,
+        ),
         Align(
           alignment: Alignment.bottomCenter,
           child: Container(

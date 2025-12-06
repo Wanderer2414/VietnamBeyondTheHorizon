@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/timeline_progress.dart';
 
 class MapShow extends StatefulWidget {
   final Size size;
-  const MapShow({super.key, required this.controller, required this.size});
+  final UserAccount account;
+  const MapShow({
+    super.key,
+    required this.controller,
+    required this.size,
+    required this.account,
+  });
 
   final MyMapController controller;
 
@@ -43,7 +50,7 @@ class _MapShowState extends State<MapShow> {
           context: context,
         ),
         children: widget.controller.mapLayers(context, [
-          MissionLayer(context, widget.controller),
+          MissionLayer(context, widget.controller, widget.account),
           SafeArea(
             // Tránh tai thỏ
             child: Align(

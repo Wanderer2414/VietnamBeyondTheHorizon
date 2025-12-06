@@ -32,16 +32,6 @@ class _MissionCardState extends State<MissionCard> {
   XFile? imageFile;
   bool _showRewardEffect = false;
   bool _isChecking = false;
-  @override
-  void initState() {
-    super.initState();
-    NetworkProxy.fetchMission(widget.mission.id).then((value) {
-      if (value != null) {
-        imageFile = XFile(value);
-        setState(() {});
-      }
-    });
-  }
 
   Future<bool> _claimed() async {
     return true;
@@ -69,8 +59,10 @@ class _MissionCardState extends State<MissionCard> {
           }
           break;
       }
+      print(url);
       if (url != null) {
         widget.mission.isCompleted = true;
+        widget.mission.illustrationURL = url;
         setState(() {});
         return true;
       }

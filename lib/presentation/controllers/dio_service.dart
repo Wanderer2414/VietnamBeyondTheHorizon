@@ -4,9 +4,7 @@ class DioService {
   final Function() onTokenExpired;
   DioService({required this.onTokenExpired});
   String? _accessToken;
-  bool get isLogged {
-    return _accessToken != null;
-  }
+  String? get token => _accessToken;
 
   set token(String t) {
     _accessToken = t;

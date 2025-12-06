@@ -1,4 +1,4 @@
-import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
+import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/home/daily_box.dart';
@@ -9,7 +9,8 @@ import 'package:vietnambeyondthehorizon/presentation/widgets/home/greeting_box.d
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final UserAccount user;
+  const HomeScreen({super.key, required this.user});
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -17,36 +18,19 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final sideBox = SideBox();
-  final List<String> _videoUrls = [];
-  String userName = "";
-
-  @override
-  void initState() {
-    super.initState();
-    NetworkProxy.account.then(
-      (value) => setState(() {
-        userName = value.username;
-      }),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: HomeAppbar(
-        superKey: _scaffoldKey,
-        size: Size(screenSize.width, screenSize.height * 0.06),
-      ),
-      drawer: Drawer(child: sideBox),
-      body: LoadingWrapper(
-        init: (context) async {
-          _videoUrls.addAll(await NetworkProxy.fetchVideoUrls());
-          _videoUrls.forEach((element) => print(element));
-          setState(() {});
-        },
-        child: Stack(
+    return LoadingWrapper(
+      child: Scaffold(
+        key: _scaffoldKey,
+        appBar: HomeAppbar(
+          superKey: _scaffoldKey,
+          size: Size(screenSize.width, screenSize.height * 0.06),
+        ),
+        drawer: Drawer(child: sideBox),
+        body: Stack(
           children: [
             Container(
               decoration: BoxDecoration(
@@ -63,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 //Hi box
                 GreetingBox(
                   size: Size(screenSize.width * 0.9, screenSize.height * 0.1),
-                  userName: userName,
+                  userName: widget.user.username,
                 ),
                 SizedBox(height: screenSize.height * 0.03),
 
@@ -93,17 +77,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 //Scroll view of visited place
                 VisitedPlaceBox(
                   size: Size(screenSize.width * 0.9, screenSize.height * 0.36),
-                  listOfVideo: _videoUrls,
+                  listOfVideo: widget.user.videos,
                 ),
               ],
             ),
           ],
         ),
+        floatingActionButton: HomeDownBar(
+          size: Size(screenSize.width * 0.9, screenSize.height * 0.13),
+          account: widget.user,
+        ),
+        resizeToAvoidBottomInset: false,
       ),
-      floatingActionButton: HomeDownBar(
-        size: Size(screenSize.width * 0.9, screenSize.height * 0.13),
-      ),
-      resizeToAvoidBottomInset: false,
     );
   }
 }

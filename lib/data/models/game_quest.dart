@@ -70,4 +70,15 @@ class Quests {
         .toList();
     return Quests._(locations: locs, missions: misses, rels: rel);
   }
+  Quests UncompletedQuest() {
+    List<MissionModel> mission = _mission
+        .where((element) => (element?.isCompleted ?? true) == false)
+        .map((e) => e!)
+        .toList();
+    List<LocationModel> locations = _locations
+        .where((e) => e != null)
+        .map((e) => e!)
+        .toList();
+    return Quests(locations: locations, missions: mission);
+  }
 }
