@@ -1,0 +1,423 @@
+import 'dart:math';
+import 'package:latlong2/latlong.dart';
+import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
+import 'package:vietnambeyondthehorizon/data/models/game_quest.dart';
+import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
+import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
+import 'package:flutter/material.dart';
+
+class RouteResult {
+  final int locationId;
+  final int missionId;
+
+  RouteResult({required this.locationId, required this.missionId});
+
+  @override
+  String toString() => 'Location: $locationId, Mission: $missionId';
+}
+
+class RoutePlannerService {
+  /// Tính khoảng cách giữa 2 điểm GPS (meters)
+  static double calculateDistance(LatLng point1, LatLng point2) {
+    final Distance _distance = Distance();
+    return _distance.as(LengthUnit.Meter, point1, point2);
+  }
+
+  /// Tính thời gian di chuyển (phút) - giả sử tốc độ 40km/h
+  static double calculateTravelTime(double distanceMeters) {
+    const double speedKmh = 40.0;
+    return (distanceMeters / 1000) / speedKmh * 60; // phút
+  }
+
+  /// Tính thời gian tham quan (phút) dựa trên độ khó mission
+  static double calculateVisitDuration(int difficulty) {
+    return difficulty * 15.0; // 15 phút cho mỗi độ khó
+  }
+
+  static bool isLocationOpen(LocationModel location, DateTime currentTime) {
+    try {
+      final open = _parseTime(location.openTime);
+      final close = _parseTime(location.closeTime);
+      final current = TimeOfDay.fromDateTime(currentTime);
+
+      final currentMinutes = current.hour * 60 + current.minute;
+      final openMinutes = open.hour * 60 + open.minute;
+      final closeMinutes = close.hour * 60 + close.minute;
+
+      if (closeMinutes < openMinutes) {
+        // Qua đêm (vd: 18:00 - 02:00)
+        return currentMinutes >= openMinutes || currentMinutes <= closeMinutes;
+      }
+
+      return currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
+    } catch (e) {
+      return true; // Nếu không parse được thì cho phép
+    }
+  }
+
+  static TimeOfDay _parseTime(String time) {
+    final parts = time.split(':');
+    return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+  }
+
+  /// Kiểm tra giá phù hợp với ngân sách
+  static bool isPriceAffordable(LocationModel location, int budget) {
+    try {
+      if (location.price.toLowerCase() == 'free') return true;
+      final price = double.parse(
+        location.price.replaceAll('.', '').replaceAll(',', ''),
+      );
+      return price <= budget;
+    } catch (e) {
+      return true;
+    }
+  }
+
+  /// Lọc địa điểm theo điều kiện - TRẢ VỀ TẤT CẢ NẾU KHÔNG CÓ ĐỦ ĐIỀU KIỆN
+  static List<LocationModel> filterLocations({
+    required List<LocationModel?> allLocations,
+    required LatLng userGPS,
+    required int budget,
+    required double maxDuration,
+    DateTime? currentTime,
+    bool strictMode = false, // Chế độ nghiêm ngặt
+  }) {
+    currentTime ??= DateTime.now();
+
+    // Lọc nghiêm ngặt theo tất cả tiêu chí
+    List<LocationModel> strictFiltered = [];
+    allLocations.forEach((location) {
+      if (location == null) return;
+      if (!isPriceAffordable(location, budget)) return;
+      // if (!isLocationOpen(location, currentTime!)) return;
+      strictFiltered.add(location);
+    });
+
+    if (strictFiltered.isNotEmpty || strictMode) {
+      return strictFiltered;
+    }
+
+    // Nếu không có kết quả, thử lọc lỏng hơn (bỏ qua giờ mở cửa)
+    List<LocationModel> relaxedFiltered = [];
+    allLocations.forEach((location) {
+      if (location == null) return;
+      if (!isPriceAffordable(location, budget)) return;
+      relaxedFiltered.add(location);
+    });
+
+    if (relaxedFiltered.isNotEmpty) {
+      return relaxedFiltered;
+    }
+
+    // Nếu vẫn không có, chỉ lọc theo interest
+    List<LocationModel> interestOnly = [];
+    allLocations.forEach((location) {
+      if (location == null) return;
+      interestOnly.add(location);
+    });
+
+    if (interestOnly.isNotEmpty) {
+      return interestOnly;
+    }
+
+    // Cuối cùng, trả về tất cả locations sẵn có
+    return allLocations
+        .where((element) => element != null)
+        .map((e) => e!)
+        .toList();
+  }
+
+  /// Thuật toán tìm đường tối ưu - LUÔN TRẢ VỀ KẾT QUẢ
+  static Future<List<RouteResult>> planOptimalRoute({
+    required LatLng userGPS,
+    required int budget,
+    required double maxDuration, // phút
+    required List<LocationModel?> allLocations,
+    required List<MissionModel?> allMissions,
+    DateTime? startTime,
+  }) async {
+    startTime ??= DateTime.now();
+
+    // Kiểm tra dataset có rỗng không
+    if (allLocations.isEmpty) {
+      return [];
+    }
+
+    // Bước 1: Lọc địa điểm phù hợp (relaxed filtering)
+    List<LocationModel> filteredLocations = filterLocations(
+      allLocations: allLocations,
+      userGPS: userGPS,
+      budget: budget,
+      maxDuration: maxDuration,
+      currentTime: startTime,
+      strictMode: false, // Cho phép lọc lỏng
+    );
+
+    if (filteredLocations.isEmpty) {
+      return [];
+    }
+
+    // Bước 2: Tính điểm cho mỗi địa điểm
+    Map<LocationModel, double> scores = {};
+    for (var location in filteredLocations) {
+      double distance = calculateDistance(
+        userGPS,
+        LatLng(location.latitude, location.longitude),
+      );
+
+      // Score: Càng gần càng tốt, ưu tiên type phù hợp
+      double score = 10000 / (distance + 1); // +1 để tránh chia cho 0
+
+      // Bonus cho type ưu tiên đầu tiên
+      // if (interests.isNotEmpty && location.type == interests[0]) {
+      //   score *= 1.2;
+      // }
+
+      scores[location] = score;
+    }
+
+    // Bước 3: Greedy algorithm - chọn địa điểm tốt nhất có thể
+    List<RouteResult> route = [];
+    LatLng currentPosition = userGPS;
+    double remainingTime = maxDuration;
+    int remainingBudget = budget;
+    Set<String> visitedTypes = {};
+    DateTime currentTime = startTime;
+
+    // Tạo bản sao để không làm thay đổi list gốc
+    List<LocationModel> availableLocations = List.from(filteredLocations);
+
+    while (availableLocations.isNotEmpty && route.length < 6) {
+      LocationModel? bestLocation;
+      double bestScore = -1;
+      bool foundAffordable = false;
+
+      for (var location in availableLocations) {
+        // Tính thời gian cần thiết
+        double distance = calculateDistance(
+          currentPosition,
+          LatLng(location.latitude, location.longitude),
+        );
+        double travelTime = calculateTravelTime(distance);
+
+        // Lấy mission
+        if (location.missionID.isEmpty) continue;
+
+        int missionId =
+            location.missionID[Random().nextInt(location.missionID.length)];
+        MissionModel mission = allMissions[missionId]!;
+
+        double visitTime = calculateVisitDuration(mission.difficulty);
+        double totalTime = travelTime + visitTime;
+
+        // Kiểm tra budget
+        bool canAfford = isPriceAffordable(location, remainingBudget);
+
+        // Nếu đã hết thời gian và budget - dừng tìm
+        if (totalTime > remainingTime && !canAfford) continue;
+
+        // Ưu tiên location vừa đủ thời gian VÀ budget
+        bool meetsAllCriteria = totalTime <= remainingTime && canAfford;
+
+        if (meetsAllCriteria) foundAffordable = true;
+
+        // Kiểm tra giờ mở cửa (lỏng lẻo hơn)
+        DateTime arrivalTime = currentTime.add(
+          Duration(minutes: travelTime.toInt()),
+        );
+        bool isOpen = isLocationOpen(location, arrivalTime);
+
+        // Tính score với nhiều yếu tố
+        double score = scores[location]!;
+
+        // Bonus cho đa dạng type
+        if (!visitedTypes.contains(location.type)) {
+          score *= 1.5;
+        }
+
+        // Bonus cho location đáp ứng đủ điều kiện
+        if (meetsAllCriteria) {
+          score *= 2.0;
+        }
+
+        // Bonus nhỏ cho location mở cửa
+        if (isOpen) {
+          score *= 1.1;
+        }
+
+        // Penalty cho location quá xa hoặc quá tốn thời gian
+        if (totalTime > remainingTime) {
+          score *= 0.3;
+        }
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestLocation = location;
+        }
+      }
+
+      // Nếu không tìm thấy location nào phù hợp, dừng
+      if (bestLocation == null) {
+        break;
+      }
+
+      // final completedMissions = UserHistoryManager().completedMissionIds;
+      // print(completedMissions);
+      // List<int> pool = bestLocation.missionID;
+      // List<int> availableMissions = pool.where((id) {
+      //   return !UserHistoryManager().hasCompletedBefore(id);
+      // }).toList();
+
+      // Thêm vào route
+      int selectedMissionId = bestLocation
+          .missionID[Random().nextInt(bestLocation.missionID.length)];
+
+      route.add(
+        RouteResult(locationId: bestLocation.id, missionId: selectedMissionId),
+      );
+
+      // Cập nhật trạng thái
+      double distance = calculateDistance(
+        currentPosition,
+        LatLng(bestLocation.latitude, bestLocation.longitude),
+      );
+      double travelTime = calculateTravelTime(distance);
+
+      MissionModel mission = allMissions[selectedMissionId]!;
+
+      double visitTime = calculateVisitDuration(mission.difficulty);
+
+      // Cập nhật remaining
+      remainingTime -= (travelTime + visitTime);
+      try {
+        int locationPrice = int.parse(
+          bestLocation.price
+              .replaceAll('.', '')
+              .replaceAll(',', '')
+              .toLowerCase()
+              .replaceAll('free', '0'),
+        );
+        remainingBudget -= locationPrice;
+      } catch (e) {
+        // Nếu parse lỗi, giữ nguyên budget
+      }
+
+      currentPosition = LatLng(bestLocation.latitude, bestLocation.longitude);
+      currentTime = currentTime.add(
+        Duration(minutes: (travelTime + visitTime).toInt()),
+      );
+      visitedTypes.add(bestLocation.type);
+      availableLocations.remove(bestLocation);
+
+      // Nếu đã đủ thời gian cho ít nhất 1 location nữa nhưng không tìm thấy, dừng
+      if (remainingTime <= 0) {
+        break;
+      }
+    }
+
+    //route.add(RouteResult(locationId: 12.toString(), missionId: 30.toString()));
+    // for (var routeRes in route) {
+    //   print("Route result (mission ID): ${routeRes.missionId}");
+    // }
+    //route = [route.first];
+    return route;
+  }
+
+  /// HÀM CHÍNH: Tạo route từ UserInput - LUÔN TRẢ VỀ KẾT QUẢ
+  static Future<GameRoute> generateRouteFromUserInput({
+    required LatLng userGPS,
+    required int budget,
+    required int durationDays,
+    required Quests quest,
+  }) async {
+    print("---Start generating routes from user input.....-----");
+    // Kiểm tra dataset
+    if (quest.locations.isEmpty) {
+      throw Exception("No locations on server!");
+    }
+    print("---Break 1-----");
+
+    // Chuyển đổi duration từ ngày sang phút (giả sử 8 giờ hoạt động/ngày)
+    double maxDurationMinutes = durationDays * 8 * 60.0;
+
+    // Gọi thuật toán tìm đường
+    List<RouteResult> routeResults = await planOptimalRoute(
+      userGPS: userGPS,
+      budget: budget,
+      maxDuration: maxDurationMinutes,
+      allLocations: quest.locations,
+      allMissions: quest.missions,
+    );
+    print("---Break 2-----");
+
+    // Nếu không tìm thấy route nào, trả về top 5-6 locations gần nhất
+    if (routeResults.isEmpty) {
+      // Sắp xếp theo khoảng cách
+      List<LocationModel> sortedByDistance = List.from(quest.locations);
+      sortedByDistance.sort((a, b) {
+        double distA = calculateDistance(
+          userGPS,
+          LatLng(a.latitude, a.longitude),
+        );
+        double distB = calculateDistance(
+          userGPS,
+          LatLng(b.latitude, b.longitude),
+        );
+        return distA.compareTo(distB);
+      });
+
+      // Lấy tối đa 6 locations
+      List<LocationModel> fallbackLocations = sortedByDistance.take(6).toList();
+      print("---Break 3: route res is empty-----");
+
+      return GameRoute(
+        missions: fallbackLocations
+            .map(
+              (e) =>
+                  quest.missions[e.missionID[Random().nextInt(
+                    e.missionID.length,
+                  )]]!,
+            )
+            .toList(),
+      );
+    }
+    // Chuyển đổi RouteResult thành List<LocationModel>
+    List<MissionModel> selectedMission = routeResults
+        .map((e) => quest.missions[e.missionId]!)
+        .toList();
+
+    print("---Break 4: Final result-----");
+    // selectedMission.length = 2;
+    return GameRoute(missions: selectedMission);
+  }
+
+  /// Helper: In thông tin chi tiết route
+  static void printRouteDetails({
+    required List<RouteResult> route,
+    required List<LocationModel> allLocations,
+    required List<MissionModel> allMissions,
+    required LatLng startPoint,
+  }) {
+    LatLng currentPos = startPoint;
+    double totalDistance = 0;
+    double totalTime = 0;
+
+    for (int i = 0; i < route.length; i++) {
+      var result = route[i];
+      var location = allLocations.firstWhere((l) => l.id == result.locationId);
+      var mission = allMissions.firstWhere((m) => m.id == result.missionId);
+
+      double distance = calculateDistance(
+        currentPos,
+        LatLng(location.latitude, location.longitude),
+      );
+      double travelTime = calculateTravelTime(distance);
+      double visitTime = calculateVisitDuration(mission.difficulty);
+
+      totalDistance += distance;
+      totalTime += (travelTime + visitTime);
+
+      currentPos = LatLng(location.latitude, location.longitude);
+    }
+  }
+}
