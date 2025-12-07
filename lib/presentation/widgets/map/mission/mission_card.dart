@@ -40,6 +40,9 @@ class _MissionCardState extends State<MissionCard> {
   Future<bool> _submitImage(XFile? imagePath) async {
     if (imagePath == null) throw Exception(("Please upload your image"));
     try {
+      setState(() {
+        _isChecking = true;
+      });
       late final String? url;
       switch (widget.mission.type) {
         case "Photo":
@@ -69,6 +72,11 @@ class _MissionCardState extends State<MissionCard> {
       return false;
     } catch (e) {
       MainRoute.showError(e.toString());
+    }
+    finally {
+      setState(() {
+        _isChecking = false;
+      });
     }
 
     return false;
