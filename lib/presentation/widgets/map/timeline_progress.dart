@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart'; // Import màu của ông
 
 class TimelineProgress extends StatelessWidget {
   final int currentIndex;

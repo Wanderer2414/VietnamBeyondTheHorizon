@@ -50,7 +50,7 @@ interface class Proxy {
   }
 
   Future<String?> postMission(int id, String file) async {
-    if (_subProxy != null) return await _subProxy.postAIMission(id, file);
+    if (_subProxy != null) return await _subProxy.postMission(id, file);
     return null;
   }
 
@@ -81,5 +81,10 @@ interface class Proxy {
 
   Future<void> init() async {
     await _subProxy?.init();
+  }
+
+  Future<String?> updateAvatar(String src) async {
+    if (_subProxy != null) return await _subProxy.updateAvatar(src);
+    return null;
   }
 }

@@ -44,24 +44,9 @@ class _MissionCardState extends State<MissionCard> {
         _isChecking = true;
       });
       late final String? url;
-      switch (widget.mission.type) {
-        case "Photo":
-          {
-            url = await NetworkProxy.postMission(
-              widget.mission.id,
-              imagePath.path,
-            );
-          }
-          break;
-        case "AI Photo":
-          {
-            url = await NetworkProxy.postAIMission(
-              widget.mission.id,
-              imagePath.path,
-            );
-          }
-          break;
-      }
+
+      url = await NetworkProxy.postMission(widget.mission.id, imagePath.path);
+
       print(url);
       if (url != null) {
         widget.mission.isCompleted = true;
@@ -72,8 +57,7 @@ class _MissionCardState extends State<MissionCard> {
       return false;
     } catch (e) {
       MainRoute.showError(e.toString());
-    }
-    finally {
+    } finally {
       setState(() {
         _isChecking = false;
       });

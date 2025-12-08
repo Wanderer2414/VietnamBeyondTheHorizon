@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/presentation/widgets/profile_register/avatar.dart';
 
 class AvatarPanel extends StatelessWidget {
-  const AvatarPanel();
+  final String? currentAvatarUrl;
+  const AvatarPanel(this.currentAvatarUrl);
 
   @override
   Widget build(BuildContext context) {
+    double radius = 56;
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
@@ -17,10 +20,10 @@ class AvatarPanel extends StatelessWidget {
           ),
         ],
       ),
-      child: const CircleAvatar(
-        radius: 56,
-        backgroundColor: Color(0xFFE8E8E8),
-        child: Icon(Icons.person, size: 56, color: Colors.grey),
+      child: AvatarWidget(
+        radius: radius,
+        onClick: true,
+        currentAvatarUrl: currentAvatarUrl,
       ),
     );
   }

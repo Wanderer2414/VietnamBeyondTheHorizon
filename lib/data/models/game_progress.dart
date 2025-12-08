@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
@@ -7,11 +8,28 @@ import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.da
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
 import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
+class LocationUtils {
+  static const double allowed_radus = 100.0;
+
+  static bool isCloseEnough(LatLng userLocation, LatLng targetLocation) {
+    final Distance distance = Distance();
+    final double meter = distance.as(
+      LengthUnit.Meter,
+      userLocation,
+      targetLocation,
+    );
+    return meter <= allowed_radus;
+  }
+}
+
 class GameRoute {
   late final List<MissionModel> _missions;
   late final List<int> _missionId;
   int _currentIndex = 0;
   int _collectedStars = 0;
+  bool _isCheckedIn = false;
+
+  bool get isCheckedIn => _isCheckedIn;
 
   int get numberOfMission => _missionId.length;
   int get collectedStars => _collectedStars;
@@ -27,6 +45,7 @@ class GameRoute {
       'progress': _missionId,
       'current': _currentIndex,
       'star': _collectedStars,
+      'isCheckedIn': _isCheckedIn,
     };
   }
 
@@ -34,6 +53,7 @@ class GameRoute {
 
   static Future<GameRoute> fromJson(Map<String, dynamic> json) async {
     final missions = (await NetworkProxy.quest)!.missions;
+
     List<int> list = (json['progress'] as List<dynamic>)
         .map((e) => e as int)
         .toList();
@@ -42,12 +62,18 @@ class GameRoute {
     route._missionId = route._missions.map((e) => e.id).toList();
     route._currentIndex = json['current'] as int;
     route._collectedStars = json['star'] as int;
+    route._isCheckedIn = (json['isCheckedIn'] as bool?) ?? false;
     return route;
+  }
+
+  void setCheckedIn() {
+    _isCheckedIn = true;
   }
 
   bool _next() {
     if (_currentIndex < _missions.length - 1) {
       _currentIndex++;
+      _isCheckedIn = false;
       return true;
     }
     return false;
@@ -83,6 +109,12 @@ class GameProgressManager {
 
   int currentIndex = 0;
   GameRoute? _userRoute;
+
+  static bool get isCurrentStepCheckedIn =>
+      _getInstance()._userRoute?._isCheckedIn ?? false;
+  static void checkInSuccess() {
+    _getInstance()._userRoute?.setCheckedIn();
+  }
 
   bool get isFinished => _userRoute?._isFinished ?? true;
   static bool isLocked(int id) =>

@@ -129,6 +129,7 @@ class _ServerProxy extends Proxy {
           user.missionCompleted.push(id: element.id, url: element.url);
         });
         user.videos = (await _fetchVideoUrls());
+
         return user;
       }
     }
@@ -216,20 +217,29 @@ class _ServerProxy extends Proxy {
         ),
         'missionID': id,
       });
+
+      print("Start posting image.....");
+      print("TOKEN WHEN POSTING IMAGE: ${_service.token}");
       final response = await _service.dio.post(
         "/mission/image",
         data: formData,
       );
+      print("Get response!");
+
+      print("response.status = ${response.statusCode}");
       if (response.statusCode == 200 || response.statusCode == 201) {
         print("Response data success: $response");
         final responseData = response.data;
         if (responseData is Map && responseData['status'] == 'success') {
+          print(responseData["data"]);
           return responseData["data"];
         }
       }
     } catch (e) {
       if (e is DioException) {
         print("Lỗi server trả về: ${e.response?.data}");
+        print("Response status code: ${e.response?.statusCode}");
+        print("Response: ${e.response}");
       }
     }
     return null;
@@ -348,5 +358,37 @@ class _ServerProxy extends Proxy {
       print("Error fetch video: $e");
     }
     return [];
+  }
+
+  @override
+  Future<String?> updateAvatar(String src) async {
+    try {
+      final fileName = src.split('/').last;
+
+      FormData formData = FormData.fromMap({
+        "file": await MultipartFile.fromFile(
+          src,
+          filename: fileName,
+          contentType: DioMediaType("image", "jpeg"),
+        ),
+      });
+
+      final response = await _service.dio.patch("/user/avatar", data: formData);
+
+      print("response.status = ${response.statusCode}");
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print("Response data success: $response");
+        final responseData = response.data;
+        if (responseData['status'] == 'success') {
+          print(responseData["data"]);
+          if (responseData["data"] != null) {
+            return responseData["data"];
+          }
+        }
+      }
+    } on DioException catch (e) {
+      print("Lỗi server trả về: ${e.response?.data}");
+    }
+    return null;
   }
 }

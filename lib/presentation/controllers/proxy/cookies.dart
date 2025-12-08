@@ -67,4 +67,13 @@ class _Cookies extends Proxy {
     if (_userAccount != null) return _userAccount;
     return await _subProxy!.isLogged(null);
   }
+
+  @override
+   Future<String?> updateAvatar(String src) async {
+    final avatarUrl = await _subProxy!.updateAvatar(src);
+    if(avatarUrl != null){
+      _userAccount!.avatarUrl = avatarUrl;
+    }
+    return avatarUrl;
+  }
 }

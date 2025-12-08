@@ -243,7 +243,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
                         vertical: 5,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 255, 211, 13),
+                        color: const Color.fromARGB(255, 255, 192, 55),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
