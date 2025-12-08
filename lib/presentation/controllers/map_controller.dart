@@ -21,17 +21,9 @@ class MyMapController {
   MapController? mapController;
   final Location _location = Location();
   LatLng? _currentLocation;
+  void Function(LocationModel?)? toggleLocation;
   List<LatLng> _routes = [];
   void Function() resetMap = () {};
-
-  // set userRoute(List<LocationModel> route) {
-  //   gameManager.userRoute = route;
-  // }
-
-  // List<LocationModel> get userRoute {
-  //   return _value.locationList;
-  // }
-  // List<LocationModel> get userRoute => gameManager.userRoute;
 
   LatLng? get currentLocation {
     if (_currentLocation == null) {
@@ -43,19 +35,6 @@ class MyMapController {
   Future<void> initialize() async {
     try {
       await _initLocation();
-      // await gameManager.loadProgress();
-
-      // final userGPS = await loadGPS();
-      // _value.currentLocation = LatLng(userGPS['lat']!, userGPS['lng']!);
-      // await UserHistoryManager().loadLocalHistory();
-
-      // if (gameManager.userRoute.isNotEmpty &&
-      //     gameManager.currentTarget != null) {
-      //   await fetchRoute(
-      //     _value.currentLocation,
-      //     gameManager.currentTarget!.coordinates,
-      //   );
-      // }
     } catch (e) {
       print("Eror in initializing map: ${e}");
     } finally {
@@ -292,6 +271,7 @@ class MyMapController {
     void Function() onClose, {
     bool isReplace = false,
   }) {
+    toggleLocation?.call(location);
     Function(Route) func = Navigator.of(context).push;
     if (isReplace) func = Navigator.of(context).pushReplacement;
     func(

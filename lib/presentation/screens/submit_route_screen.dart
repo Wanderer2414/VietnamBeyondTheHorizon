@@ -34,16 +34,10 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
   late Drawer _sidePanel;
   HomeAppbar? _homeBar;
   Content? _content;
-  late final FloatingActionButton _myLocation;
 
   @override
   void initState() {
     super.initState();
-    _myLocation = FloatingActionButton(
-      onPressed: widget.controller.moveToCurrentLocation,
-      backgroundColor: Colors.blue,
-      child: const Icon(Icons.my_location, size: 30, color: Colors.white),
-    );
     _sidePanel = Drawer(child: SideBox());
 
     // LoadingManager.run(context, (context) async {
@@ -63,7 +57,6 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
         controller: widget.controller,
         screenSize: screenSize,
         route: route,
-        onSubmit: (route) {},
         onLocationPress: (location) {
           widget.controller.moveToLocation(
             LatLng(location.latitude, location.longitude),
@@ -76,7 +69,7 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
             );
           }, () {});
         },
-        onStart: () {
+        onStart: (route) {
           Navigator.of(context).pushReplacement(
             TransitionLRPageRoute(
               nextScreen: MapScreen(
@@ -97,15 +90,6 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
     return LoadingWrapper(
       init: (context) async {
         if (widget.controller.currentLocation != null) {
-          // Cập nhật UserInput với dữ liệu từ các controllers
-          // widget.userInput.budget = UserInput.parseBudget(
-          //   widget.._budgetController.text,
-          // );
-          // userInput.durationDays = UserInput.parseDuration(
-          //   _durationController.text,
-          // );
-
-          // Gọi thuật toán để tạo route
           final quest = (await NetworkProxy.quest);
           if (quest == null)
             MainRoute.showError("No quest response!");
@@ -132,7 +116,6 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
         appBar: _homeBar,
         drawer: _sidePanel,
         body: _content,
-        floatingActionButton: _myLocation,
       ),
     );
   }

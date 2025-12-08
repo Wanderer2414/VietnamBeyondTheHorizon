@@ -19,7 +19,6 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void navigateNext() async {
-    await NetworkProxy.clean();
     Future<UserAccount?> func = NetworkProxy.isLogged();
     func.timeout(
       const Duration(seconds: 90),

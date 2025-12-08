@@ -4,7 +4,6 @@ class NetworkProxy {
   static _Cookies? _instance;
 
   static Future<_Cookies> _getInstance() async {
-    print("Get instance $_instance");
     if (_instance == null) await _initialize();
     return _instance!;
   }
