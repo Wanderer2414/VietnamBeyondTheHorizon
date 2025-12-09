@@ -48,8 +48,6 @@ class MyMapController {
     if (!await _checkPermission()) return;
 
     final locData = await _location.getLocation();
-    print(locData.latitude);
-    print(locData.longitude);
     if (locData.latitude != null && locData.longitude != null) {
       _currentLocation = LatLng(locData.latitude!, locData.longitude!);
       // saveGPS(locData.latitude!, locData.longitude!);
@@ -199,7 +197,6 @@ class MyMapController {
 
   Future<void> fetchFullRoute({required List<LatLng> route}) async {
     if (route.length < 2) return;
-    print("Start fetch route!");
     _routes.clear();
     final dio = Dio();
     LatLng end = _currentLocation!;
@@ -237,30 +234,8 @@ class MyMapController {
         throw Exception('Failed to fetch route: $e');
       }
     }
-    print("Done fetch ${route.length} locs");
     resetMap();
-
-    // throw Exception("Full route length: ${fullRoute.length} points");
   }
-
-  // Future<double> fetchDistance(LatLng? start, LatLng? end) async {
-  //    if (start == null || end == null) return 0;
-
-  //   final url = Uri.parse(
-  //     'https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=polyline&alternatives=false&annotations=distance',
-  //   );
-
-  //   final response = await http.get(url);
-  //   if (response.statusCode == 200) {
-  //     final data = json.decode(response.body);
-  //     final route = data['routes'][0];
-  //     final double distanceMeters = route['distance'];
-  //     return distanceMeters;
-  //   } else {
-  //     _showError('Failed to fetch distance.');
-  //   }
-  //   return 0;
-  // }
 
   String moveToCurrentLocation() {
     if (_currentLocation != null) {

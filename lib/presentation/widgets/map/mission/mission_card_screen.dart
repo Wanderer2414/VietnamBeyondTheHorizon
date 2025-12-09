@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -44,48 +43,13 @@ class _MissionCardScreenState extends State<MissionCardScreen> {
 
   void _handleCheckInUpload() async {
     setState(() => _isCheckingGPS = true);
-
-    LatLng target = LatLng(
-      widget.missionCard.mission.location!.latitude,
-      widget.missionCard.mission.location!.longitude,
-    );
-
-    bool isNear = LocationUtils.isCloseEnough(widget.userCurrentGPS, target);
-
-    // if (!isNear) {
-    //   setState(() => _isCheckingGPS = false);
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(
-    //       content: Text(
-    //         "You are too far away! Please come nearby to unlock the mission",
-    //       ),
-    //       backgroundColor: Colors.red,
-    //     ),
-    //   );
-    //   return;
-    // }
-
-    
-
     await Future.delayed(Duration(seconds: 1));
 
     if (imageFile != null) {
-
-
-
-      if(await GameProgressManager.checkInSuccess(imageFile!.path)){
-
+      if (await GameProgressManager.checkInSuccess(imageFile!.path)) {
         if (mounted) {
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   const SnackBar(
-          //     content: Text("Check-in successfully!"),
-          //     backgroundColor: Colors.green,
-          //     duration: Duration(seconds: 2),
-          //   ),
-          // );
           _triggerUnlockEffect();
         }
-
       }
     } else {}
 

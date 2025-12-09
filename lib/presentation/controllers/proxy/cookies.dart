@@ -13,12 +13,6 @@ class _Cookies extends Proxy {
   Quests? _gameData;
   UserAccountCore? _userAccount;
 
-  // @override
-  // Future<UserAccountCore?> getAccount() async {
-  //   if (_userAccount != null) return _userAccount;
-  //   return _subProxy!.getAccount();
-  // }
-
   @override
   Future<Quests?> getQuests() async {
     if (_gameData != null) return _gameData;
@@ -69,9 +63,9 @@ class _Cookies extends Proxy {
   }
 
   @override
-   Future<String?> updateAvatar(String src) async {
+  Future<String?> updateAvatar(String src) async {
     final avatarUrl = await _subProxy!.updateAvatar(src);
-    if(avatarUrl != null){
+    if (avatarUrl != null) {
       _userAccount!.avatarUrl = avatarUrl;
     }
     return avatarUrl;

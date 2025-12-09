@@ -65,13 +65,6 @@ class _CacheProxy extends Proxy {
     return false;
   }
 
-  // Future<UserAccountCore?> _getAccount() async {
-  //   final raw = (await _get()).getString("user");
-  //   if (raw == null) return null;
-  //   final data = jsonDecode(raw);
-  //   return UserAccountCore.fromJson(data);
-  // }
-
   @override
   Future<bool> clear() async {
     print("Clear cache!");
@@ -109,21 +102,6 @@ class _CacheProxy extends Proxy {
   }
 
   @override
-  Future<String?> postAIMission(int id, String file) async {
-    String? res = await _subProxy!.postAIMission(id, file);
-    if (res == null) return null;
-    (await _get()).setString(id.toString(), res);
-    return res;
-  }
-
-  @override
-  Future<String?> fetchMission(int id) async {
-    String? local = (await _get()).getString(id.toString());
-    if (local != null) return local;
-    return await _subProxy!.fetchMission(id);
-  }
-
-  @override
   Future<GameRoute?> getRoute() async {
     final response = (await _get()).getString("route");
     if (response != null) return GameRoute.fromJson(jsonDecode(response));
@@ -132,10 +110,7 @@ class _CacheProxy extends Proxy {
 
   @override
   Future<bool> setRoute(GameRoute route) async {
-    // bool res = await _subProxy!.setRoute(route);
-    // if (res)
     return (await _get()).setString("route", jsonEncode(route.toJson()));
-    // return false;
   }
 
   @override
@@ -144,6 +119,4 @@ class _CacheProxy extends Proxy {
     if (res) return (await _get()).remove("route");
     return false;
   }
-
-
 }

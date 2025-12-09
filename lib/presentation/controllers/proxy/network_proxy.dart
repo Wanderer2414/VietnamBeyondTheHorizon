@@ -13,7 +13,6 @@ class NetworkProxy {
     return (await instance.isLogged(null))?.userAccount;
   }
 
- 
   static Future<void> _initialize() async {
     if (_instance != null) return;
     _instance = _Cookies(logout);
@@ -68,16 +67,6 @@ class NetworkProxy {
     return (await instance.postMission(misssion, file));
   }
 
-  static Future<String?> postAIMission(int misssion, String file) async {
-    final instance = await _getInstance();
-    return await instance.postAIMission(misssion, file);
-  }
-
-  // static Future<String?> fetchMission(int mission) async {
-  //   final instance = await _getInstance();
-  //   return await instance.fetchMission(mission);
-  // }
-
   static Future<void> completeRoute(GameRoute route) async {
     final instance = await _getInstance();
     await instance.completeRoute(route);
@@ -88,13 +77,13 @@ class NetworkProxy {
     return instance.createVideo(url, ids);
   }
 
-  static  Future<String?> updateAvatar(String src) async {
+  static Future<String?> updateAvatar(String src) async {
     final instance = await _getInstance();
     return instance.updateAvatar(src);
   }
 
-  static Future<String?> postCheckInPhoto(String src,int locationID) async{
+  static Future<String?> postCheckInPhoto(String src, int locationID) async {
     final instance = await _getInstance();
-    return (await instance.postCheckInPhoto(src, locationID));  
+    return (await instance.postCheckInPhoto(src, locationID));
   }
 }

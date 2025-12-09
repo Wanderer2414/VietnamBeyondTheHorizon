@@ -21,9 +21,7 @@ class _MapShowState extends State<MapShow> {
   @override
   void initState() {
     super.initState();
-    print("Set reset map");
     widget.controller.resetMap = () {
-      print("Reset map");
       setState(() {});
     };
     NetworkProxy.quest.then(

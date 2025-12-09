@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
-import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
 class UserButton extends StatelessWidget {
   final UserAccount account;

@@ -54,16 +54,6 @@ interface class Proxy {
     return null;
   }
 
-  Future<String?> fetchMission(int id) async {
-    if (_subProxy != null) return await _subProxy.fetchMission(id);
-    return null;
-  }
-
-  Future<String?> postAIMission(int id, String file) async {
-    if (_subProxy != null) return await _subProxy.postAIMission(id, file);
-    return null;
-  }
-
   Future<bool> submit(int id) async {
     if (_subProxy != null) return await _subProxy.submit(id);
     return false;
@@ -88,8 +78,9 @@ interface class Proxy {
     return null;
   }
 
-  Future<String?> postCheckInPhoto(String src,int locationID) async{
-    if(_subProxy != null) return await _subProxy.postCheckInPhoto(src, locationID);
+  Future<String?> postCheckInPhoto(String src, int locationID) async {
+    if (_subProxy != null)
+      return await _subProxy.postCheckInPhoto(src, locationID);
     return null;
   }
 }

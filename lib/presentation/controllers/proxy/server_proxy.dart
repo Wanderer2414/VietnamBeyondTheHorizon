@@ -102,23 +102,6 @@ class _ServerProxy extends Proxy {
     return quest;
   }
 
-  @override
-  Future<String?> fetchMission(int id) async {
-    return null;
-    // if (id >= _missionPhotos.length || _missionPhotos[id] == null) return null;
-    // final dir = await getApplicationDocumentsDirectory();
-    // final source = "${dir.path}/$id";
-    // if (!(await File(source).exists())) {
-    //   final response = await http.get(Uri.parse(_missionPhotos[id]!));
-    //   if (response.statusCode != 200) {
-    //     throw Exception("Error fetch image id ${_missionPhotos[id]}");
-    //   }
-    //   final file = File(source);
-    //   file.writeAsBytes(response.bodyBytes);
-    // }
-    // return source;
-  }
-
   Future<UserAccountCore> _getAccount() async {
     final response = await _service.dio.get("/user/info");
 
@@ -219,17 +202,11 @@ class _ServerProxy extends Proxy {
         'missionID': id,
       });
 
-      print("Start posting image.....");
-      print("TOKEN WHEN POSTING IMAGE: ${_service.token}");
       final response = await _service.dio.post(
         "/mission/image",
         data: formData,
       );
-      print("Get response!");
-
-      print("response.status = ${response.statusCode}");
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print("Response data success: $response");
         final responseData = response.data;
         if (responseData is Map && responseData['status'] == 'success') {
           print(responseData["data"]);
@@ -238,41 +215,9 @@ class _ServerProxy extends Proxy {
       }
     } catch (e) {
       if (e is DioException) {
-        print("Lỗi server trả về: ${e.response?.data}");
+        print("Error: ${e.response?.data}");
         print("Response status code: ${e.response?.statusCode}");
         print("Response: ${e.response}");
-      }
-    }
-    return null;
-  }
-
-  @override
-  Future<String?> postAIMission(int id, String src) async {
-    try {
-      final fileName = src.split('/').last;
-
-      FormData formData = FormData.fromMap({
-        "files": await MultipartFile.fromFile(
-          src,
-          filename: fileName,
-          contentType: DioMediaType("image", "jpeg"),
-        ),
-        'missionID': id,
-      });
-      final response = await _service.dio.post(
-        "/mission/image",
-        data: formData,
-      );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final responseData = response.data;
-        print(response.toString());
-        if (responseData is Map && responseData['status'] == 'success') {
-          return responseData["url"];
-        }
-      }
-    } catch (e) {
-      if (e is DioException) {
-        print("Lỗi server trả về: ${e.response?.data}");
       }
     }
     return null;
@@ -299,7 +244,6 @@ class _ServerProxy extends Proxy {
         ),
       );
 
-
       // Check status code
       print("RESPONSE: $response");
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -322,8 +266,8 @@ class _ServerProxy extends Proxy {
   }
 
   @override
-  Future<String?> postCheckInPhoto(String src,int locationID) async{
-      try {
+  Future<String?> postCheckInPhoto(String src, int locationID) async {
+    try {
       final fileName = src.split('/').last;
       print("Posting Check-in photo...");
       print("Location Id: $locationID");

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/video_screen.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/waiting_generating_video.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/result/result_mission.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/result/result_point.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/result/result_summary.dart';
@@ -133,19 +131,10 @@ class _ResultAutoScreenState extends State<ResultAutoScreen> {
                   FloatingActionButton.extended(
                     heroTag: "btn_video",
                     onPressed: () async {
-                      //Review the journey(VIDEO)
-                      
-                      // final videoUrls = await generateRecapVideo();
-                      // if (videoUrls != null) {
-                      //   Navigator.of(context).push(
-                      //     MaterialPageRoute(
-                      //       builder: (context) => VideoApp(path: videoUrls),
-                      //     ),
-                      //   );
-                      // }
-
-                      MainRoute.goGeneratingVideo(widget.account,  () => generateRecapVideo());
-
+                      MainRoute.goGeneratingVideo(
+                        widget.account,
+                        () => generateRecapVideo(),
+                      );
                     },
                     backgroundColor: const Color.fromARGB(255, 124, 60, 0),
                     icon: const Icon(
