@@ -10,22 +10,22 @@ class BottomBar extends Container {
     required int total,
     required BuildContext context,
     required Size size,
-    required Route skipRoute,
-    required Route nextRoute,
+    required void Function() onSkip,
+    required void Function() onNext,
     EdgeInsets padding = EdgeInsets.zero,
   }) : super(
          padding: padding,
          child: Row(
            mainAxisAlignment: MainAxisAlignment.spaceBetween,
            children: [
-             SkipButton(skipRoute: skipRoute),
+             SkipButton(onPressed: onSkip),
              CustomPaint(
                painter: ScreenIndex(index: index, total: total),
                size: Size(size.width * 0.15, size.height),
              ),
              NextButton(
-               nextRoute: nextRoute,
                size: Size(size.width * 0.22, size.height),
+               onPressed: onNext,
              ),
            ],
          ),

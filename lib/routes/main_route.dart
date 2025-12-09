@@ -35,6 +35,12 @@ class MainRoute {
     );
   }
 
+  static void goNavigatorScreen() {
+    NavigatorKey.currentState?.pushReplacement(
+      TransitionRLPageRoute(nextScreen: LogNavigatorScreen()),
+    );
+  }
+
   static void logout() {
     NavigatorKey.currentState?.pushAndRemoveUntil(
       TransitionRLPageRoute(nextScreen: LogNavigatorScreen()),
