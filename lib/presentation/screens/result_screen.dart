@@ -3,6 +3,7 @@ import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/proxy/proxy.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/video_screen.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/waiting_generating_video.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/result/result_mission.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/result/result_point.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/result/result_summary.dart';
@@ -69,8 +70,9 @@ class _ResultAutoScreenState extends State<ResultAutoScreen> {
   }
 
   Future<String?> generateRecapVideo() async {
-    final uploadData = await widget.account.RepresentPhoto;
-    return await NetworkProxy.createVideo(uploadData.urls, uploadData.ids);
+    // final uploadData = await widget.account.RepresentPhoto;
+    final locationIds = GameProgressManager.locationIDs();
+    return await NetworkProxy.createVideo([], locationIds);
   }
 
   void _onBackHome() async {
@@ -132,15 +134,18 @@ class _ResultAutoScreenState extends State<ResultAutoScreen> {
                     heroTag: "btn_video",
                     onPressed: () async {
                       //Review the journey(VIDEO)
+                      
+                      // final videoUrls = await generateRecapVideo();
+                      // if (videoUrls != null) {
+                      //   Navigator.of(context).push(
+                      //     MaterialPageRoute(
+                      //       builder: (context) => VideoApp(path: videoUrls),
+                      //     ),
+                      //   );
+                      // }
 
-                      final videoUrls = await generateRecapVideo();
-                      if (videoUrls != null) {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => VideoApp(path: videoUrls),
-                          ),
-                        );
-                      }
+                      MainRoute.goGeneratingVideo(widget.account,  () => generateRecapVideo());
+
                     },
                     backgroundColor: const Color.fromARGB(255, 124, 60, 0),
                     icon: const Icon(

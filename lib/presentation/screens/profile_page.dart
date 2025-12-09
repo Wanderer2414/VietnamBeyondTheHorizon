@@ -51,7 +51,7 @@ class _ContentState extends State<_Content> {
       children: [
         // Header with gradient + avatar stacked on top
         SizedBox(height: 20),
-        AvatarPanel(),
+        AvatarPanel(widget.user.avatarUrl),
         SizedBox(height: 20),
 
         // Name & Location

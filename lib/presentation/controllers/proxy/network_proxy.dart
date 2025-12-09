@@ -13,6 +13,7 @@ class NetworkProxy {
     return (await instance.isLogged(null))?.userAccount;
   }
 
+ 
   static Future<void> _initialize() async {
     if (_instance != null) return;
     _instance = _Cookies(logout);
@@ -85,5 +86,15 @@ class NetworkProxy {
   static Future<String?> createVideo(List<String> url, List<int> ids) async {
     final instance = await _getInstance();
     return instance.createVideo(url, ids);
+  }
+
+  static  Future<String?> updateAvatar(String src) async {
+    final instance = await _getInstance();
+    return instance.updateAvatar(src);
+  }
+
+  static Future<String?> postCheckInPhoto(String src,int locationID) async{
+    final instance = await _getInstance();
+    return (await instance.postCheckInPhoto(src, locationID));  
   }
 }

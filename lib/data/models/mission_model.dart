@@ -11,6 +11,7 @@ class MissionModel {
   bool isCompleted;
   final DateTime? finishDay;
   String? illustrationURL;
+  String? imagePath;
   String? cost;
 
   MissionModel({
@@ -23,6 +24,7 @@ class MissionModel {
     this.isCompleted = false,
     this.finishDay,
     this.illustrationURL,
+    this.imagePath,
     this.cost = "0",
   });
 
@@ -37,6 +39,7 @@ class MissionModel {
       'isCompleted': isCompleted,
       'finishDay': finishDay?.toIso8601String(),
       'illustrationURL': illustrationURL,
+      'imagePath': imagePath,
       'cost': cost,
     };
   }
@@ -57,6 +60,7 @@ class MissionModel {
           ?.map((e) => e['url'] as String)
           .toList()
           .firstOrNull,
+      imagePath: (json['imagePath'] as String?),
       cost: json['cost']?.toString() ?? "0",
     );
   }

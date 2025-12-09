@@ -8,11 +8,30 @@ import 'package:vietnambeyondthehorizon/presentation/widgets/map/marker_layer.da
 import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
 import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 
+class LocationUtils {
+  static const double allowed_radus = 100.0;
+
+  static bool isCloseEnough(LatLng userLocation, LatLng targetLocation) {
+    final Distance distance = Distance();
+    final double meter = distance.as(
+      LengthUnit.Meter,
+      userLocation,
+      targetLocation,
+    );
+    return meter <= allowed_radus;
+  }
+}
+
 class GameRoute {
   late final List<MissionModel> _missions;
   late final List<int> _missionId;
   int _currentIndex = 0;
   int _collectedStars = 0;
+  bool _isCheckedIn = false;
+  List<String> _checkInPhotos = [];
+
+  bool get isCheckedIn => _isCheckedIn;
+  List<String> get checkInPhotos => _checkInPhotos;
 
   int get numberOfMission => _missionId.length;
   int get collectedStars => _collectedStars;
@@ -28,6 +47,8 @@ class GameRoute {
       'progress': _missionId,
       'current': _currentIndex,
       'star': _collectedStars,
+      'isCheckedIn': _isCheckedIn,
+      'checkInPhotos': _checkInPhotos,
     };
   }
 
@@ -68,6 +89,7 @@ class GameRoute {
 
   static Future<GameRoute> fromJson(Map<String, dynamic> json) async {
     final missions = (await NetworkProxy.quest)!.missions;
+
     List<int> list = (json['progress'] as List<dynamic>)
         .map((e) => e as int)
         .toList();
@@ -76,17 +98,35 @@ class GameRoute {
     route._missionId = route._missions.map((e) => e.id).toList();
     route._currentIndex = json['current'] as int;
     route._collectedStars = json['star'] as int;
+    route._isCheckedIn = (json['isCheckedIn'] as bool?) ?? false;
+    route._checkInPhotos =
+        (json['checkInPhotos'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        [];
     return route;
+  }
+
+  bool isCurrentStepCheckedIn(int missionId) {
+    int index = _missionId.indexOf(missionId);
+    return (_isCheckedIn && _currentIndex == index) || (index < _currentIndex);
+  }
+
+  void setCheckedIn() {
+    _isCheckedIn = true;
   }
 
   bool _next() {
     if (_currentIndex < _missions.length - 1) {
       _currentIndex++;
+      _isCheckedIn = false;
       return true;
     }
     return false;
   }
-
+  List<int> locationIds() {
+    return missions.map((e) => e.location!.id).toList();
+  }
   MissionModel? get _currentTarget {
     if (_missions.isNotEmpty && _currentIndex < _missions.length)
       return _missions[_currentIndex];
@@ -98,13 +138,19 @@ class GameRoute {
     return _missionId.indexWhere((element) => id == element);
   }
 
-  bool _isLocked(int id) {
+  bool _isLocationLocked(int id) {
     int index = _missionId.indexOf(id);
     return (index > _currentIndex);
   }
 
+  void addPhoto(String path) {
+    _checkInPhotos.add(path);
+  }
+
   bool get _isFinished => _currentIndex >= _missionId.length;
   int get currentIndex => _currentIndex;
+
+  int get currentLocationIndex => _missions[_currentIndex].location!.id;
 }
 
 class GameProgressManager {
@@ -118,9 +164,34 @@ class GameProgressManager {
   int currentIndex = 0;
   GameRoute? _userRoute;
 
+  static bool isCurrentStepCheckedIn(int missionId) =>
+      _getInstance()._userRoute?.isCurrentStepCheckedIn(missionId) ?? false;
+  
+  static List<int> locationIDs() => _getInstance()._userRoute?.locationIds() ?? [];
+
+  static Future<bool> checkInSuccess(String path) async {
+    final instance = _getInstance();
+
+    if (instance._userRoute != null) {
+      final url = await  NetworkProxy.postCheckInPhoto(path, instance._userRoute!.currentLocationIndex);
+      
+      if(url != null) {
+        instance._userRoute!.setCheckedIn();
+        instance._userRoute!.addPhoto(url);
+        NetworkProxy.setRoute(instance._userRoute!);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static List<String> get checkInPhotos => _getInstance()._userRoute?.checkInPhotos ?? [];
+
   bool get isFinished => _userRoute?._isFinished ?? true;
-  static bool isLocked(int id) =>
-      _getInstance()._userRoute?._isLocked(id) ?? true;
+  static bool isLocationLocked(int id) =>
+      _getInstance()._userRoute?._isLocationLocked(id) ?? true;
+
+  // static bool isMissionLocked(int id) => _getInstance()._userRoute?._isMissionLocked( id) ?? true;
   static int get collectedStars => _getInstance()._userRoute!._collectedStars;
   static MissionModel get currentTarget =>
       _getInstance()._userRoute!._currentTarget!;
@@ -134,6 +205,7 @@ class GameProgressManager {
 
   //   print("Saved Photo URL for Mission $missionId: $url");
   // }> get completedMissionID => _completedMissionIds;
+
   static Future<void> addStars(int amount) async {
     final instance = _getInstance();
     instance._userRoute!._collectedStars += amount;
@@ -249,7 +321,7 @@ class GameProgressManager {
         return MarkerAppearance(
           color: ColorPalette.successColor,
           size: 40,
-          sequenceNumber: indexInRoute,
+          sequenceNumber: indexInRoute + 1,
         );
       }
       if (indexInRoute == instance._userRoute!._currentIndex) {
@@ -257,7 +329,7 @@ class GameProgressManager {
           color: const Color.fromARGB(255, 230, 131, 39),
           size: 50,
           shouldPulse: true,
-          sequenceNumber: indexInRoute,
+          sequenceNumber: indexInRoute + 1,
           icon: Icons.my_location_rounded,
         );
       }
