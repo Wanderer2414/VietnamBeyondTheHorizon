@@ -190,7 +190,6 @@ class RoutePlannerService {
     while (availableLocations.isNotEmpty && route.length < 6) {
       LocationModel? bestLocation;
       double bestScore = -1;
-      bool foundAffordable = false;
 
       for (var location in availableLocations) {
         // Tính thời gian cần thiết
@@ -218,8 +217,6 @@ class RoutePlannerService {
 
         // Ưu tiên location vừa đủ thời gian VÀ budget
         bool meetsAllCriteria = totalTime <= remainingTime && canAfford;
-
-        if (meetsAllCriteria) foundAffordable = true;
 
         // Kiểm tra giờ mở cửa (lỏng lẻo hơn)
         DateTime arrivalTime = currentTime.add(
@@ -260,13 +257,6 @@ class RoutePlannerService {
       if (bestLocation == null) {
         break;
       }
-
-      // final completedMissions = UserHistoryManager().completedMissionIds;
-      // print(completedMissions);
-      // List<int> pool = bestLocation.missionID;
-      // List<int> availableMissions = pool.where((id) {
-      //   return !UserHistoryManager().hasCompletedBefore(id);
-      // }).toList();
 
       // Thêm vào route
       int selectedMissionId = bestLocation
@@ -314,12 +304,6 @@ class RoutePlannerService {
         break;
       }
     }
-
-    //route.add(RouteResult(locationId: 12.toString(), missionId: 30.toString()));
-    // for (var routeRes in route) {
-    //   print("Route result (mission ID): ${routeRes.missionId}");
-    // }
-    //route = [route.first];
     return route;
   }
 
@@ -330,12 +314,10 @@ class RoutePlannerService {
     required int durationDays,
     required Quests quest,
   }) async {
-    print("---Start generating routes from user input.....-----");
     // Kiểm tra dataset
     if (quest.locations.isEmpty) {
       throw Exception("No locations on server!");
     }
-    print("---Break 1-----");
 
     // Chuyển đổi duration từ ngày sang phút (giả sử 8 giờ hoạt động/ngày)
     double maxDurationMinutes = durationDays * 8 * 60.0;
@@ -348,7 +330,6 @@ class RoutePlannerService {
       allLocations: quest.locations,
       allMissions: quest.missions,
     );
-    print("---Break 2-----");
 
     // Nếu không tìm thấy route nào, trả về top 5-6 locations gần nhất
     if (routeResults.isEmpty) {
@@ -368,8 +349,6 @@ class RoutePlannerService {
 
       // Lấy tối đa 6 locations
       List<LocationModel> fallbackLocations = sortedByDistance.take(6).toList();
-      print("---Break 3: route res is empty-----");
-
       return GameRoute(
         missions: fallbackLocations
             .map(
@@ -386,38 +365,6 @@ class RoutePlannerService {
         .map((e) => quest.missions[e.missionId]!)
         .toList();
 
-    print("---Break 4: Final result-----");
-    // selectedMission.length = 2;
     return GameRoute(missions: selectedMission);
-  }
-
-  /// Helper: In thông tin chi tiết route
-  static void printRouteDetails({
-    required List<RouteResult> route,
-    required List<LocationModel> allLocations,
-    required List<MissionModel> allMissions,
-    required LatLng startPoint,
-  }) {
-    LatLng currentPos = startPoint;
-    double totalDistance = 0;
-    double totalTime = 0;
-
-    for (int i = 0; i < route.length; i++) {
-      var result = route[i];
-      var location = allLocations.firstWhere((l) => l.id == result.locationId);
-      var mission = allMissions.firstWhere((m) => m.id == result.missionId);
-
-      double distance = calculateDistance(
-        currentPos,
-        LatLng(location.latitude, location.longitude),
-      );
-      double travelTime = calculateTravelTime(distance);
-      double visitTime = calculateVisitDuration(mission.difficulty);
-
-      totalDistance += distance;
-      totalTime += (travelTime + visitTime);
-
-      currentPos = LatLng(location.latitude, location.longitude);
-    }
   }
 }

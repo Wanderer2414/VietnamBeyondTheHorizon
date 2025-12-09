@@ -4,7 +4,6 @@ class NetworkProxy {
   static _Cookies? _instance;
 
   static Future<_Cookies> _getInstance() async {
-    print("Get instance $_instance");
     if (_instance == null) await _initialize();
     return _instance!;
   }
@@ -68,16 +67,6 @@ class NetworkProxy {
     return (await instance.postMission(misssion, file));
   }
 
-  static Future<String?> postAIMission(int misssion, String file) async {
-    final instance = await _getInstance();
-    return await instance.postAIMission(misssion, file);
-  }
-
-  // static Future<String?> fetchMission(int mission) async {
-  //   final instance = await _getInstance();
-  //   return await instance.fetchMission(mission);
-  // }
-
   static Future<void> completeRoute(GameRoute route) async {
     final instance = await _getInstance();
     await instance.completeRoute(route);
@@ -86,5 +75,15 @@ class NetworkProxy {
   static Future<String?> createVideo(List<String> url, List<int> ids) async {
     final instance = await _getInstance();
     return instance.createVideo(url, ids);
+  }
+
+  static Future<String?> updateAvatar(String src) async {
+    final instance = await _getInstance();
+    return instance.updateAvatar(src);
+  }
+
+  static Future<String?> postCheckInPhoto(String src, int locationID) async {
+    final instance = await _getInstance();
+    return (await instance.postCheckInPhoto(src, locationID));
   }
 }

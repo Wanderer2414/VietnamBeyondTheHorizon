@@ -79,12 +79,9 @@ class PlayConfirmBox extends StatelessWidget {
                       text: "Alright",
                       color: const Color(0xFF7CFF70),
                       onPressed: () {
-                        Navigator.of(context).pop();
+                        MainRoute.pop();
                         LoadingManager.run(context, (context) async {
                           final route = await NetworkProxy.route;
-                          print(
-                            "Route ${route?.numberOfMission} ${route?.currentIndex}",
-                          );
                           final controller = MyMapController();
                           await controller.initialize();
                           if (route == null) {
@@ -92,7 +89,6 @@ class PlayConfirmBox extends StatelessWidget {
                           } else {
                             MainRoute.goGameScreen(controller, route, account);
                           }
-                          ;
                         });
                       },
                     ),

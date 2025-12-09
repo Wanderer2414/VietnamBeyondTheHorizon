@@ -11,7 +11,14 @@ import 'package:vietnambeyondthehorizon/presentation/widgets/home/user_button.da
 class HomeDownBar extends StatelessWidget {
   final UserAccount account;
   final Size size;
-  const HomeDownBar({super.key, required this.size, required this.account});
+  const HomeDownBar({
+    super.key,
+    required this.size,
+    required this.account,
+    required this.onGoHome,
+    required this.onGoProfile,
+  });
+  final void Function() onGoHome, onGoProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +40,11 @@ class HomeDownBar extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  HomeButton(radius: size.height / 2, account: account),
+                  HomeButton(
+                    radius: size.height / 2,
+                    account: account,
+                    onPressed: () => onGoHome(),
+                  ),
                   SizedBox(width: spacing),
                   RankingButton(radius: size.height / 2 / 1.2),
                   SizedBox(width: spacing),
@@ -41,7 +52,11 @@ class HomeDownBar extends StatelessWidget {
                   SizedBox(width: spacing),
                   HeartButton(radius: size.height / 2 / 1.2),
                   SizedBox(width: spacing),
-                  UserButton(radius: size.height / 2 / 1.2, account: account),
+                  UserButton(
+                    radius: size.height / 2 / 1.2,
+                    account: account,
+                    onPressed: () => onGoProfile(),
+                  ),
                   SizedBox(width: size.height / 24),
                 ],
               ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,17 +22,10 @@ class MyMapController {
   MapController? mapController;
   final Location _location = Location();
   LatLng? _currentLocation;
+  void Function(LocationModel?)? toggleLocation;
   List<LatLng> _routes = [];
   void Function() resetMap = () {};
-
-  // set userRoute(List<LocationModel> route) {
-  //   gameManager.userRoute = route;
-  // }
-
-  // List<LocationModel> get userRoute {
-  //   return _value.locationList;
-  // }
-  // List<LocationModel> get userRoute => gameManager.userRoute;
+  Timer? _cameraMoveTimer, _fetchRouteTimer;
 
   LatLng? get currentLocation {
     if (_currentLocation == null) {
@@ -43,19 +37,6 @@ class MyMapController {
   Future<void> initialize() async {
     try {
       await _initLocation();
-      // await gameManager.loadProgress();
-
-      // final userGPS = await loadGPS();
-      // _value.currentLocation = LatLng(userGPS['lat']!, userGPS['lng']!);
-      // await UserHistoryManager().loadLocalHistory();
-
-      // if (gameManager.userRoute.isNotEmpty &&
-      //     gameManager.currentTarget != null) {
-      //   await fetchRoute(
-      //     _value.currentLocation,
-      //     gameManager.currentTarget!.coordinates,
-      //   );
-      // }
     } catch (e) {
       print("Eror in initializing map: ${e}");
     } finally {
@@ -67,8 +48,6 @@ class MyMapController {
     if (!await _checkPermission()) return;
 
     final locData = await _location.getLocation();
-    print(locData.latitude);
-    print(locData.longitude);
     if (locData.latitude != null && locData.longitude != null) {
       _currentLocation = LatLng(locData.latitude!, locData.longitude!);
       // saveGPS(locData.latitude!, locData.longitude!);
@@ -183,6 +162,8 @@ class MyMapController {
         'https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=polyline&alternatives=false&annotations=distance';
 
     try {
+      _routes.clear();
+      resetMap.call();
       final response = await dio.get(url).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -192,8 +173,20 @@ class MyMapController {
           _decodePolyline,
           geometry,
         );
-        _routes = decodedRoute;
-        resetMap();
+        _fetchRouteTimer?.cancel();
+        double percent = 0;
+        _fetchRouteTimer = Timer.periodic(const Duration(milliseconds: 10), (
+          t,
+        ) {
+          percent += 0.01;
+          if (percent > 1) {
+            percent = 1;
+            _fetchRouteTimer?.cancel();
+          }
+          int length = (decodedRoute.length * percent).floor();
+          _routes = decodedRoute.sublist(0, length);
+          resetMap.call();
+        });
       } else {
         throw Exception('Failed to fetch route.');
       }
@@ -204,7 +197,6 @@ class MyMapController {
 
   Future<void> fetchFullRoute({required List<LatLng> route}) async {
     if (route.length < 2) return;
-    print("Start fetch route!");
     _routes.clear();
     final dio = Dio();
     LatLng end = _currentLocation!;
@@ -219,11 +211,9 @@ class MyMapController {
           '?overview=full&geometries=polyline';
 
       try {
-        print("Wait fetch $loc...");
         final response = await dio
             .get(url)
             .timeout(const Duration(seconds: 10));
-        print("Fetch $loc");
 
         if (response.statusCode == 200) {
           final data = response.data;
@@ -241,48 +231,49 @@ class MyMapController {
           throw Exception('Failed to fetch route between $start and $end');
         }
       } catch (e) {
-        // _value.routes?.add(start);
-        // _value.routes?.add(end);
-        print("$e");
         throw Exception('Failed to fetch route: $e');
       }
     }
-    print("Done fetch ${route.length} locs");
     resetMap();
-
-    // throw Exception("Full route length: ${fullRoute.length} points");
   }
-
-  // Future<double> fetchDistance(LatLng? start, LatLng? end) async {
-  //    if (start == null || end == null) return 0;
-
-  //   final url = Uri.parse(
-  //     'https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=polyline&alternatives=false&annotations=distance',
-  //   );
-
-  //   final response = await http.get(url);
-  //   if (response.statusCode == 200) {
-  //     final data = json.decode(response.body);
-  //     final route = data['routes'][0];
-  //     final double distanceMeters = route['distance'];
-  //     return distanceMeters;
-  //   } else {
-  //     _showError('Failed to fetch distance.');
-  //   }
-  //   return 0;
-  // }
 
   String moveToCurrentLocation() {
     if (_currentLocation != null) {
-      mapController?.move(_currentLocation!, 15);
+      moveToLocation(_currentLocation!);
       return "";
     } else {
       return "Current location not available";
     }
   }
 
-  void moveToLocation(LatLng destination, double zoom) {
-    mapController?.move(destination, zoom);
+  void moveToLocation(LatLng destination) {
+    if (mapController == null) return;
+    LatLng current = mapController!.camera.center;
+    _cameraMoveTimer?.cancel();
+    double percent = -1;
+    double z = mapController!.camera.zoom;
+    _cameraMoveTimer = Timer.periodic(const Duration(milliseconds: 10), (t) {
+      percent += 0.05;
+      if (percent > 1.5) {
+        percent = 1.5;
+        z = 15;
+        _cameraMoveTimer?.cancel();
+      }
+      double dx =
+          current.latitude +
+          (destination.latitude - current.latitude) * percent;
+      double dy =
+          current.longitude +
+          (destination.longitude - current.longitude) * percent;
+      if (percent > 1) z = z + (15 - z) * ((percent - 1) / 0.5);
+      if (percent < 0) z -= 0.02;
+      if (percent > 0 && percent < 1)
+        mapController?.move(LatLng(dx, dy), z);
+      else if (percent > 1)
+        mapController?.move(destination, z);
+      else if (percent < 0)
+        mapController?.move(current, z);
+    });
   }
 
   void toggleLocationInfo(
@@ -292,6 +283,7 @@ class MyMapController {
     void Function() onClose, {
     bool isReplace = false,
   }) {
+    toggleLocation?.call(location);
     Function(Route) func = Navigator.of(context).push;
     if (isReplace) func = Navigator.of(context).pushReplacement;
     func(
@@ -338,7 +330,7 @@ class MyMapController {
                   _currentLocation,
                   mission.location!.coordinates,
                 );
-                moveToLocation(mission.location!.coordinates, 15);
+                moveToLocation(mission.location!.coordinates);
                 MainRoute.pop();
               } else {}
             });

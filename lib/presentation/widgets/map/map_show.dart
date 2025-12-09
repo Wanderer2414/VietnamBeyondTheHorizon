@@ -52,7 +52,6 @@ class _MapShowState extends State<MapShow> {
         children: widget.controller.mapLayers(context, [
           MissionLayer(context, widget.controller, widget.account),
           SafeArea(
-            // Tránh tai thỏ
             child: Align(
               alignment: Alignment.topCenter,
               child: Padding(

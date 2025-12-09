@@ -2,44 +2,39 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-class ImageUploadWidget extends StatefulWidget {
+class LockedImageUploadWidget extends StatefulWidget {
   final Function(XFile file) onPicked;
   final XFile? selectedImage;
-  final String? imagePath;
   final bool isChecking;
-  const ImageUploadWidget({
+  const LockedImageUploadWidget({
     super.key,
     required this.onPicked,
-    this.imagePath,
     this.selectedImage,
     this.isChecking = false,
   });
 
   @override
-  State<ImageUploadWidget> createState() => _ImageUploadWidgetState();
+  State<LockedImageUploadWidget> createState() => _LockedImageUploadWidgetState();
 }
 
-class _ImageUploadWidgetState extends State<ImageUploadWidget> {
+class _LockedImageUploadWidgetState extends State<LockedImageUploadWidget> {
   final picker = ImagePicker();
 
   void _pickImage() async {
     if (widget.isChecking) return;
     final pickedFile = await picker.pickImage(
-      source: ImageSource.gallery,
+      source: ImageSource.camera,
       imageQuality: 80,
     );
     if (pickedFile != null) widget.onPicked(pickedFile);
-
-    //   setState(() {
-    //   _selectedImage = File(pickedFile.path);
-    //   widget.controller.updateMissionImage(widget.mission.id, pickedFile.path);
-    // });
   }
 
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     final double boxSize = screenSize.width * 0.8;
+      String lockedImagePath = "assets/backgrounds/checkin1.png";
+
 
     return Center(
       child: GestureDetector(
@@ -62,7 +57,7 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                _buildImageContent(),
+                _buildImageContent(lockedImagePath),
 
                 if (widget.isChecking)
                   Container(
@@ -81,7 +76,7 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
                         ),
                         SizedBox(height: 12),
                         Text(
-                          "Analyzing...",
+                          "Checking...",
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -100,28 +95,48 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
     );
   }
 
-  Widget _buildImageContent() {
+  Widget _buildImageContent(String lockedPath) {
     if (widget.selectedImage != null) {
       return Image.file(File(widget.selectedImage!.path), fit: BoxFit.cover);
-    }
-
-    if (widget.imagePath != null) {
-      return Image(image: NetworkImage(widget.imagePath!), fit: BoxFit.cover);
     } else {
       return Container(
         color: Colors.grey[200],
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.add_a_photo_rounded, size: 50, color: Colors.grey[400]),
-            SizedBox(height: 10),
-            Text(
-              "Tap to upload",
-              style: TextStyle(
-                color: Colors.grey[500],
-                fontWeight: FontWeight.w600,
+        child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            bottom: 0, 
+            left: 0,
+            right: 0,
+            child: Opacity(
+              opacity: 0.5,
+              child: Image.asset(
+                'assets/backgrounds/checkin0.png',
+                height: 200, 
+                fit: BoxFit.contain, 
               ),
             ),
+          ),
+            Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.add_a_photo_rounded, size: 40, color: Colors.grey[600]),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Text(
+                  "Upload check-in photo",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20), 
+            ],
+          ),
           ],
         ),
       );

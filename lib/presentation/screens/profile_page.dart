@@ -1,11 +1,8 @@
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/common/side_box.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_down_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile/avatar_panel.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile/decoration.dart'
     as profile;
 import 'package:flutter/material.dart';
-import 'package:vietnambeyondthehorizon/presentation/widgets/home/home_app_bar.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile/start_panel.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile/tab_content_panel.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/profile/tab_panel.dart';
@@ -19,38 +16,20 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
-  final SideBox _box = SideBox();
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-
-    return Scaffold(
-      key: _key,
-      appBar: HomeAppbar(
-        superKey: _key,
-        size: Size(size.width, size.height * 0.06),
-      ),
-      backgroundColor: Colors.white,
-      drawer: Drawer(child: _box),
-      body: SizedBox(
-        width: size.width,
-        height: size.height,
-        child: Stack(
-          children: [
-            CustomPaint(
-              painter: profile.Decoration(),
-              size: Size(size.width, size.height),
-            ),
-            _Content(user: widget.user),
-          ],
-        ),
-      ),
-
-      floatingActionButton: HomeDownBar(
-        size: Size(size.width * 0.9, size.height * 0.13),
-        account: widget.user,
+    return SizedBox(
+      width: size.width,
+      height: size.height,
+      child: Stack(
+        children: [
+          CustomPaint(
+            painter: profile.Decoration(),
+            size: Size(size.width, size.height),
+          ),
+          _Content(user: widget.user),
+        ],
       ),
     );
   }
@@ -72,7 +51,7 @@ class _ContentState extends State<_Content> {
       children: [
         // Header with gradient + avatar stacked on top
         SizedBox(height: 20),
-        AvatarPanel(),
+        AvatarPanel(widget.user.avatarUrl),
         SizedBox(height: 20),
 
         // Name & Location

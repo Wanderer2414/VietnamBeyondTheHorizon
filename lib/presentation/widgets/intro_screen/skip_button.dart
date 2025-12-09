@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 
 class SkipButton extends StatelessWidget {
-  final Route skipRoute;
-  const SkipButton({super.key, required this.skipRoute});
+  final void Function() onPressed;
+  const SkipButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: () {
-        Navigator.of(context).pushReplacement(skipRoute);
-      },
+      onPressed: this.onPressed,
       child: const Text(
         'SKIP',
         style: TextStyle(

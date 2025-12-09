@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -68,19 +70,13 @@ class _LoadingWrapperState extends State<LoadingWrapper> with RouteAware {
 
   Future<void> _run(Future<void> Function(BuildContext context) func) async {
     if (!mounted) return;
-    setState(() {
-      _loadingCount++;
-      print("loading count: $_loadingCount");
-    });
+    setState(() => _loadingCount++);
     await func(context);
     if (!mounted) {
       _loadingCount--;
       return;
     }
-    setState(() {
-      _loadingCount--;
-      print("loading count: $_loadingCount");
-    });
+    setState(() => _loadingCount--);
   }
 
   @override
@@ -93,7 +89,6 @@ class _LoadingWrapperState extends State<LoadingWrapper> with RouteAware {
   void didPopNext() {
     super.didPopNext();
     LoadingManager._run = _run;
-    print("Change run!");
   }
 
   @override
@@ -102,7 +97,6 @@ class _LoadingWrapperState extends State<LoadingWrapper> with RouteAware {
     if (widget.init != null) {
       _loadingCount++;
       widget.init!(context).then((value) {
-        print("Loading count: 0");
         setState(() {
           _loadingCount--;
         });
@@ -113,7 +107,6 @@ class _LoadingWrapperState extends State<LoadingWrapper> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    print("LOADING COUNTTT: $_loadingCount");
     if (_loadingCount > 0)
       return Stack(children: [widget.child, const LoadingScreen()]);
     return widget.child;
@@ -128,9 +121,43 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
+  Timer? _timer;
+  int _seconds = 0;
+  String _quote = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _quote = getQuote();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _seconds++;
+        });
+      }
+    });
+  }
+
+  String get _timerText {
+    final int minutes = _seconds ~/ 60;
+    final int seconds = _seconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           Container(
@@ -150,10 +177,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
               "Vietnam\n Beyond The Horizon",
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: const Color.fromARGB(255, 0, 0, 0),
-                fontSize: 20,
+                color: const Color.fromARGB(255, 121, 68, 0),
+                fontSize: 24,
                 fontFamily: 'Gantari',
-                fontWeight: FontWeight.w100,
+                fontWeight: FontWeight.normal,
               ),
             ),
           ),
@@ -168,11 +195,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   padding: EdgeInsets.all(15),
                   width: 250,
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(109, 143, 44, 14),
+                    color: const Color.fromARGB(180, 143, 44, 14),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    getQuote(),
+                    _quote,
                     style: TextStyle(
                       color: Colors.yellow[100],
                       fontSize: 20,
@@ -182,18 +209,45 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   ),
                 ),
                 SizedBox(width: 15),
-                SpinKitFadingCircle(
-                  size: 80,
-                  itemBuilder: (_, int index) {
-                    return DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: index.isEven
-                            ? const Color.fromARGB(126, 255, 117, 4)
-                            : const Color.fromARGB(157, 255, 211, 13),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SpinKitFadingCircle(
+                      size: 70,
+                      itemBuilder: (_, int index) {
+                        return DecoratedBox(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: index.isEven
+                                ? const Color.fromARGB(126, 255, 117, 4)
+                                : const Color.fromARGB(157, 255, 211, 13),
+                          ),
+                        );
+                      },
+                    ),
+
+                    SizedBox(height: 8),
+
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
                       ),
-                    );
-                  },
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 255, 192, 55),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        _timerText,
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Courier',
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -205,17 +259,30 @@ class _LoadingScreenState extends State<LoadingScreen> {
 }
 
 String getQuote() {
-  Random random = Random();
-  int randnum = random.nextInt(3);
-  switch (randnum) {
-    case 1:
-      return "The limit is not the sky. The limit is the mind.";
-    case 2:
-      return "Focus on the next step, not the whole path";
-    case 3:
-      return "Every second you wait, something gets better.";
+  final List<String> quotes = [
+    "The journey of a thousand miles begins with a single step.",
+    "Not all those who wander are lost.",
+    "Collect moments, not things.",
+    "Life is either a daring adventure or nothing at all.",
+    "Travel is the only thing you buy that makes you richer.",
+    "Adventure awaits beyond the horizon.",
+    "Don't listen to what they say. Go see.",
+    "To travel is to live.",
+    "The limit is not the sky. The limit is the mind.",
+    "Focus on the next step, not the whole path.",
+    "Dream big. Start small. Act now.",
+    "Believe you can and you're halfway there.",
+    "Your potential is endless.",
+    "Great things never came from comfort zones.",
+    "Difficult roads often lead to beautiful destinations.",
+    "Every second you wait, something gets better.",
+    "Good things come to those who wait.",
+    "Patience is not the ability to wait, but the ability to keep a good attitude while waiting.",
+    "Loading your next adventure...",
+    "Preparing the magic just for you...",
+    "Almost there... Great views take time!",
+    "Enjoying the app? Rate us 5 stars to support future updates!",
+  ];
 
-    default:
-      return "Enjoying the app? Rate us 5 stars to support future updates!";
-  }
+  return quotes[Random().nextInt(quotes.length)];
 }
