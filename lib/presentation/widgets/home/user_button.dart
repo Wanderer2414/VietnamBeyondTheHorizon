@@ -5,14 +5,18 @@ import 'package:vietnambeyondthehorizon/routes/main_route.dart';
 class UserButton extends StatelessWidget {
   final UserAccount account;
   final double radius;
-  const UserButton({super.key, required this.radius, required this.account});
+  final void Function() onPressed;
+  const UserButton({
+    super.key,
+    required this.radius,
+    required this.account,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {
-        MainRoute.goProfilePage(account);
-      },
+      onPressed: () => onPressed(),
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadiusGeometry.circular(10),
