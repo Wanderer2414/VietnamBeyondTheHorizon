@@ -18,21 +18,9 @@ class _SplashScreenState extends State<SplashScreen> {
     navigateNext();
   }
 
-<<<<<<< HEAD
   Future<void> navigateNext() async {
     await NetworkProxy.clean();
     UserAccount? account = await NetworkProxy.isLogged();
-=======
-  void navigateNext() async {
-    // await NetworkProxy.clean();
-    Future<UserAccount?> func = NetworkProxy.isLogged();
-    func.timeout(
-      const Duration(seconds: 90),
-      onTimeout: () => throw Exception("Disconnect server!"),
-    );
-    // await UserHistoryManager().syncHistory();
-    UserAccount? account = await func;
->>>>>>> origin/feature/locked-mission
     if (account != null) {
       MainRoute.goHome(account);
     } else
