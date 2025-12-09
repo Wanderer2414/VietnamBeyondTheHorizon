@@ -93,4 +93,9 @@ class NetworkProxy {
     final instance = await _getInstance();
     return instance.updateAvatar(src);
   }
+
+  static Future<String?> postCheckInPhoto(String src,int locationID) async{
+    final instance = await _getInstance();
+    return (await instance.postCheckInPhoto(src, locationID));  
+  }
 }

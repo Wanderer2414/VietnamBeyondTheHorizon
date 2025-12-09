@@ -87,4 +87,9 @@ interface class Proxy {
     if (_subProxy != null) return await _subProxy.updateAvatar(src);
     return null;
   }
+
+  Future<String?> postCheckInPhoto(String src,int locationID) async{
+    if(_subProxy != null) return await _subProxy.postCheckInPhoto(src, locationID);
+    return null;
+  }
 }

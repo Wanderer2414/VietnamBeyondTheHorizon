@@ -28,8 +28,10 @@ class GameRoute {
   int _currentIndex = 0;
   int _collectedStars = 0;
   bool _isCheckedIn = false;
+  List<String> _checkInPhotos = [];
 
   bool get isCheckedIn => _isCheckedIn;
+  List<String> get checkInPhotos => _checkInPhotos;
 
   int get numberOfMission => _missionId.length;
   int get collectedStars => _collectedStars;
@@ -46,6 +48,7 @@ class GameRoute {
       'current': _currentIndex,
       'star': _collectedStars,
       'isCheckedIn': _isCheckedIn,
+      'checkInPhotos': _checkInPhotos,
     };
   }
 
@@ -63,14 +66,16 @@ class GameRoute {
     route._currentIndex = json['current'] as int;
     route._collectedStars = json['star'] as int;
     route._isCheckedIn = (json['isCheckedIn'] as bool?) ?? false;
+    route._checkInPhotos =
+        (json['checkInPhotos'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        [];
     return route;
   }
 
   bool isCurrentStepCheckedIn(int missionId) {
     int index = _missionId.indexOf(missionId);
-    print("current index mission id: $index");
-    print("current checkin: $currentIndex");
-    print("isCurrentStepChecking: ${_isCheckedIn && _currentIndex == index}");
     return (_isCheckedIn && _currentIndex == index) || (index < _currentIndex);
   }
 
@@ -86,7 +91,9 @@ class GameRoute {
     }
     return false;
   }
-
+  List<int> locationIds() {
+    return missions.map((e) => e.location!.id).toList();
+  }
   MissionModel? get _currentTarget {
     if (_missions.isNotEmpty && _currentIndex < _missions.length)
       return _missions[_currentIndex];
@@ -103,8 +110,14 @@ class GameRoute {
     return (index > _currentIndex);
   }
 
+  void addPhoto(String path) {
+    _checkInPhotos.add(path);
+  }
+
   bool get _isFinished => _currentIndex >= _missionId.length;
   int get currentIndex => _currentIndex;
+
+  int get currentLocationIndex => _missions[_currentIndex].location!.id;
 }
 
 class GameProgressManager {
@@ -120,15 +133,26 @@ class GameProgressManager {
 
   static bool isCurrentStepCheckedIn(int missionId) =>
       _getInstance()._userRoute?.isCurrentStepCheckedIn(missionId) ?? false;
-  static void checkInSuccess() {
+  
+  static List<int> locationIDs() => _getInstance()._userRoute?.locationIds() ?? [];
+
+  static Future<bool> checkInSuccess(String path) async {
     final instance = _getInstance();
 
-    instance._userRoute?.setCheckedIn();
-
     if (instance._userRoute != null) {
-      NetworkProxy.setRoute(instance._userRoute!);
+      final url = await  NetworkProxy.postCheckInPhoto(path, instance._userRoute!.currentLocationIndex);
+      
+      if(url != null) {
+        instance._userRoute!.setCheckedIn();
+        instance._userRoute!.addPhoto(url);
+        NetworkProxy.setRoute(instance._userRoute!);
+        return true;
+      }
     }
+    return false;
   }
+
+  static List<String> get checkInPhotos => _getInstance()._userRoute?.checkInPhotos ?? [];
 
   bool get isFinished => _userRoute?._isFinished ?? true;
   static bool isLocationLocked(int id) =>
@@ -148,6 +172,7 @@ class GameProgressManager {
 
   //   print("Saved Photo URL for Mission $missionId: $url");
   // }> get completedMissionID => _completedMissionIds;
+
   static Future<void> addStars(int amount) async {
     final instance = _getInstance();
     instance._userRoute!._collectedStars += amount;

@@ -14,6 +14,7 @@ import 'package:vietnambeyondthehorizon/presentation/screens/profile_page.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/result_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/splash_begin_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/screens/submit_route_screen.dart';
+import 'package:vietnambeyondthehorizon/presentation/screens/waiting_generating_video.dart';
 
 class MainRoute {
   static final GlobalKey<NavigatorState> NavigatorKey =
@@ -108,6 +109,11 @@ class MainRoute {
     );
   }
 
+  static void goGeneratingVideo(UserAccount account, Future<String?> Function() onGenerate){
+    NavigatorKey.currentState?.push(
+      TransitionRLPageRoute(nextScreen:  WaitingGeneratingVideoScreen(account: account, onGenerate: onGenerate))
+    );
+  }
   static void showError(String text) {
     if (NavigatorKey.currentContext != null)
       ScaffoldMessenger.of(
@@ -118,6 +124,8 @@ class MainRoute {
   static void pop() {
     NavigatorKey.currentState?.pop();
   }
+
+
 }
 
 // class MainRoute {
