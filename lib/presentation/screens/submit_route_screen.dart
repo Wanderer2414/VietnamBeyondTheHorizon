@@ -60,7 +60,6 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
         onLocationPress: (location) {
           widget.controller.moveToLocation(
             LatLng(location.latitude, location.longitude),
-            15,
           );
           widget.controller.toggleLocationInfo(context, location, () {
             widget.controller.fetchRoute(

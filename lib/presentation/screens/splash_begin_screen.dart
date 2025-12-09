@@ -19,6 +19,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> navigateNext() async {
+    await NetworkProxy.clean();
     UserAccount? account = await NetworkProxy.isLogged();
     if (account != null) {
       MainRoute.goHome(account);

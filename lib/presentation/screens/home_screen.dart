@@ -81,9 +81,9 @@ class _MainContentState extends State<MainContent> {
   double _old = 0, _current = 0, _percent = 0, _offset = 0, _duration = 0;
 
   @override
-  void didChangeDependencies() {
+  void dispose() {
     _timer?.cancel();
-    super.didChangeDependencies();
+    super.dispose();
   }
 
   @override
