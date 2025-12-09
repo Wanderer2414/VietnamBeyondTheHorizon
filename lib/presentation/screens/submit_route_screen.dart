@@ -99,7 +99,9 @@ class _SubmitRouteScreenState extends State<SubmitRouteScreen> {
               durationDays: widget.userInput.durationDays,
               quest: quest.UncompletedQuest(),
             );
-            print("Mission: ${route.missions.length}");
+            print("Route length ${route.missions.length}");
+            route.sort(widget.controller.currentLocation!);
+
             init(route);
             await widget.controller.fetchFullRoute(
               route: route.missions

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:vietnambeyondthehorizon/data/models/location_model.dart';
 import 'package:vietnambeyondthehorizon/data/models/mission_model.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
@@ -28,6 +29,39 @@ class GameRoute {
       'current': _currentIndex,
       'star': _collectedStars,
     };
+  }
+
+  double _dis(MissionModel model, LatLng cur) {
+    LatLng des = LatLng(model.location!.latitude, model.location!.longitude);
+    return (des.latitude - cur.latitude) * (des.latitude - cur.latitude) +
+        (des.longitude - cur.longitude) * (des.longitude - cur.longitude);
+  }
+
+  void sort(LatLng current) {
+    print(_missionId.length);
+    List<MissionModel> missions = [];
+    int length = _missions.length;
+
+    for (int i = 0; i < length; i++) {
+      double dis = _dis(_missions[0], current);
+      int index = 0;
+      for (int i = 1; i < _missions.length; i++) {
+        if (_dis(_missions[i], current) < dis) {
+          dis = _dis(_missions[i], current);
+          index = i;
+        }
+      }
+      missions.add(_missions[index]);
+      current = LatLng(
+        _missions[index].location!.latitude,
+        _missions[index].location!.longitude,
+      );
+      _missions.removeAt(index);
+    }
+    _missions.clear();
+    _missions.addAll(missions);
+    _missionId.clear();
+    _missionId.addAll(missions.map((e) => e.id));
   }
 
   List<MissionModel> get missions => _missions;
