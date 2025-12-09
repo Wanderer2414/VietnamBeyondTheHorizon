@@ -132,7 +132,7 @@ class _ResultAutoScreenState extends State<ResultAutoScreen> {
                     heroTag: "btn_video",
                     onPressed: () async {
                       //Review the journey(VIDEO)
-
+                      
                       final videoUrls = await generateRecapVideo();
                       if (videoUrls != null) {
                         Navigator.of(context).push(

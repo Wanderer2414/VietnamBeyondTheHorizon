@@ -22,7 +22,7 @@ class MissionCardScreen extends StatefulWidget {
 }
 
 class _MissionCardScreenState extends State<MissionCardScreen> {
-  bool get _isUnlocked => GameProgressManager.isCurrentStepCheckedIn;
+  bool get _isUnlocked => GameProgressManager.isCurrentStepCheckedIn(widget.missionCard.mission.id);
   bool _isCheckingGPS = false;
   final picker = ImagePicker();
   XFile? imageFile;

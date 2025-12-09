@@ -96,7 +96,8 @@ class _ServerProxy extends Proxy {
     final quest = Quests(locations: dataLocation, missions: dataMissions);
     (await _getVisit())?.forEach((e) {
       quest.missions[e.id]!.isCompleted = true;
-      quest.missions[e.id]!.illustrationURL = e.url[0];
+      quest.missions[e.id]!.imagePath = e.url[0];
+      // quest.missions[e.id]!.illustrationURL = e.url[0];
     });
     return quest;
   }

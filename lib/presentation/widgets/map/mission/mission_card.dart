@@ -50,7 +50,7 @@ class _MissionCardState extends State<MissionCard> {
       print(url);
       if (url != null) {
         widget.mission.isCompleted = true;
-        widget.mission.illustrationURL = url;
+        widget.mission.imagePath = url;
         setState(() {});
         return true;
       }
@@ -175,7 +175,8 @@ class _MissionCardState extends State<MissionCard> {
                                 padding: const EdgeInsets.all(10.0),
                                 child: ImageUploadWidget(
                                   isChecking: _isChecking,
-                                  selectedImage: imageFile,
+                                  selectedImage:  imageFile,
+                                  imagePath: widget.mission.imagePath,
                                   onPicked: (file) =>
                                       setState(() => imageFile = file),
                                 ),

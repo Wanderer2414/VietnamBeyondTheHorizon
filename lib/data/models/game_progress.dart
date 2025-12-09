@@ -66,6 +66,14 @@ class GameRoute {
     return route;
   }
 
+  bool isCurrentStepCheckedIn(int missionId) {
+    int index = _missionId.indexOf(missionId);
+    print("current index mission id: $index");
+    print("current checkin: $currentIndex");
+    print("isCurrentStepChecking: ${_isCheckedIn && _currentIndex == index}");
+    return (_isCheckedIn && _currentIndex == index) || (index < _currentIndex);
+  }
+
   void setCheckedIn() {
     _isCheckedIn = true;
   }
@@ -90,7 +98,7 @@ class GameRoute {
     return _missionId.indexWhere((element) => id == element);
   }
 
-  bool _isLocked(int id) {
+  bool _isLocationLocked(int id) {
     int index = _missionId.indexOf(id);
     return (index > _currentIndex);
   }
@@ -110,15 +118,23 @@ class GameProgressManager {
   int currentIndex = 0;
   GameRoute? _userRoute;
 
-  static bool get isCurrentStepCheckedIn =>
-      _getInstance()._userRoute?._isCheckedIn ?? false;
+  static bool isCurrentStepCheckedIn(int missionId) =>
+      _getInstance()._userRoute?.isCurrentStepCheckedIn(missionId) ?? false;
   static void checkInSuccess() {
-    _getInstance()._userRoute?.setCheckedIn();
+    final instance = _getInstance();
+
+    instance._userRoute?.setCheckedIn();
+
+    if (instance._userRoute != null) {
+      NetworkProxy.setRoute(instance._userRoute!);
+    }
   }
 
   bool get isFinished => _userRoute?._isFinished ?? true;
-  static bool isLocked(int id) =>
-      _getInstance()._userRoute?._isLocked(id) ?? true;
+  static bool isLocationLocked(int id) =>
+      _getInstance()._userRoute?._isLocationLocked(id) ?? true;
+
+  // static bool isMissionLocked(int id) => _getInstance()._userRoute?._isMissionLocked( id) ?? true;
   static int get collectedStars => _getInstance()._userRoute!._collectedStars;
   static MissionModel get currentTarget =>
       _getInstance()._userRoute!._currentTarget!;
@@ -247,7 +263,7 @@ class GameProgressManager {
         return MarkerAppearance(
           color: ColorPalette.successColor,
           size: 40,
-          sequenceNumber: indexInRoute,
+          sequenceNumber: indexInRoute + 1,
         );
       }
       if (indexInRoute == instance._userRoute!._currentIndex) {
@@ -255,7 +271,7 @@ class GameProgressManager {
           color: const Color.fromARGB(255, 230, 131, 39),
           size: 50,
           shouldPulse: true,
-          sequenceNumber: indexInRoute,
+          sequenceNumber: indexInRoute + 1,
           icon: Icons.my_location_rounded,
         );
       }

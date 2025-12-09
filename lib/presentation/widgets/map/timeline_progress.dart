@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart';
 
 class TimelineProgress extends StatelessWidget {
   final int currentIndex;
@@ -107,9 +108,9 @@ class TimelineProgress extends StatelessWidget {
             ),
           ),
           Positioned(
-            bottom: -5,
-            right: -5,
-            child: Icon(Icons.lock, size: 12, color: Colors.black),
+            bottom: -10,
+            right: -10,
+            child: Icon(Icons.lock, size: 14, color: const Color.fromARGB(255, 131, 131, 131)),
           ),
         ],
       );

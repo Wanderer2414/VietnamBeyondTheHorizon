@@ -14,7 +14,7 @@ class ColorPalette {
 
   static const Color buttonColor = Color(0xFF6200EE);
 
-  static const Color successColor = Color(0xFF4CAF50);
+  static const Color successColor = Color.fromARGB(255, 60, 151, 63);
   static const Color errorColor = Color(0xFFF44336);
   static const Color dividerColor = Color.fromARGB(255, 136, 136, 136);
   static const Color culture = Color.fromARGB(255, 243, 147, 87);

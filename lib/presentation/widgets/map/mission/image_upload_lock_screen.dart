@@ -23,7 +23,7 @@ class _LockedImageUploadWidgetState extends State<LockedImageUploadWidget> {
   void _pickImage() async {
     if (widget.isChecking) return;
     final pickedFile = await picker.pickImage(
-      source: ImageSource.gallery,
+      source: ImageSource.camera,
       imageQuality: 80,
     );
     if (pickedFile != null) widget.onPicked(pickedFile);

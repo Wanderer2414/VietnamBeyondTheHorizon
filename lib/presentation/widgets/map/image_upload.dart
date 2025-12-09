@@ -5,10 +5,12 @@ import 'package:image_picker/image_picker.dart';
 class ImageUploadWidget extends StatefulWidget {
   final Function(XFile file) onPicked;
   final XFile? selectedImage;
+  final String? imagePath;
   final bool isChecking;
   const ImageUploadWidget({
     super.key,
     required this.onPicked,
+    this.imagePath,
     this.selectedImage,
     this.isChecking = false,
   });
@@ -101,6 +103,10 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
   Widget _buildImageContent() {
     if (widget.selectedImage != null) {
       return Image.file(File(widget.selectedImage!.path), fit: BoxFit.cover);
+    }
+
+    if (widget.imagePath != null) {
+      return Image(image: NetworkImage(widget.imagePath!), fit: BoxFit.cover);
     } else {
       return Container(
         color: Colors.grey[200],

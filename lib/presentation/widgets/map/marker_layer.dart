@@ -50,7 +50,7 @@ class MissionLayer extends MarkerLayer {
                 e.location?.coordinates ?? LatLng(0, 0),
                 GameProgressManager.getMissionAppearance(mission: e),
                 (loc, context) {
-                  if (GameProgressManager.isLocked(e.id)) {
+                  if (GameProgressManager.isLocationLocked(e.id)) {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
