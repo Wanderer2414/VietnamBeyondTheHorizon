@@ -19,10 +19,15 @@ class BottomContent extends StatelessWidget {
       padding: padding,
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(shape: BoxShape.rectangle),
+      alignment: Alignment.center,
       child: Text(
         content,
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 18, color: Colors.black87),
+        style: TextStyle(
+          fontSize: 18,
+          color: Colors.black87,
+          fontFamily: "Kay Pho Du",
+        ),
       ),
     );
   }

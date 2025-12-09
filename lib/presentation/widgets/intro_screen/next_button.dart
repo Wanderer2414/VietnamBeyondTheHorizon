@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 
 class NextButton extends StatelessWidget {
-  final Route nextRoute;
   final Size size;
-  const NextButton({super.key, required this.nextRoute, required this.size});
+  final void Function() onPressed;
+  const NextButton({super.key, required this.size, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {
-        Navigator.of(context).pushReplacement(nextRoute);
-      },
+      onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFFD99100),
         foregroundColor: Colors.white,

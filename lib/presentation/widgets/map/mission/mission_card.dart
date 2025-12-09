@@ -40,35 +40,27 @@ class _MissionCardState extends State<MissionCard> {
   Future<bool> _submitImage(XFile? imagePath) async {
     if (imagePath == null) throw Exception(("Please upload your image"));
     try {
+      setState(() {
+        _isChecking = true;
+      });
       late final String? url;
-      switch (widget.mission.type) {
-        case "Photo":
-          {
-            url = await NetworkProxy.postMission(
-              widget.mission.id,
-              imagePath.path,
-            );
-          }
-          break;
-        case "AI Photo":
-          {
-            url = await NetworkProxy.postAIMission(
-              widget.mission.id,
-              imagePath.path,
-            );
-          }
-          break;
-      }
+
+      url = await NetworkProxy.postMission(widget.mission.id, imagePath.path);
+
       print(url);
       if (url != null) {
         widget.mission.isCompleted = true;
-        widget.mission.illustrationURL = url;
+        widget.mission.imagePath = url;
         setState(() {});
         return true;
       }
       return false;
     } catch (e) {
       MainRoute.showError(e.toString());
+    } finally {
+      setState(() {
+        _isChecking = false;
+      });
     }
 
     return false;
@@ -183,7 +175,8 @@ class _MissionCardState extends State<MissionCard> {
                                 padding: const EdgeInsets.all(10.0),
                                 child: ImageUploadWidget(
                                   isChecking: _isChecking,
-                                  selectedImage: imageFile,
+                                  selectedImage:  imageFile,
+                                  imagePath: widget.mission.imagePath,
                                   onPicked: (file) =>
                                       setState(() => imageFile = file),
                                 ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vietnambeyondthehorizon/presentation/constants/color_palette.dart'; // Import màu của ông
 
 class TimelineProgress extends StatelessWidget {
   final int currentIndex;
@@ -25,9 +24,6 @@ class TimelineProgress extends StatelessWidget {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final double stepWidth =
-              (constraints.maxWidth - (30 * totalSteps)) / (totalSteps - 1);
-
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(totalSteps, (index) {
@@ -70,7 +66,6 @@ class TimelineProgress extends StatelessWidget {
   ) {
     // Màu sắc
     Color bgColor = isCompleted || isCurrent ? Colors.blue : Colors.black87;
-    Color iconColor = Colors.white;
 
     double size = isCurrent ? 34 : 28;
 
@@ -108,9 +103,13 @@ class TimelineProgress extends StatelessWidget {
             ),
           ),
           Positioned(
-            bottom: -5,
-            right: -5,
-            child: Icon(Icons.lock, size: 12, color: Colors.black),
+            bottom: -10,
+            right: -10,
+            child: Icon(
+              Icons.lock,
+              size: 14,
+              color: const Color.fromARGB(255, 131, 131, 131),
+            ),
           ),
         ],
       );

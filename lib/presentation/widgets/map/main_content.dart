@@ -6,7 +6,6 @@ import 'package:vietnambeyondthehorizon/data/models/game_progress.dart';
 import 'package:vietnambeyondthehorizon/data/user/user_account.dart';
 import 'package:vietnambeyondthehorizon/extra/text_measure.dart';
 import 'package:vietnambeyondthehorizon/presentation/controllers/map_controller.dart';
-import 'package:vietnambeyondthehorizon/presentation/screens/loading_screen.dart';
 import 'package:vietnambeyondthehorizon/presentation/widgets/map/map_show.dart';
 
 class Content extends StatefulWidget {
@@ -55,18 +54,16 @@ class _ContentState extends State<Content> {
               alignment: Alignment.center,
               child: ScrollTextButton(
                 onPressed: () {
-                  LoadingManager.run(context, (context) async {
-                    final mission = GameProgressManager.currentTarget;
-                    final loc = LatLng(
-                      mission.location?.latitude ?? 0,
-                      mission.location?.longitude ?? 0,
-                    );
-                    await widget.controller.fetchRoute(
-                      widget.controller.currentLocation,
-                      loc,
-                    );
-                    widget.controller.moveToLocation(loc, 15);
-                  });
+                  final mission = GameProgressManager.currentTarget;
+                  final loc = LatLng(
+                    mission.location?.latitude ?? 0,
+                    mission.location?.longitude ?? 0,
+                  );
+                  widget.controller.fetchRoute(
+                    widget.controller.currentLocation,
+                    loc,
+                  );
+                  widget.controller.moveToLocation(loc);
                 },
                 text:
                     "Go to " +

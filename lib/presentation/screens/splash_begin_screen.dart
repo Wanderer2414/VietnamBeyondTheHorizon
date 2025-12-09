@@ -15,18 +15,12 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 2), navigateNext);
+    navigateNext();
   }
 
-  void navigateNext() async {
+  Future<void> navigateNext() async {
     await NetworkProxy.clean();
-    Future<UserAccount?> func = NetworkProxy.isLogged();
-    func.timeout(
-      const Duration(seconds: 90),
-      onTimeout: () => throw Exception("Disconnect server!"),
-    );
-    // await UserHistoryManager().syncHistory();
-    UserAccount? account = await func;
+    UserAccount? account = await NetworkProxy.isLogged();
     if (account != null) {
       MainRoute.goHome(account);
     } else
@@ -54,7 +48,7 @@ class _SplashScreenState extends State<SplashScreen> {
         children: [
           AppIcon(screenWidth: screenWidth),
           AppTitle(size: Size(screenWidth, screenHeight)),
-          // Waiting4L(side: screenWidth * 0.15),
+          Waiting4L(side: screenWidth * 0.15),
         ],
       ),
     );
@@ -71,30 +65,30 @@ class Waiting4L extends StatefulWidget {
 
 class _Waiting4LState extends State<Waiting4L> {
   double _angle = 0;
-  late final Timer _timer;
+  Timer? _timer;
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(milliseconds: 80), handle);
-  }
-
-  void handle(Timer time) {
-    setState(() {
-      _angle -= 0.2;
-    });
+    _timer?.cancel();
+    _timer = Timer.periodic(
+      const Duration(milliseconds: 80),
+      (timer) => setState(() {
+        _angle -= 0.2;
+      }),
+    );
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
     super.dispose();
-    _timer.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
     return Transform.rotate(
       angle: _angle,
-      child: Icon(Icons.sync, size: widget.side, color: Colors.black54),
+      child: Icon(Icons.sync, size: widget.side, color: Colors.white),
     );
   }
 }
