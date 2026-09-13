@@ -1,14 +1,12 @@
 package com.wanderlab.vietnambeyondthehorizon
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import org.osmdroid.config.Configuration
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 
 class MainActivity : AppCompatActivity() {
@@ -23,25 +21,9 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-
-        Configuration.getInstance().userAgentValue = packageName
-        map = findViewById<MapView>(R.id.map)
-        map.setMultiTouchControls(true)
-        map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
-        map.setTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE)
-
-        val location = GeoPoint(10.7769, 106.7009)
-        map.controller.setZoom(15.0)
-        map.controller.setCenter(location)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        map.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        map.onPause()
+        findViewById<AppCompatButton>(R.id.map_button).setOnClickListener {
+            var intent = Intent(this, NormalMapActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

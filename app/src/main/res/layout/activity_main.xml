@@ -7,9 +7,40 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <org.osmdroid.views.MapView
-        android:id="@+id/map"
+    <ImageView
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:src="@drawable/home_background_map"
+        android:scaleType="fitStart"
+        android:alpha="0.5"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/gradient_screen_cover"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
+
+        <include
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginHorizontal="20dp"
+            layout="@layout/home_greeting_box"/>
+
+        <include
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginHorizontal="20dp"
+            layout="@layout/home_features_box"/>
+
+    </LinearLayout>
     
 </androidx.constraintlayout.widget.ConstraintLayout>
