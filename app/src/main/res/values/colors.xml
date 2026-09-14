@@ -6,9 +6,13 @@
     <color name="background_primary">#E5E4E2</color>
     <color name="icon_primary">#808080</color>
     <color name="text_primary">#1C1C1C</color>
-    <color name="border_primary">#D1D0CE</color>
     <color name="background_second">#EA7F38</color>
     <color name="background_third">#EEEEEE</color>
+    <color name="background_forth">#728FCE</color>
+    <color name="background_fifth">#FFCE44</color>
+    <color name="border_primary">#D1D0CE</color>
     <color name="border_second">#1E90FF</color>
+    <color name="border_third">#B6B6B4</color>
     <color name="current_primary">#0909FF</color>
+    <color name="lock_primary">#838996</color>
 </resources>

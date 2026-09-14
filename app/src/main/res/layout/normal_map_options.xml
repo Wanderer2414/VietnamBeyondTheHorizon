@@ -1,18 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="5dp"
     android:orientation="vertical">
 
     <ImageButton
-        android:id="@+id/current_button"
+        android:id="@+id/add_button"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginVertical="5dp"
         android:elevation="1dp"
+        android:background="@drawable/normal_map_options_special_box"
+        android:src="@drawable/ic_camera_outlined" />
+
+    <ImageButton
+        android:id="@+id/current_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginVertical="5dp"
         android:background="@drawable/normal_map_options_box"
-        android:src="@drawable/ic_location_outlined"/>
+        android:elevation="1dp"
+        android:src="@drawable/ic_location_outlined"
+        app:tint="@drawable/normal_map_tint_selector" />
 
     <ImageButton
         android:id="@+id/home_button"

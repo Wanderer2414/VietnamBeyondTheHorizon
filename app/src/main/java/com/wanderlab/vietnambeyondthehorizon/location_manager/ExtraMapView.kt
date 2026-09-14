@@ -1,4 +1,4 @@
-package com.wanderlab.vietnambeyondthehorizon.`location-manager`
+package com.wanderlab.vietnambeyondthehorizon.location_manager
 
 import android.animation.ValueAnimator
 import org.osmdroid.util.GeoPoint

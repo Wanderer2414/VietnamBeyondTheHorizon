@@ -1,4 +1,4 @@
-package com.wanderlab.vietnambeyondthehorizon.`osm-connection`
+package com.wanderlab.vietnambeyondthehorizon.osm_connection
 
 data class Place(
     val name: String,

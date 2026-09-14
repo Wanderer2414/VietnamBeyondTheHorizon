@@ -14,11 +14,22 @@
   ~ limitations under the License.
   -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="32dp"
-    android:height="32dp"
-    android:viewportWidth="960"
-    android:viewportHeight="960">
+    android:width="40dp"
+    android:height="40dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
   <path
-      android:pathData="m600,840 l-240,-84 -186,72q-20,8 -37,-4.5T120,790v-560q0,-13 7.5,-23t20.5,-15l212,-72 240,84 186,-72q20,-8 37,4.5t17,33.5v560q0,13 -7.5,23T812,768l-212,72ZM560,742v-468l-160,-56v468l160,56ZM640,742 L760,702v-474l-120,46v468ZM200,732 L320,686v-468l-120,40v474ZM640,274v468,-468ZM320,218v468,-468Z"
-      android:fillColor="#e3e3e3"/>
+      android:pathData="M12,12m-9,0a9,9 0,1 1,18 0a9,9 0,1 1,-18 0"
+      android:strokeLineJoin="round"
+      android:strokeWidth="2"
+      android:fillColor="#00000000"
+      android:strokeColor="#fff"
+      android:strokeLineCap="round"/>
+  <path
+      android:pathData="M11.307,9.739L15,9l-0.739,3.693a2,2 0,0 1,-1.568 1.569L9,15l0.739,-3.693a2,2 0,0 1,1.568 -1.568"
+      android:strokeLineJoin="round"
+      android:strokeWidth="2"
+      android:fillColor="#00000000"
+      android:strokeColor="#fff"
+      android:strokeLineCap="round"/>
 </vector>

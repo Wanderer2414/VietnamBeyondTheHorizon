@@ -1,4 +1,4 @@
-package com.wanderlab.vietnambeyondthehorizon.`osm-connection`
+package com.wanderlab.vietnambeyondthehorizon.osm_connection
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
