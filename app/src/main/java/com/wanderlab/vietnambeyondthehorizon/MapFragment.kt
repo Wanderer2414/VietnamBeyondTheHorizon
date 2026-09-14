@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatButton
@@ -74,7 +75,7 @@ class MapFragment : Fragment(R.layout.map_fragment) {
                 locationManager.goto(marker.position)
             }
         }
-        requireActivity().findViewById<AppCompatButton>(R.id.navigation_home_button).setOnClickListener {
+        requireActivity().findViewById<FrameLayout>(R.id.navigation_home_button).setOnClickListener {
             (requireActivity() as MainActivity).pageRouter.transitionTo(HomeFragment())
         }
     }

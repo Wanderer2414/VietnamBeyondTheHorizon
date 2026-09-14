@@ -1,6 +1,7 @@
 package com.wanderlab.vietnambeyondthehorizon
 
 import android.os.Bundle
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
@@ -12,7 +13,7 @@ class HomeFragment: Fragment(R.layout.home_fragment) {
 
     override fun onResume() {
         super.onResume()
-        requireActivity().findViewById<AppCompatButton>(R.id.navigation_map_button).setOnClickListener {
+        requireActivity().findViewById<FrameLayout>(R.id.navigation_map_button).setOnClickListener {
             (requireActivity() as MainActivity).pageRouter.transitionTo(MapFragment())
         }
     }
