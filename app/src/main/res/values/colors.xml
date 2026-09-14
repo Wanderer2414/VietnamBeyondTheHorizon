@@ -10,5 +10,7 @@
     <color name="background_second">#EA7F38</color>
     <color name="background_third">#EEEEEE</color>
     <color name="border_second">#1E90FF</color>
+    <color name="border_search_activated">#EA7F38</color>
+    <color name="border_search_deactivated">#80EA7F38</color>
     <color name="current_primary">#0909FF</color>
 </resources>
