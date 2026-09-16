@@ -34,8 +34,8 @@ class PageRouter(private val activity: AppCompatActivity, private val containerI
             clone(constraintLayout)
             index.values.forEachIndexed { index, it ->
                 if (index != 2) {
-                    setMargin(it[2], ConstraintSet.TOP, 20 * dp)
-                    setMargin(it[2], ConstraintSet.BOTTOM, 10 * dp)
+                    setMargin(it[2], ConstraintSet.TOP, 12 * dp)
+                    setMargin(it[2], ConstraintSet.BOTTOM, 12 * dp)
                 }
             }
             setMargin(index.values.elementAt(2)[1], ConstraintSet.START, 20 * dp)
@@ -93,8 +93,8 @@ class PageRouter(private val activity: AppCompatActivity, private val containerI
 
             setMargin(currentIndex[1], ConstraintSet.START, 0)
             setMargin(currentIndex[1], ConstraintSet.END, 0)
-            setMargin(currentIndex[2], ConstraintSet.TOP, 20 * dp)
-            setMargin(currentIndex[2], ConstraintSet.BOTTOM, 10 * dp)
+            setMargin(currentIndex[2], ConstraintSet.TOP, 12 * dp)
+            setMargin(currentIndex[2], ConstraintSet.BOTTOM, 12 * dp)
 
             setMargin(nextIndex[1], ConstraintSet.START, 20 * dp)
             setMargin(nextIndex[1], ConstraintSet.END, 20 * dp)
