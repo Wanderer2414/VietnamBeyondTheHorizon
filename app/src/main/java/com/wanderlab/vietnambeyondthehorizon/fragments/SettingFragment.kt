@@ -1,0 +1,12 @@
+package com.wanderlab.vietnambeyondthehorizon.fragments
+
+import android.os.Bundle
+import androidx.fragment.app.Fragment
+import com.wanderlab.vietnambeyondthehorizon.R
+
+class SettingFragment: Fragment(R.layout.home_fragment) {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
+
+}

@@ -1,15 +1,15 @@
-package com.wanderlab.vietnambeyondthehorizon
+package com.wanderlab.vietnambeyondthehorizon.fragments
 
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.EditText
-import android.widget.FrameLayout
 import android.widget.ImageButton
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.wanderlab.vietnambeyondthehorizon.MainActivity
+import com.wanderlab.vietnambeyondthehorizon.R
 import com.wanderlab.vietnambeyondthehorizon.location_manager.LocationManager
 import com.wanderlab.vietnambeyondthehorizon.osm_connection.osm_connection
 import kotlinx.coroutines.launch
@@ -74,9 +74,6 @@ class MapFragment : Fragment(R.layout.map_fragment) {
             lifecycleScope.launch {
                 locationManager.goto(marker.position)
             }
-        }
-        requireActivity().findViewById<FrameLayout>(R.id.navigation_home_button).setOnClickListener {
-            (requireActivity() as MainActivity).pageRouter.transitionTo(HomeFragment())
         }
     }
 

@@ -1,10 +1,13 @@
 package com.wanderlab.vietnambeyondthehorizon
 
 import android.os.Bundle
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.wanderlab.vietnambeyondthehorizon.fragments.HomeFragment
+import com.wanderlab.vietnambeyondthehorizon.fragments.MapFragment
 import com.wanderlab.vietnambeyondthehorizon.location_manager.LocationManager
 import com.wanderlab.vietnambeyondthehorizon.page_router.PageRouter
 
@@ -18,7 +21,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction().replace(R.id.content_container, HomeFragment()).commit()
+            supportFragmentManager.beginTransaction().replace(R.id.content_container,
+                HomeFragment()
+            ).commit()
         }
 
         locationManager  = LocationManager(this);
@@ -29,7 +34,6 @@ class MainActivity : AppCompatActivity() {
             systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
-
     }
 
 }
