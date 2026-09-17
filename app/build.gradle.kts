@@ -46,6 +46,7 @@ dependencies {
     implementation(libs.osmdroid.android)
     implementation(libs.play.services.location)
     implementation(libs.kotlin.reflect)
+    implementation(libs.androidx.core.splashscreen)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)

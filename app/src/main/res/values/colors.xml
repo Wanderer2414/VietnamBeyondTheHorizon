@@ -12,6 +12,7 @@
     <color name="background_third">#EEEEEE</color>
     <color name="background_forth">#728FCE</color>
     <color name="background_fifth">#FFCE44</color>
+    <color name="background_sixth">#FF6262</color>
     <color name="border_primary">#D1D0CE</color>
     <color name="border_second">#1E90FF</color>
     <color name="border_third">#B6B6B4</color>

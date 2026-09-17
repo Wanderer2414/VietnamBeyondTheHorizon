@@ -6,4 +6,10 @@
     </style>
 
     <style name="Theme.VietnamBeyondTheHorizon" parent="Base.Theme.VietnamBeyondTheHorizon" />
+    <style name="Theme.VietnamBeyondTheHorizon.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FFA500</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Base.Theme.VietnamBeyondTheHorizon</item>
+    </style>
+
 </resources>
