@@ -1,4 +1,4 @@
-package com.wanderlab.vietnambeyondthehorizon.fragments
+package com.wanderlab.vietnambeyondthehorizon.home_fragments
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment

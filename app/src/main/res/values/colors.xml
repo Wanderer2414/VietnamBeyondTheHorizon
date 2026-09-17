@@ -18,4 +18,7 @@
     <color name="border_third">#B6B6B4</color>
     <color name="current_primary">#0909FF</color>
     <color name="lock_primary">#838996</color>
+    <color name="background_login">#FFDF9E</color>
+    <color name="text_third">#795100</color>
+    <color name="link_primary">#1295FF</color>
 </resources>

@@ -10,14 +10,14 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import androidx.transition.TransitionManager
-import com.wanderlab.vietnambeyondthehorizon.fragments.HomeFragment
-import com.wanderlab.vietnambeyondthehorizon.fragments.MapFragment
+import com.wanderlab.vietnambeyondthehorizon.home_fragments.HomeFragment
+import com.wanderlab.vietnambeyondthehorizon.home_fragments.MapFragment
 import com.wanderlab.vietnambeyondthehorizon.R
-import com.wanderlab.vietnambeyondthehorizon.fragments.DiscoverFragment
-import com.wanderlab.vietnambeyondthehorizon.fragments.ListFragment
-import com.wanderlab.vietnambeyondthehorizon.fragments.SettingFragment
+import com.wanderlab.vietnambeyondthehorizon.home_fragments.DiscoverFragment
+import com.wanderlab.vietnambeyondthehorizon.home_fragments.ListFragment
+import com.wanderlab.vietnambeyondthehorizon.home_fragments.SettingFragment
 import kotlin.reflect.full.createInstance
-class PageRouter(private val activity: AppCompatActivity, private val containerId: Int) {
+class HomeNavigation(private val activity: AppCompatActivity, private val containerId: Int) {
     private val index = mapOf(
         DiscoverFragment::class to listOf(0, R.id.navigation_discover_button, R.id.navigation_discover),
         ListFragment::class to listOf(1, R.id.navigation_list_button, R.id.navigation_list),
@@ -48,6 +48,10 @@ class PageRouter(private val activity: AppCompatActivity, private val containerI
                 transitionTo(klass.createInstance())
             }
         }
+
+        activity.supportFragmentManager.beginTransaction().replace(R.id.content_container,
+            HomeFragment()
+        ).commit()
     }
     private fun transitionTo(fragment: Fragment) {
         val nextIndex = index[fragment::class].apply {

@@ -1,41 +1,29 @@
 package com.wanderlab.vietnambeyondthehorizon
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.wanderlab.vietnambeyondthehorizon.location_manager.LocationManager
-import com.wanderlab.vietnambeyondthehorizon.page_router.HomeNavigation
+import com.wanderlab.vietnambeyondthehorizon.page_router.LogNavigation
 
-class MainActivity : AppCompatActivity() {
-    internal lateinit var pageRouter: HomeNavigation;
-    internal lateinit var locationManager: LocationManager;
+class LogActivity : AppCompatActivity() {
+    internal lateinit var pageRouter: LogNavigation;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
-
         super.onCreate(savedInstanceState)
-
-        startActivity(Intent(this, LogActivity::class.java))
-        finish()
-        return;
-
         enableEdgeToEdge()
+        setContentView(R.layout.activity_log)
 
-        setContentView(R.layout.activity_main)
-
-        locationManager  = LocationManager(this);
-        pageRouter = HomeNavigation(this, R.id.content_container)
+        pageRouter = LogNavigation(this, R.id.content_container)
 
         WindowInsetsControllerCompat(window, window.decorView).apply {
             hide(WindowInsetsCompat.Type.systemBars())
             systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
-
     }
 
 }
