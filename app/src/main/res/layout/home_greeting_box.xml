@@ -1,46 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:elevation="10dp"
     android:paddingHorizontal="20dp"
-    android:background="@drawable/rounded_rectangle"
-    android:orientation="horizontal"
-    >
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_weight="7"
-        android:layout_gravity="center"
-        android:orientation="vertical">
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:textColor="@color/black"
-            android:textFontWeight="700"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:text="Hello, Nguyen Van A"
-            />
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="3dp"
-            android:orientation="horizontal"
-            >
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="Ho Chi Minh City"
-                android:textSize="15sp"
-                android:textColor="@color/description_primary"
-                />
-        </LinearLayout>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="3"
-        ></LinearLayout>
-</LinearLayout>
+    android:background="@drawable/home_header_bar_layout">
+    <TextView
+        android:id="@+id/home_greeting_greets"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:textSize="20sp"
+        android:textColor="@color/text_second"
+        android:textFontWeight="700"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:text="Hello, Nguyen Van A"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/home_greeting_locations"
+        android:layout_marginTop="10dp"
+        />
+    <ImageView
+        android:id="@+id/home_ic_location"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:src="@drawable/ic_location_outlined"
+        app:layout_constraintTop_toBottomOf="@id/home_greeting_greets"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/home_greeting_greets"
+        android:layout_marginBottom="10dp"
+        android:alpha="0.5"
+        app:tint="@color/text_second" />
+    <TextView
+        android:id="@+id/home_greeting_locations"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:text="Ho Chi Minh City"
+        android:textSize="15sp"
+        android:textColor="@color/text_second"
+        android:alpha="0.5"
+        app:layout_constraintTop_toBottomOf="@id/home_greeting_greets"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/home_ic_location"
+        android:layout_marginStart="5dp"
+        android:layout_marginBottom="10dp"
+        />
+</androidx.constraintlayout.widget.ConstraintLayout>
